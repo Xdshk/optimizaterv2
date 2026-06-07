@@ -106,7 +106,7 @@
         </Setter>
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowBrush Color="#00D4FF" Opacity="0.3" ShadowDepth="0" BlurRadius="15"/>
+                <DropShadowEffect Color="#00D4FF" Opacity="0.3" ShadowDepth="0" BlurRadius="15"/>
             </Setter.Value>
         </Setter>
         <Setter Property="Template">
@@ -133,7 +133,7 @@
                             </Setter>
                             <Setter Property="Effect">
                                 <Setter.Value>
-                                    <DropShadowBrush Color="#00D4FF" Opacity="0.5" ShadowDepth="0" BlurRadius="20"/>
+                                    <DropShadowEffect Color="#00D4FF" Opacity="0.5" ShadowDepth="0" BlurRadius="20"/>
                                 </Setter.Value>
                             </Setter>
                         </Trigger>
@@ -250,7 +250,7 @@
                                     CornerRadius="1.5"
                                     HorizontalAlignment="Left">
                                 <Border.Effect>
-                                    <DropShadowBrush Color="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BrushToColorConverter}}" Opacity="0.5" ShadowDepth="0" BlurRadius="8"/>
+                                    <DropShadowEffect Color="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BrushToColorConverter}}" Opacity="0.5" ShadowDepth="0" BlurRadius="8"/>
                                 </Border.Effect>
                             </Border>
                         </Border>
