@@ -23,7 +23,9 @@ public partial class MonitorViewModel : ObservableObject
         _monitor = monitor;
         _monitor.OnMetricsUpdated += OnMetricsUpdated;
 
-        _updateTimer = new Timer(async _ => await UpdateMetricsAsync(), null, TimeSpan.Zero, TimeSpan.FromMilliseconds(500));
+        _updateTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        _updateTimer.Tick += async (_, _) => await UpdateMetricsAsync();
+        _updateTimer.Start();
     }
 
     private async Task UpdateMetricsAsync()
