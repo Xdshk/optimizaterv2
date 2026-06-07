@@ -28,10 +28,10 @@ public partial class LogsViewModel : ObservableObject
     {
         _loggerService = loggerService;
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
-        _refreshTimer.Tick += async (_, _) => await RefreshLogsAsync();
+        _refreshTimer.Tick += async (_, _) => await RefreshLogs();
         _refreshTimer.Start();
 
-        _ = RefreshLogsAsync();
+        _ = RefreshLogs();
     }
 
     [RelayCommand]
