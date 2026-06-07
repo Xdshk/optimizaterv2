@@ -123,7 +123,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     private void OnMetricsUpdated(GTA5Optimizer.Models.Monitoring.PerformanceMetrics metrics)
     {
-        Application.Current?.Dispatcher.Invoke(() =>
+        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
         {
             CurrentFPS = metrics.CurrentFPS;
             CpuUsage = metrics.CPUUsage;
