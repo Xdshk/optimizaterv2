@@ -2,6 +2,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GTA5Optimizer.Core.Interfaces;
 using GTA5Optimizer.Models.Logging;
+using System.Collections.ObjectModel;
+using System.Windows.Threading;
 
 namespace GTA5Optimizer.UI.ViewModels;
 
@@ -11,7 +13,7 @@ namespace GTA5Optimizer.UI.ViewModels;
 public partial class LogsViewModel : ObservableObject
 {
     private readonly ILoggerService _loggerService;
-    private readonly Timer _refreshTimer;
+    private readonly DispatcherTimer _refreshTimer;
 
     [ObservableProperty]
     private ObservableCollection<LogEntry> _logs = new();
@@ -19,28 +21,49 @@ public partial class LogsViewModel : ObservableObject
     [ObservableProperty]
     private LogEntry? _selectedLog;
 
+    [ObservableProperty]
+    private bool _autoRefresh = true;
+
     public LogsViewModel(ILoggerService loggerService)
     {
         _loggerService = loggerService;
-        _refreshTimer = new Timer(async _ => await RefreshLogsAsync(), null, TimeSpan.Zero, TimeSpan.FromSeconds(2));
+        _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        _refreshTimer.Tick += async (_, _) => await RefreshLogsAsync();
+        _refreshTimer.Start();
+
+        _ = RefreshLogsAsync();
     }
 
     [RelayCommand]
-    private async Task RefreshLogsAsync()
+    private async Task RefreshLogs()
     {
-        var logs = await _loggerService.GetRecentLogsAsync(100);
-        Logs = new ObservableCollection<LogEntry>(logs);
+        try
+        {
+            var logs = await _loggerService.GetRecentLogsAsync(200);
+            Logs = new ObservableCollection<LogEntry>(logs);
+        }
+        catch
+        {
+            // Тихо игнорируем
+        }
     }
 
     [RelayCommand]
-    private async Task ClearLogsAsync()
+    private async Task ClearLogs()
     {
-        await _loggerService.ClearLogsAsync();
-        Logs.Clear();
+        try
+        {
+            await _loggerService.ClearLogsAsync();
+            Logs.Clear();
+        }
+        catch
+        {
+            // Тихо игнорируем
+        }
     }
 
     public void Dispose()
     {
-        _refreshTimer?.Dispose();
+        _refreshTimer?.Stop();
     }
 }
