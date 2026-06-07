@@ -9,7 +9,7 @@
             </ResourceDictionary.MergedDictionaries>
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
             <converters:BytesToMBConverter x:Key="BytesToMBConverter"/>
-            <converters:GreaterThanConverter x:Key="GreaterThanConverter" />
+            <converters:SeverityToColorConverter x:Key="SeverityToColorConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
