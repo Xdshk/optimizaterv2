@@ -428,7 +428,7 @@
                                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Игра" Foreground="#555555" FontSize="11"/>
                                         <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Monitor.Metrics.GameRAM_MB, StringFormat={}{0:F0} MB}" Foreground="White" FontSize="11"/>
                                     </Grid>
-                                    <ProgressBar Value="{Binding Monitor.Metrics.RAMUsagePercent}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#FFAB00" Background="#1A1A1A"/>
+                                    <ProgressBar Value="{Binding Monitor.Metrics.RAMUsagePercent, Mode=OneWay}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#FFAB00" Background="#1A1A1A"/>
                                 </StackPanel>
                             </Border>
                             <Border Style="{StaticResource CardStyle}" Margin="6,0,0,0">
