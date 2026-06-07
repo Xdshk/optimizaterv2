@@ -289,11 +289,9 @@
                                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Использовано" Foreground="#555555" FontSize="11"/>
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Monitor.Metrics.UsedRAM, StringFormat={}{0:F0} MB}" Foreground="White" FontSize="11" FontWeight="Medium">
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Foreground="White" FontSize="11" FontWeight="Medium">
                                             <TextBlock.Text>
-                                                <MultiBinding StringFormat="{}{0:F0} MB">
-                                                    <Binding Path="Monitor.Metrics.UsedRAM" Converter="{StaticResource BytesToMBConverter}"/>
-                                                </MultiBinding>
+                                                <Binding Path="Monitor.Metrics.UsedRAM" Converter="{StaticResource BytesToMBConverter}"/>
                                             </TextBlock.Text>
                                         </TextBlock>
                                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Standby" Foreground="#555555" FontSize="11"/>
