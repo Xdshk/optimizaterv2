@@ -7,9 +7,9 @@ namespace GTA5Optimizer.UI.Views;
 /// </summary>
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    public MainWindow(MainWindowViewModel viewModel)
     {
         InitializeComponent();
-        DataContext = App.ServiceProvider?.GetService(typeof(MainWindowViewModel)) as MainWindowViewModel;
+        DataContext = viewModel;
     }
 }
