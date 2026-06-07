@@ -20,8 +20,15 @@ namespace GTA5Optimizer.UI
                 .ConfigureServices(services =>
                 {
                     services.AddGTA5OptimizerServices();
-                    services.AddSingleton<Views.MainWindow>();
+
+                    // ViewModels
+                    services.AddSingleton<ViewModels.LogsViewModel>();
+                    services.AddSingleton<ViewModels.MonitorViewModel>();
+                    services.AddSingleton<ViewModels.SettingsViewModel>();
                     services.AddSingleton<ViewModels.MainWindowViewModel>();
+
+                    // Views
+                    services.AddSingleton<Views.MainWindow>();
                 })
                 .Build();
 
