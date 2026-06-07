@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows.Data;
-using System.Windows.Media;
+using MediaColor = System.Windows.Media.Color;
+using MediaSolidColorBrush = System.Windows.Media.SolidColorBrush;
 
 namespace GTA5Optimizer.UI.Converters;
 
@@ -26,12 +27,12 @@ public class SeverityToColorConverter : IValueConverter
         if (value is double severity)
         {
             if (severity > 80)
-                return new SolidColorBrush(Color.FromRgb(0xFF, 0x44, 0x44));
+                return new MediaSolidColorBrush(MediaColor.FromRgb(0xFF, 0x44, 0x44));
             if (severity > 50)
-                return new SolidColorBrush(Color.FromRgb(0xFF, 0xAA, 0x00));
-            return new SolidColorBrush(Color.FromRgb(0x00, 0xFF, 0x88));
+                return new MediaSolidColorBrush(MediaColor.FromRgb(0xFF, 0xAA, 0x00));
+            return new MediaSolidColorBrush(MediaColor.FromRgb(0x00, 0xFF, 0x88));
         }
-        return new SolidColorBrush(Color.FromRgb(0x88, 0x88, 0x88));
+        return new MediaSolidColorBrush(MediaColor.FromRgb(0x88, 0x88, 0x88));
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
