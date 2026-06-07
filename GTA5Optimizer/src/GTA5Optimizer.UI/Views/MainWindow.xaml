@@ -351,7 +351,7 @@
                                             <TextBlock Text="CPU" Foreground="#555555" FontSize="10" FontWeight="Bold"/>
                                             <Ellipse Width="6" Height="6" Fill="#00D4FF"/>
                                         </StackPanel>
-                                        <StackPanel Orientation="Baseline" Margin="0,8,0,0">
+                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                             <TextBlock Text="{Binding CpuUsage, StringFormat={}{0:F0}}" Foreground="White" FontSize="36" FontWeight="Light"/>
                                             <TextBlock Text="%" Foreground="#555555" FontSize="16" FontWeight="Light"/>
                                         </StackPanel>
@@ -364,7 +364,7 @@
                                             <TextBlock Text="GPU" Foreground="#555555" FontSize="10" FontWeight="Bold"/>
                                             <Ellipse Width="6" Height="6" Fill="#FF6D00"/>
                                         </StackPanel>
-                                        <StackPanel Orientation="Baseline" Margin="0,8,0,0">
+                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                             <TextBlock Text="{Binding GpuUsage, StringFormat={}{0:F0}}" Foreground="White" FontSize="36" FontWeight="Light"/>
                                             <TextBlock Text="%" Foreground="#555555" FontSize="16" FontWeight="Light"/>
                                         </StackPanel>
@@ -377,7 +377,7 @@
                                             <TextBlock Text="RAM" Foreground="#555555" FontSize="10" FontWeight="Bold"/>
                                             <Ellipse Width="6" Height="6" Fill="#FFAB00"/>
                                         </StackPanel>
-                                        <StackPanel Orientation="Baseline" Margin="0,8,0,0">
+                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                             <TextBlock Text="{Binding RamUsage, StringFormat={}{0:F0}}" Foreground="White" FontSize="36" FontWeight="Light"/>
                                             <TextBlock Text="%" Foreground="#555555" FontSize="16" FontWeight="Light"/>
                                         </StackPanel>
