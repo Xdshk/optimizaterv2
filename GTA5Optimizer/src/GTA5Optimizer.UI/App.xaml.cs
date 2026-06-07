@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace GTA5Optimizer.UI
 {
-    public partial class App : Application
+    public partial class App : System.Windows.Application
     {
         private IHost? _host;
         private TrayService? _trayService;
