@@ -65,7 +65,7 @@
                         <!-- Diamond icon -->
                         <Path Data="M 6 2 L 10 8 L 6 14 L 2 8 Z" Fill="#00D4FF" Width="14" Height="16" Stretch="Uniform" VerticalAlignment="Center">
                             <Path.Effect>
-                                <DropShadowBrush Color="#00D4FF" Opacity="0.6" ShadowDepth="0" BlurRadius="8"/>
+                                <DropShadowEffect Color="#00D4FF" Opacity="0.6" ShadowDepth="0" BlurRadius="8"/>
                             </Path.Effect>
                         </Path>
                         <TextBlock Text="GTA5" Foreground="White" FontSize="16" FontWeight="Light" VerticalAlignment="Center" Margin="8,0,0,0" Opacity="0.9"/>
