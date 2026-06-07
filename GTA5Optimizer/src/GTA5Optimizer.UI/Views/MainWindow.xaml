@@ -3,46 +3,73 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:GTA5Optimizer.UI.ViewModels"
+        xmlns:controls="clr-namespace:GTA5Optimizer.UI.Controls"
         mc:Ignorable="d"
         Title="GTA5 Optimizer &amp; Majestic RP"
-        Height="700" Width="1000"
-        WindowStartupLocation="CenterScreen">
+        Height="750" Width="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="#121212">
 
-    <Window.Background>
-        <SolidColorBrush Color="#121212"/>
-    </Window.Background>
+    <Window.Resources>
+        <!-- Converters -->
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <!-- Цвет для уровня лога -->
+        <Style x:Key="LogItemStyle" TargetType="ListViewItem">
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
 
         <!-- Заголовок -->
         <Border Grid.Row="0" Background="#1e1e1e" BorderBrush="#333333" BorderThickness="0,0,0,1">
-            <DockPanel Margin="20,0" LastChildFill="True">
-                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="GTA5 Optimizer"
-                               Foreground="White"
-                               FontSize="20"
-                               FontWeight="Bold"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Text=" &amp; Majestic RP"
-                               Foreground="#00d4ff"
-                               FontSize="20"
-                               FontWeight="Bold"
-                               VerticalAlignment="Center"/>
+            <Grid Margin="20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="GTA5 Optimizer" Foreground="White" FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text=" &amp; Majestic RP" Foreground="#00d4ff" FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
                 </StackPanel>
-                <TextBlock DockPanel.Dock="Right"
-                           Text="{Binding StatusMessage}"
-                           Foreground="#00ff88"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Right"/>
-            </DockPanel>
+
+                <!-- Статус -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse Width="8" Height="8" Margin="0,0,8,0">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="#ff4444"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsOptimizing}" Value="True">
+                                        <Setter Property="Fill" Value="#ffaa00"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsOptimizing}" Value="False">
+                                        <Setter Property="Fill" Value="#00ff88"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock Text="{Binding StatusMessage}" Foreground="#aaaaaa" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <!-- Контент -->
-        <TabControl Grid.Row="1" SelectedIndex="0">
+        <TabControl Grid.Row="1" Background="#121212" BorderBrush="#333333" Foreground="#ffffff">
+
+            <!-- ==================== ВКЛАДКА: ОПТИМИЗАЦИЯ ==================== -->
             <TabItem Header="Оптимизация">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -53,69 +80,386 @@
                     </Grid.RowDefinitions>
 
                     <!-- Профиль -->
-                    <GroupBox Grid.Row="0" Header="Профиль оптимизации" Margin="10">
-                        <StackPanel Orientation="Horizontal">
-                            <ComboBox ItemsSource="{Binding Profiles}"
-                                      SelectedItem="{Binding SelectedProfileConfig}"
-                                      DisplayMemberPath="Name"
-                                      Width="200"/>
-                            <TextBlock Text="{Binding SelectedProfileConfig.Description}"
-                                       VerticalAlignment="Center"
-                                       Foreground="#aaaaaa"
-                                       Margin="10,0,0,0"/>
-                        </StackPanel>
-                    </GroupBox>
+                    <Border Grid.Row="0" Background="#1e1e1e" Margin="10" Padding="15" BorderBrush="#333333" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Vertical">
+                                <TextBlock Text="Профиль оптимизации" Foreground="#888888" FontSize="11" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding Profiles}"
+                                          SelectedItem="{Binding SelectedProfileConfig}"
+                                          DisplayMemberPath="Name"
+                                          Width="220" HorizontalAlignment="Left"
+                                          Background="#2a2a2a" Foreground="White"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding SelectedProfileConfig.Description, TargetNullValue='Выберите профиль', FallbackValue='Выберите профиль'}"
+                                       Foreground="#666666" VerticalAlignment="Center" Margin="15,0,0,0"/>
+                        </Grid>
+                    </Border>
 
-                    <!-- Кнопка оптимизации -->
-                    <Border Grid.Row="1" Margin="10">
-                        <Button Content="OPTIMIZE"
+                    <!-- Кнопки действий -->
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10,0">
+                        <Button Content="🚀 ОПТИМИЗИРОВАТЬ"
                                 Command="{Binding OptimizeCommand}"
                                 IsEnabled="{Binding IsOptimizing, Converter={StaticResource InverseBooleanConverter}}"
-                                Width="200"
-                                Height="40"
-                                Background="#00d4ff"
-                                Foreground="#000000"
-                                FontWeight="Bold"
-                                FontSize="14"/>
-                    </Border>
+                                Width="200" Height="45"
+                                Background="#00d4ff" Foreground="#000000"
+                                FontWeight="Bold" FontSize="14"
+                                Margin="0,0,10,0"/>
+                        <Button Content="↩ Восстановить"
+                                Command="{Binding RestoreDefaultsCommand}"
+                                IsEnabled="{Binding IsOptimizing, Converter={StaticResource InverseBooleanConverter}}"
+                                Width="160" Height="45"
+                                Background="#2a2a2a" Foreground="#ffffff"
+                                FontSize="13"
+                                Margin="0,0,10,0"/>
+                        <Button Content="🔄 Обновить метрики"
+                                Command="{Binding RefreshMetricsCommand}"
+                                Width="160" Height="45"
+                                Background="#2a2a2a" Foreground="#ffffff"
+                                FontSize="13"/>
+                    </StackPanel>
 
                     <!-- Метрики -->
-                    <Border Grid.Row="2" Margin="10">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                            <Border Width="150" Padding="10" Background="#1e1e1e" Margin="5">
-                                <StackPanel>
-                                    <TextBlock Text="FPS" Foreground="#888888" FontSize="12"/>
-                                    <TextBlock Text="{Binding CurrentFPS, StringFormat={}{0:F1}}" Foreground="#00ff88" FontSize="18" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Width="150" Padding="10" Background="#1e1e1e" Margin="5">
-                                <StackPanel>
-                                    <TextBlock Text="CPU" Foreground="#888888" FontSize="12"/>
-                                    <TextBlock Text="{Binding CPUUsage, StringFormat={}{0:F1}%}" Foreground="#00d4ff" FontSize="18" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Width="150" Padding="10" Background="#1e1e1e" Margin="5">
-                                <StackPanel>
-                                    <TextBlock Text="GPU" Foreground="#888888" FontSize="12"/>
-                                    <TextBlock Text="{Binding GPUUsage, StringFormat={}{0:F1}%}" Foreground="#ff6600" FontSize="18" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Width="150" Padding="10" Background="#1e1e1e" Margin="5">
-                                <StackPanel>
-                                    <TextBlock Text="RAM" Foreground="#888888" FontSize="12"/>
-                                    <TextBlock Text="{Binding RAMUsage, StringFormat={}{0:F1}%}" Foreground="#ff6600" FontSize="18" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Border>
+                    <UniformGrid Grid.Row="2" Columns="4" Margin="10">
+                        <!-- FPS -->
+                        <Border Background="#1e1e1e" BorderBrush="#333333" BorderThickness="1" Padding="15" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="FPS" Foreground="#888888" FontSize="11"/>
+                                <TextBlock Text="{Binding CurrentFPS, StringFormat={}{0:F1}, TargetNullValue=—}" Foreground="#00ff88" FontSize="28" FontWeight="Bold"/>
+                                <ProgressBar Height="3" Margin="0,5,0,0" Value="{Binding CurrentFPS}" Maximum="144" Foreground="#00ff88" Background="#333333"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- CPU -->
+                        <Border Background="#1e1e1e" BorderBrush="#333333" BorderThickness="1" Padding="15" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="CPU" Foreground="#888888" FontSize="11"/>
+                                <TextBlock Text="{Binding CpuUsage, StringFormat={}{0:F1}%}" Foreground="#00d4ff" FontSize="28" FontWeight="Bold"/>
+                                <ProgressBar Height="3" Margin="0,5,0,0" Value="{Binding CpuUsage}" Maximum="100" Foreground="#00d4ff" Background="#333333"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- GPU -->
+                        <Border Background="#1e1e1e" BorderBrush="#333333" BorderThickness="1" Padding="15" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="GPU" Foreground="#888888" FontSize="11"/>
+                                <TextBlock Text="{Binding GpuUsage, StringFormat={}{0:F1}%}" Foreground="#ff6600" FontSize="28" FontWeight="Bold"/>
+                                <ProgressBar Height="3" Margin="0,5,0,0" Value="{Binding GpuUsage}" Maximum="100" Foreground="#ff6600" Background="#333333"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- RAM -->
+                        <Border Background="#1e1e1e" BorderBrush="#333333" BorderThickness="1" Padding="15" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="RAM" Foreground="#888888" FontSize="11"/>
+                                <TextBlock Text="{Binding RamUsage, StringFormat={}{0:F1}%}" Foreground="#ffaa00" FontSize="28" FontWeight="Bold"/>
+                                <ProgressBar Height="3" Margin="0,5,0,0" Value="{Binding RamUsage}" Maximum="100" Foreground="#ffaa00" Background="#333333"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <!-- Результаты оптимизации -->
+                    <Border Grid.Row="3" Background="#1e1e1e" Margin="10" BorderBrush="#333333" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Результаты оптимизации" Foreground="#888888" FontSize="12" Margin="10,8,10,5"/>
+                            <ListView Grid.Row="1" ItemsSource="{Binding OptimizationResults}"
+                                      Background="Transparent" BorderThickness="0"
+                                      Foreground="#cccccc" FontSize="12"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="5,2">
+                                            <TextBlock Text="{Binding Success, Converter={StaticResource BoolToVis}}" Width="20">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="❌"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Success}" Value="True">
+                                                                <Setter Property="Text" Value="✅"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding Message}" Foreground="#cccccc" Margin="5,0,0,0"/>
+                                            <TextBlock Text="{Binding Details}" Foreground="#888888" Margin="10,0,0,0"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ==================== ВКЛАДКА: МОНИТОРИНГ ==================== -->
+            <TabItem Header="Мониторинг">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Детальные метрики -->
+                    <UniformGrid Grid.Row="0" Columns="3">
+                        <!-- CPU детали -->
+                        <Border Background="#1e1e1e" BorderBrush="#333333" BorderThickness="1" Padding="12" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="🖥 CPU" Foreground="#00d4ff" FontSize="13" FontWeight="Bold" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/><RowDefinition/><RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Загрузка" Foreground="#888888" FontSize="11"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Monitor.Metrics.CPUUsage, StringFormat={}{0:F1}%}" Foreground="White" FontSize="11"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Игра" Foreground="#888888" FontSize="11"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Monitor.Metrics.CPUUsageGame, StringFormat={}{0:F1}%}" Foreground="White" FontSize="11"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Температура" Foreground="#888888" FontSize="11"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Monitor.Metrics.CPUTemperature, StringFormat={}{0:F1}°C}" Foreground="White" FontSize="11"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- RAM детали -->
+                        <Border Background="#1e1e1e" BorderBrush="#333333" BorderThickness="1" Padding="12" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="💾 RAM" Foreground="#ffaa00" FontSize="13" FontWeight="Bold" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/><RowDefinition/><RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Использовано" Foreground="#888888" FontSize="11"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Monitor.Metrics.UsedRAM, Converter={StaticResource BytesToMBConverter}}" Foreground="White" FontSize="11"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Standby" Foreground="#888888" FontSize="11"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Monitor.Metrics.StandbyMemoryMB, StringFormat={}{0:F0} MB}" Foreground="White" FontSize="11"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Игра" Foreground="#888888" FontSize="11"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Monitor.Metrics.GameRAM_MB, StringFormat={}{0:F0} MB}" Foreground="White" FontSize="11"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Диск и сеть -->
+                        <Border Background="#1e1e1e" BorderBrush="#333333" BorderThickness="1" Padding="12" Margin="5">
+                            <StackPanel>
+                                <TextBlock Text="📡 Диск &amp; Сеть" Foreground="#ff6600" FontSize="13" FontWeight="Bold" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/><RowDefinition/><RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Чтение" Foreground="#888888" FontSize="11"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Monitor.Metrics.DiskReadSpeedMBps, StringFormat={}{0:F1} MB/s}" Foreground="White" FontSize="11"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Запись" Foreground="#888888" FontSize="11"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Monitor.Metrics.DiskWriteSpeedMBps, StringFormat={}{0:F1} MB/s}" Foreground="White" FontSize="11"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Пинг" Foreground="#888888" FontSize="11"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Monitor.Metrics.CurrentPing, StringFormat={}{0:F0} ms}" Foreground="White" FontSize="11"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <!-- Анализ узких мест -->
+                    <Border Grid.Row="1" Background="#1e1e1e" BorderBrush="#333333" BorderThickness="1" Padding="12" Margin="5">
+                        <StackPanel>
+                            <TextBlock Text="🔍 Анализ узких мест" Foreground="#ffffff" FontSize="13" FontWeight="Bold" Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding Monitor.Bottleneck.PrimaryBottleneck, StringFormat={}Основное узкое место: {0}}" Foreground="#888888" FontSize="11" Margin="0,0,0,5"/>
+                            <ItemsControl ItemsSource="{Binding Monitor.Bottleneck.Details}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#2a2a2a" Padding="8" Margin="0,2">
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Severity, StringFormat={}{0:F0}%}" FontWeight="Bold" Width="45">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#00ff88"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Severity, Converter={StaticResource GreaterThan50Converter}}" Value="True">
+                                                                        <Setter Property="Foreground" Value="#ffaa00"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Severity, Converter={StaticResource GreaterThan80Converter}}" Value="True">
+                                                                        <Setter Property="Foreground" Value="#ff4444"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding Description}" Foreground="#cccccc" FontSize="12"/>
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Recommendation}" Foreground="#888888" FontSize="11" Margin="45,2,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </Border>
 
-                    <TabControl Grid.Row="3" Margin="10">
-                        <TabItem Header="Мониторинг"/>
-                        <TabItem Header="Логи"/>
-                        <TabItem Header="Настройки"/>
-                    </TabControl>
+                    <!-- Статус производительности -->
+                    <Border Grid.Row="2" Background="#1e1e1e" BorderBrush="#333333" BorderThickness="1" Padding="12" Margin="5">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding Monitor.Metrics.PerformanceStatus}" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#00ff88"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Monitor.Metrics.IsPerformanceGood}" Value="False">
+                                                <Setter Property="Foreground" Value="#ff4444"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBlock Text="{Binding Monitor.Metrics.Timestamp, StringFormat={}Обновлено: {0:HH:mm:ss}}" Foreground="#666666" FontSize="11" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
                 </Grid>
             </TabItem>
+
+            <!-- ==================== ВКЛАДКА: ЛОГИ ==================== -->
+            <TabItem Header="Логи">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Панель управления логами -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+                        <Button Content="🔄 Обновить" Command="{Binding Logs.RefreshCommand}" Width="110" Height="30" Background="#2a2a2a" Foreground="White" FontSize="12" Margin="0,0,8,0"/>
+                        <Button Content="🗑 Очистить" Command="{Binding Logs.ClearCommand}" Width="110" Height="30" Background="#2a2a2a" Foreground="White" FontSize="12" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding Logs.Logs.Count, StringFormat={}Записей: {0}}" Foreground="#666666" VerticalAlignment="Center" FontSize="11"/>
+                    </StackPanel>
+
+                    <!-- Список логов -->
+                    <ListView Grid.Row="1" ItemsSource="{Binding Logs.Logs}"
+                              Background="#1e1e1e" BorderBrush="#333333"
+                              Foreground="#cccccc" FontSize="12"
+                              FontFamily="Consolas, Courier New"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Padding" Value="6,3"/>
+                                <Setter Property="Margin" Value="0"/>
+                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                <Setter Property="BorderBrush" Value="#2a2a2a"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="75"/>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding ShortTime}" Foreground="#666666" FontSize="11"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Level}" FontSize="11" FontWeight="Bold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#888888"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Level}" Value="Information">
+                                                        <Setter Property="Foreground" Value="#00d4ff"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Level}" Value="Warning">
+                                                        <Setter Property="Foreground" Value="#ffaa00"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Level}" Value="Error">
+                                                        <Setter Property="Foreground" Value="#ff4444"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Level}" Value="Critical">
+                                                        <Setter Property="Foreground" Value="#ff0000"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock Grid.Column="2" Text="{Binding Category}" Foreground="#555555" FontSize="11"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding Message}" Foreground="#cccccc" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </TabItem>
+
+            <!-- ==================== ВКЛАДКА: НАСТРОЙКИ ==================== -->
+            <TabItem Header="Настройки">
+                <ScrollViewer Margin="10" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Профиль по умолчанию -->
+                        <Border Background="#1e1e1e" BorderBrush="#333333" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="⚙ Профиль по умолчанию" Foreground="#ffffff" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                                <ComboBox ItemsSource="{Binding Settings.AvailableProfiles}"
+                                          SelectedItem="{Binding Settings.SelectedProfileName}"
+                                          Width="250" HorizontalAlignment="Left"
+                                          Background="#2a2a2a" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Автооптимизация -->
+                        <Border Background="#1e1e1e" BorderBrush="#333333" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🔄 Автооптимизация" Foreground="#ffffff" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                                <CheckBox Content="Включить автооптимизацию" IsChecked="{Binding Settings.EnableAutoOptimization}" Foreground="#cccccc" FontSize="12" Margin="0,0,0,8"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="Интервал (сек):" Foreground="#888888" FontSize="12" VerticalAlignment="Center" Width="120"/>
+                                    <TextBox Text="{Binding Settings.AutoOptimizationInterval}" Width="80" Background="#2a2a2a" Foreground="White" Padding="5,2"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                    <TextBlock Text="Порог очистки RAM (%):" Foreground="#888888" FontSize="12" VerticalAlignment="Center" Width="170"/>
+                                    <TextBox Text="{Binding Settings.MemoryCleanupThreshold}" Width="80" Background="#2a2a2a" Foreground="White" Padding="5,2"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Действия -->
+                        <Border Background="#1e1e1e" BorderBrush="#333333" BorderThickness="1" Padding="15" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="🎯 Действия" Foreground="#ffffff" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                                <CheckBox Content="Закрывать браузеры" IsChecked="{Binding Settings.CloseBrowsers}" Foreground="#cccccc" FontSize="12" Margin="0,0,0,5"/>
+                                <CheckBox Content="Отключать Discord Overlay" IsChecked="{Binding Settings.CloseDiscordOverlay}" Foreground="#cccccc" FontSize="12" Margin="0,0,0,5"/>
+                                <CheckBox Content="Очищать память" IsChecked="{Binding Settings.EnableMemoryCleanup}" Foreground="#cccccc" FontSize="12" Margin="0,0,0,5"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Кнопки -->
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="💾 Сохранить" Command="{Binding Settings.SaveCommand}" Width="130" Height="35" Background="#00d4ff" Foreground="#000000" FontWeight="Bold" FontSize="13" Margin="0,0,10,0"/>
+                            <Button Content="↩ Сбросить" Command="{Binding Settings.ResetCommand}" Width="130" Height="35" Background="#2a2a2a" Foreground="White" FontSize="13"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
         </TabControl>
+
+        <!-- Статус-бар -->
+        <Border Grid.Row="2" Background="#1e1e1e" BorderBrush="#333333" BorderThickness="0,1,0,0">
+            <Grid Margin="10,0">
+                <TextBlock Text="{Binding GameStatusText}" Foreground="#666666" FontSize="11" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding Monitor.Metrics.Timestamp, StringFormat={}Обновлено: {0:HH:mm:ss}}" Foreground="#555555" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
