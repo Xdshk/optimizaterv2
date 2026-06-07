@@ -68,13 +68,16 @@ public partial class SettingsViewModel : ObservableObject
                 var settings = JsonSerializer.Deserialize<AppSettings>(json);
                 if (settings != null)
                 {
-                    SelectedProfileName = settings.DefaultProfile.ToString();
+                    SelectedProfileName = settings.ActiveProfile switch
+                    {
+                        OptimizationProfile.Everyday => "Everyday Mode",
+                        OptimizationProfile.RPMode => "RP Mode",
+                        OptimizationProfile.MassiveOnline => "Massive Online Mode",
+                        OptimizationProfile.MaximumFPS => "Maximum FPS Mode",
+                        _ => "RP Mode"
+                    };
                     AutoOptimizationInterval = settings.AutoOptimizationIntervalSeconds;
                     EnableAutoOptimization = settings.EnableAutoOptimization;
-                    EnableMemoryCleanup = settings.EnableMemoryCleanup;
-                    CloseBrowsers = settings.CloseBrowsers;
-                    CloseDiscordOverlay = settings.CloseDiscordOverlay;
-                    MemoryCleanupThreshold = settings.MemoryCleanupThresholdPercent;
                 }
             }
         }
@@ -82,8 +85,8 @@ public partial class SettingsViewModel : ObservableObject
         {
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Warning,
-                Category = LogCategories.UI,
+                Level = GTA5LogLevel.Warning,
+                Category = "SETTINGS",
                 Message = "Не удалось загрузить настройки, используются значения по умолчанию",
                 Details = ex.Message
             });
@@ -106,13 +109,9 @@ public partial class SettingsViewModel : ObservableObject
 
             var settings = new AppSettings
             {
-                DefaultProfile = profile,
+                ActiveProfile = profile,
                 AutoOptimizationIntervalSeconds = AutoOptimizationInterval,
-                EnableAutoOptimization = EnableAutoOptimization,
-                EnableMemoryCleanup = EnableMemoryCleanup,
-                CloseBrowsers = CloseBrowsers,
-                CloseDiscordOverlay = CloseDiscordOverlay,
-                MemoryCleanupThresholdPercent = MemoryCleanupThreshold
+                EnableAutoOptimization = EnableAutoOptimization
             };
 
             Directory.CreateDirectory(Path.GetDirectoryName(_settingsPath)!);
@@ -121,7 +120,7 @@ public partial class SettingsViewModel : ObservableObject
 
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Information,
+                Level = GTA5LogLevel.Information,
                 Category = "SETTINGS",
                 Message = "Настройки сохранены"
             });
@@ -130,8 +129,8 @@ public partial class SettingsViewModel : ObservableObject
         {
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Error,
-                Category = LogCategories.UI,
+                Level = GTA5LogLevel.Error,
+                Category = "SETTINGS",
                 Message = "Ошибка сохранения настроек",
                 Details = ex.Message
             });
