@@ -286,21 +286,8 @@
                                         <Border Background="#2a2a2a" Padding="8" Margin="0,2">
                                             <StackPanel>
                                                 <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="{Binding Severity, StringFormat={}{0:F0}%}" FontWeight="Bold" Width="45">
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Foreground" Value="#00ff88"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding Severity, Converter={StaticResource GreaterThan50Converter}}" Value="True">
-                                                                        <Setter Property="Foreground" Value="#ffaa00"/>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding Severity, Converter={StaticResource GreaterThan80Converter}}" Value="True">
-                                                                        <Setter Property="Foreground" Value="#ff4444"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding Severity, StringFormat={}{0:F0}%}" FontWeight="Bold" Width="45"
+                                                               Foreground="{Binding Severity, Converter={StaticResource SeverityToColorConverter}}"/>
                                                     <TextBlock Text="{Binding Description}" Foreground="#cccccc" FontSize="12"/>
                                                 </StackPanel>
                                                 <TextBlock Text="{Binding Recommendation}" Foreground="#888888" FontSize="11" Margin="45,2,0,0"/>
