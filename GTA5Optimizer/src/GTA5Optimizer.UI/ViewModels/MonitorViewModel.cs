@@ -10,7 +10,7 @@ namespace GTA5Optimizer.UI.ViewModels;
 public partial class MonitorViewModel : ObservableObject
 {
     private readonly IPerformanceMonitor _monitor;
-    private readonly Timer _updateTimer;
+    private readonly System.Windows.Threading.DispatcherTimer _updateTimer;
 
     [ObservableProperty]
     private PerformanceMetrics _metrics = new();
