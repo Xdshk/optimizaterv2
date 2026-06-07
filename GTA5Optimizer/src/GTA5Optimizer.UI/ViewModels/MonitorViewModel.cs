@@ -44,7 +44,7 @@ public partial class MonitorViewModel : ObservableObject
 
     public void Dispose()
     {
-        _updateTimer?.Dispose();
+        _updateTimer?.Stop();
         _monitor.OnMetricsUpdated -= OnMetricsUpdated;
     }
 }
