@@ -1,12 +1,12 @@
 using GTA5Optimizer.Core.Interfaces;
 using GTA5Optimizer.Models.Enums;
-using GTA5Optimizer.Models.Logging;
 using GTA5Optimizer.Models.Optimization;
 using GTA5Optimizer.Models.System;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Management;
 using System.Runtime.InteropServices;
+using GTA5LogLevel = GTA5Optimizer.Models.Logging.LogLevel;
 
 namespace GTA5Optimizer.Services.Services;
 
