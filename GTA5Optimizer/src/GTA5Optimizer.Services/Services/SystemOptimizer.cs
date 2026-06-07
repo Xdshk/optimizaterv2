@@ -1,5 +1,6 @@
 using GTA5Optimizer.Core.Interfaces;
 using GTA5Optimizer.Models.Enums;
+using GTA5Optimizer.Models.Logging;
 using GTA5Optimizer.Models.Optimization;
 using GTA5Optimizer.Models.System;
 using Microsoft.Extensions.Logging;
