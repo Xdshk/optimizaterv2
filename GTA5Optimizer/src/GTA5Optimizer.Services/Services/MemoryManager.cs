@@ -18,7 +18,8 @@ public class MemoryManager : IMemoryManager
         _logger = logger;
     }
 
-    [DllImport("kernel32.dll", SetLastError = true)]
+    [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = false)]
+    [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool EmptyWorkingSet(IntPtr hProcess);
 
     [DllImport("kernel32.dll")]
@@ -90,8 +91,7 @@ public class MemoryManager : IMemoryManager
         });
     }
 
-    [DllImport("kernel32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = false)]
     private static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
 
     [StructLayout(LayoutKind.Sequential)]
