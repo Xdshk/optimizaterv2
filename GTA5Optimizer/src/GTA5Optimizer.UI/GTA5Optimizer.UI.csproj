@@ -12,7 +12,7 @@
     <AssemblyName>GTA5Optimizer</AssemblyName>
     <RootNamespace>GTA5Optimizer.UI</RootNamespace>
     <OutputType>WinExe</OutputType>
-    <ApplicationIcon>Resources\app.ico</ApplicationIcon>
+    <!-- <ApplicationIcon>Resources\app.ico</ApplicationIcon> -->
   </PropertyGroup>
 
   <ItemGroup>
