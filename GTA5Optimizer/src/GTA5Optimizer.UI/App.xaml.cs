@@ -43,7 +43,8 @@ namespace GTA5Optimizer.UI
             _trayService.Initialize();
             _trayService.ShowRequested += () =>
             {
-                Current.Dispatcher.Invoke(() =>
+                var app = System.Windows.Application.Current;
+                app?.Dispatcher.Invoke(() =>
                 {
                     var mw = _host.Services.GetRequiredService<Views.MainWindow>();
                     mw.Show();
@@ -53,7 +54,10 @@ namespace GTA5Optimizer.UI
             };
             _trayService.ExitRequested += () =>
             {
-                Current.Dispatcher.Invoke(() => Shutdown());
+                System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    Shutdown();
+                });
             };
 
             var mainWindow = _host.Services.GetRequiredService<Views.MainWindow>();
