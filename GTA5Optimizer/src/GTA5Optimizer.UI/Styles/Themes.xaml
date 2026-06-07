@@ -236,23 +236,18 @@
     <!-- ==================== СТИЛЬ PROGRESSBAR ==================== -->
     <Style x:Key="ModernProgressBar" TargetType="ProgressBar">
         <Setter Property="Height" Value="3"/>
-        <Setter Property="Background" Value="#252525"/>
-        <Setter Property="Foreground" Value="{StaticResource AccentCyan}"/>
+        <Setter Property="Background" Value="#1A1A1A"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ProgressBar">
                     <Grid>
-                        <Border Background="{TemplateBinding Background}" CornerRadius="1.5"/>
-                        <Border x:Name="PART_Track" CornerRadius="1.5">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="2"/>
+                        <Border x:Name="PART_Track" CornerRadius="2">
                             <Border x:Name="PART_Indicator"
                                     Background="{TemplateBinding Foreground}"
-                                    CornerRadius="1.5"
-                                    HorizontalAlignment="Left">
-                                <Border.Effect>
-                                    <DropShadowEffect Color="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BrushToColorConverter}}" Opacity="0.5" ShadowDepth="0" BlurRadius="8"/>
-                                </Border.Effect>
-                            </Border>
+                                    CornerRadius="2"
+                                    HorizontalAlignment="Left"/>
                         </Border>
                     </Grid>
                 </ControlTemplate>
