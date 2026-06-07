@@ -9,8 +9,7 @@
             </ResourceDictionary.MergedDictionaries>
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
             <converters:BytesToMBConverter x:Key="BytesToMBConverter"/>
-            <converters:GreaterThanConverter x:Key="GreaterThan50Converter" />
-            <converters:GreaterThanConverter x:Key="GreaterThan80Converter" />
+            <converters:GreaterThanConverter x:Key="GreaterThanConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
