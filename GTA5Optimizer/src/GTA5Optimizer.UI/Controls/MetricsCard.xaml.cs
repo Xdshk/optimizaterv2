@@ -1,11 +1,9 @@
-using System.Windows.Controls;
-
 namespace GTA5Optimizer.UI.Controls;
 
 /// <summary>
 /// Interaction logic for MetricsCard.xaml
 /// </summary>
-public partial class MetricsCard : UserControl
+public partial class MetricsCard : System.Windows.Controls.UserControl
 {
     public MetricsCard()
     {
