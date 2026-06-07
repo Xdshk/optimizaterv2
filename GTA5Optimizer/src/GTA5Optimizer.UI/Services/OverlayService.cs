@@ -47,7 +47,7 @@ public class OverlayService : IDisposable
             Height = 120,
             WindowStyle = WindowStyle.None,
             AllowsTransparency = true,
-            Background = Brushes.Transparent,
+            Background = System.Windows.Media.Brushes.Transparent,
             Topmost = true,
             ShowInTaskbar = false,
             Left = 10,
