@@ -38,8 +38,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [ObservableProperty] private double _ramUsage;
     [ObservableProperty] private string _statusMessage = "Готов к оптимизации";
     [ObservableProperty] private ObservableCollection<OptimizationResult> _optimizationResults = new();
-    [ObservableProperty] private bool _overlayEnabled;
-    [ObservableProperty] private bool _autoStartEnabled;
+    private bool _overlayEnabled;
+    private bool _autoStartEnabled;
     [ObservableProperty] private string _version = "v1.0.0";
 
     public MonitorViewModel Monitor { get; }
