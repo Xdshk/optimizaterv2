@@ -337,7 +337,7 @@
                             <UniformGrid Columns="4" Margin="0,0,0,16">
                                 <Border Style="{StaticResource MetricCard}" Margin="0,0,6,0">
                                     <StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="SpaceBetween">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
                                             <TextBlock Text="FPS" Foreground="#555555" FontSize="10" FontWeight="Bold"/>
                                             <Ellipse Width="6" Height="6" Fill="#00E676"/>
                                         </StackPanel>
@@ -347,7 +347,7 @@
                                 </Border>
                                 <Border Style="{StaticResource MetricCard}" Margin="6,0,6,0">
                                     <StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="SpaceBetween">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
                                             <TextBlock Text="CPU" Foreground="#555555" FontSize="10" FontWeight="Bold"/>
                                             <Ellipse Width="6" Height="6" Fill="#00D4FF"/>
                                         </StackPanel>
@@ -360,7 +360,7 @@
                                 </Border>
                                 <Border Style="{StaticResource MetricCard}" Margin="6,0,6,0">
                                     <StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="SpaceBetween">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
                                             <TextBlock Text="GPU" Foreground="#555555" FontSize="10" FontWeight="Bold"/>
                                             <Ellipse Width="6" Height="6" Fill="#FF6D00"/>
                                         </StackPanel>
@@ -373,7 +373,7 @@
                                 </Border>
                                 <Border Style="{StaticResource MetricCard}" Margin="6,0,0,0">
                                     <StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="SpaceBetween">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
                                             <TextBlock Text="RAM" Foreground="#555555" FontSize="10" FontWeight="Bold"/>
                                             <Ellipse Width="6" Height="6" Fill="#FFAB00"/>
                                         </StackPanel>
