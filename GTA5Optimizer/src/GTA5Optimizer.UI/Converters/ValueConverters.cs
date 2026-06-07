@@ -10,6 +10,8 @@ public class BytesToMBConverter : IValueConverter
     {
         if (value is long bytes)
             return $"{bytes / 1024.0 / 1024.0:F0} MB";
+        if (value is double d)
+            return $"{d / 1024.0 / 1024.0:F0} MB";
         return "0 MB";
     }
 
