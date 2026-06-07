@@ -177,16 +177,57 @@ public class SystemOptimizer : ISystemOptimizer
         try
         {
             _logger.LogInformation("Восстановление настроек по умолчанию");
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = LogLevel.Information,
+                Category = LogCategories.Rollback,
+                Message = "Начало восстановления настроек по умолчанию"
+            });
 
             await RestorePowerPlanAsync();
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = LogLevel.Information,
+                Category = LogCategories.Rollback,
+                Message = "Энергоплан восстановлен"
+            });
+
             await RestoreProcessPrioritiesAsync();
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = LogLevel.Information,
+                Category = LogCategories.Process,
+                Message = "Приоритеты процессов восстановлены"
+            });
+
             await _registryManager.RestoreRegistryKeyAsync(@"SOFTWARE\GTA5Optimizer");
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = LogLevel.Information,
+                Category = LogCategories.Registry,
+                Message = "Ключи реестра восстановлены"
+            });
+
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = LogLevel.Information,
+                Category = LogCategories.Rollback,
+                Message = "Восстановление настроек завершено успешно"
+            });
 
             return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Ошибка при восстановлении настроек");
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = LogLevel.Error,
+                Category = LogCategories.Rollback,
+                Message = "Ошибка восстановления настроек",
+                Details = ex.Message,
+                Exception = ex
+            });
             return false;
         }
     }
