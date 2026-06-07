@@ -8,6 +8,9 @@
                 <ResourceDictionary Source="/Styles/Themes.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+            <converters:BytesToMBConverter x:Key="BytesToMBConverter"/>
+            <converters:GreaterThanConverter x:Key="GreaterThan50Converter" />
+            <converters:GreaterThanConverter x:Key="GreaterThan80Converter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
