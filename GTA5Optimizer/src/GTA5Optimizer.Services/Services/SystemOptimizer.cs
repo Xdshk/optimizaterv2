@@ -15,6 +15,7 @@ namespace GTA5Optimizer.Services.Services;
 public class SystemOptimizer : ISystemOptimizer
 {
     private readonly ILogger<SystemOptimizer> _logger;
+    private readonly ILoggerService _loggerService;
     private readonly IProcessManager _processManager;
     private readonly IMemoryManager _memoryManager;
     private readonly IRegistryManager _registryManager;
@@ -36,12 +37,14 @@ public class SystemOptimizer : ISystemOptimizer
 
     public SystemOptimizer(
         ILogger<SystemOptimizer> logger,
+        ILoggerService loggerService,
         IProcessManager processManager,
         IMemoryManager memoryManager,
         IRegistryManager registryManager,
         IGameDetector gameDetector)
     {
         _logger = logger;
+        _loggerService = loggerService;
         _processManager = processManager;
         _memoryManager = memoryManager;
         _registryManager = registryManager;
