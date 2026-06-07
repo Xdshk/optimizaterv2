@@ -7,6 +7,8 @@ using System.Diagnostics;
 using System.Management;
 using System.Runtime.InteropServices;
 using GTA5LogLevel = GTA5Optimizer.Models.Logging.LogLevel;
+using LogEntry = GTA5Optimizer.Models.Logging.LogEntry;
+using LogCategories = GTA5Optimizer.Models.Logging.LogCategories;
 
 namespace GTA5Optimizer.Services.Services;
 
