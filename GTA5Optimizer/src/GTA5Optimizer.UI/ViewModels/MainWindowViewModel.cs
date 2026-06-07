@@ -2,10 +2,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GTA5Optimizer.Core.Interfaces;
 using GTA5Optimizer.Models.Enums;
-using GTA5Optimizer.Models.Logging;
 using GTA5Optimizer.Models.Optimization;
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
+using GTA5LogLevel = GTA5Optimizer.Models.Logging.LogLevel;
+using LogEntry = GTA5Optimizer.Models.Logging.LogEntry;
+using LogCategories = GTA5Optimizer.Models.Logging.LogCategories;
+using System.Windows;
 
 namespace GTA5Optimizer.UI.ViewModels;
 
@@ -100,10 +103,9 @@ public partial class MainWindowViewModel : ObservableObject
         _ = CheckGameStatusAsync();
     }
 
-    private void OnMetricsUpdated(Models.Monitoring.PerformanceMetrics metrics)
+    private void OnMetricsUpdated(GTA5Optimizer.Models.Monitoring.PerformanceMetrics metrics)
     {
-        // Обновляется из фонового потока монитора — используем Dispatcher
-        App.Current?.Dispatcher.Invoke(() =>
+        Application.Current?.Dispatcher.Invoke(() =>
         {
             CurrentFPS = metrics.CurrentFPS;
             CpuUsage = metrics.CPUUsage;
@@ -126,7 +128,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Error,
+                Level = GTA5LogLevel.Error,
                 Category = LogCategories.UI,
                 Message = "Ошибка загрузки профилей",
                 Details = ex.Message
@@ -170,7 +172,6 @@ public partial class MainWindowViewModel : ObservableObject
 
             StatusMessage = success ? "✅ Оптимизация завершена успешно" : "⚠️ Оптимизация завершена с ошибками";
 
-            // Обновляем логи после оптимизации
             await Logs.RefreshLogsCommand.ExecuteAsync(null);
         }
         catch (Exception ex)
@@ -178,7 +179,7 @@ public partial class MainWindowViewModel : ObservableObject
             StatusMessage = $"❌ Ошибка: {ex.Message}";
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Error,
+                Level = GTA5LogLevel.Error,
                 Category = LogCategories.Optimization,
                 Message = "Ошибка оптимизации",
                 Details = ex.Message,
