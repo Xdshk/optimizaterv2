@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using GTA5Optimizer.Core.Interfaces;
 using GTA5Optimizer.Models.Enums;
 using GTA5Optimizer.Models.Optimization;
+using GTA5Optimizer.UI.Services;
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using GTA5LogLevel = GTA5Optimizer.Models.Logging.LogLevel;
@@ -12,67 +13,77 @@ using System.Windows;
 
 namespace GTA5Optimizer.UI.ViewModels;
 
-/// <summary>
-/// ViewModel главного окна
-/// </summary>
-public partial class MainWindowViewModel : ObservableObject
+public partial class MainWindowViewModel : ObservableObject, IDisposable
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILoggerService _loggerService;
     private readonly IPerformanceMonitor _performanceMonitor;
     private readonly IGameDetector _gameDetector;
+    private readonly TrayService _trayService;
+    private readonly OverlayService _overlayService;
     private readonly DispatcherTimer _metricsTimer;
     private readonly DispatcherTimer _gameStatusTimer;
+    private readonly DispatcherTimer _trayUpdateTimer;
 
-    [ObservableProperty]
-    private bool _isOptimizing;
+    [ObservableProperty] private bool _isOptimizing;
+    [ObservableProperty] private OptimizationProfile _selectedProfile = OptimizationProfile.RPMode;
+    [ObservableProperty] private ObservableCollection<ProfileConfig> _profiles = new();
+    [ObservableProperty] private ProfileConfig? _selectedProfileConfig;
+    [ObservableProperty] private bool _isGameRunning;
+    [ObservableProperty] private string _gamePath = string.Empty;
+    [ObservableProperty] private string _gameStatusText = "GTA V: не запущена";
+    [ObservableProperty] private double _currentFPS;
+    [ObservableProperty] private double _cpuUsage;
+    [ObservableProperty] private double _gpuUsage;
+    [ObservableProperty] private double _ramUsage;
+    [ObservableProperty] private string _statusMessage = "Готов к оптимизации";
+    [ObservableProperty] private ObservableCollection<OptimizationResult> _optimizationResults = new();
+    [ObservableProperty] private bool _overlayEnabled;
+    [ObservableProperty] private bool _autoStartEnabled;
+    [ObservableProperty] private string _version = "v1.0.0";
 
-    [ObservableProperty]
-    private OptimizationProfile _selectedProfile = OptimizationProfile.RPMode;
-
-    [ObservableProperty]
-    private ObservableCollection<ProfileConfig> _profiles = new();
-
-    [ObservableProperty]
-    private ProfileConfig? _selectedProfileConfig;
-
-    [ObservableProperty]
-    private bool _isGameRunning;
-
-    [ObservableProperty]
-    private string _gamePath = string.Empty;
-
-    [ObservableProperty]
-    private string _gameStatusText = "GTA V: не запущена";
-
-    [ObservableProperty]
-    private double _currentFPS;
-
-    [ObservableProperty]
-    private double _cpuUsage;
-
-    [ObservableProperty]
-    private double _gpuUsage;
-
-    [ObservableProperty]
-    private double _ramUsage;
-
-    [ObservableProperty]
-    private string _statusMessage = "Готов к оптимизации";
-
-    [ObservableProperty]
-    private ObservableCollection<OptimizationResult> _optimizationResults = new();
-
-    // Sub-viewmodels
     public MonitorViewModel Monitor { get; }
     public LogsViewModel Logs { get; }
     public SettingsViewModel Settings { get; }
+
+    public bool OverlayEnabled
+    {
+        get => _overlayEnabled;
+        set
+        {
+            if (SetProperty(ref _overlayEnabled, value))
+            {
+                _overlayService.IsVisible = value;
+                _ = _loggerService.LogAsync(new LogEntry
+                {
+                    Level = GTA5LogLevel.Information,
+                    Category = "UI",
+                    Message = value ? "Оверлей включён" : "Оверлей выключен"
+                });
+            }
+        }
+    }
+
+    public bool AutoStartEnabled
+    {
+        get => _autoStartEnabled;
+        set
+        {
+            if (SetProperty(ref _autoStartEnabled, value))
+            {
+                if (value) AutoStartService.Enable();
+                else AutoStartService.Disable();
+            }
+        }
+    }
 
     public MainWindowViewModel(
         IServiceProvider serviceProvider,
         ILoggerService loggerService,
         IPerformanceMonitor performanceMonitor,
         IGameDetector gameDetector,
+        TrayService trayService,
+        OverlayService overlayService,
         MonitorViewModel monitor,
         LogsViewModel logs,
         SettingsViewModel settings)
@@ -81,23 +92,30 @@ public partial class MainWindowViewModel : ObservableObject
         _loggerService = loggerService;
         _performanceMonitor = performanceMonitor;
         _gameDetector = gameDetector;
+        _trayService = trayService;
+        _overlayService = overlayService;
         Monitor = monitor;
         Logs = logs;
         Settings = settings;
 
-        // Запускаем мониторинг производительности
+        _autoStartEnabled = AutoStartService.IsEnabled;
+
         _performanceMonitor.StartMonitoring();
         _performanceMonitor.OnMetricsUpdated += OnMetricsUpdated;
 
-        // Таймер обновления метрик в UI (каждые 2 сек)
         _metricsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
         _metricsTimer.Tick += async (_, _) => await RefreshMetricsAsync();
         _metricsTimer.Start();
 
-        // Таймер проверки статуса игры (каждые 5 сек)
         _gameStatusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _gameStatusTimer.Tick += async (_, _) => await CheckGameStatusAsync();
         _gameStatusTimer.Start();
+
+        _trayUpdateTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        _trayUpdateTimer.Tick += (_, _) => UpdateTrayTooltip();
+        _trayUpdateTimer.Start();
+
+        _trayService.OptimizeRequested += async () => await OptimizeAsync();
 
         _ = LoadProfilesAsync();
         _ = CheckGameStatusAsync();
@@ -112,6 +130,11 @@ public partial class MainWindowViewModel : ObservableObject
             GpuUsage = metrics.GPUUsage;
             RamUsage = metrics.RAMUsagePercent;
         });
+    }
+
+    private void UpdateTrayTooltip()
+    {
+        _trayService.UpdateTooltip($"GTA5 Optimizer | FPS: {CurrentFPS:F0} | CPU: {CpuUsage:F0}% | RAM: {RamUsage:F0}%");
     }
 
     private async Task LoadProfilesAsync()
@@ -147,10 +170,7 @@ public partial class MainWindowViewModel : ObservableObject
                 ? $"GTA V: запущена (PID: {gameInfo.ProcessId})"
                 : "GTA V: не запущена";
         }
-        catch
-        {
-            GameStatusText = "GTA V: статус неизвестен";
-        }
+        catch { GameStatusText = "GTA V: статус неизвестен"; }
     }
 
     [RelayCommand]
@@ -170,8 +190,8 @@ public partial class MainWindowViewModel : ObservableObject
             await profileManager.ApplyProfileAsync(profile);
             var success = await optimizer.ApplyOptimizationsAsync(profile);
 
-            StatusMessage = success ? "✅ Оптимизация завершена успешно" : "⚠️ Оптимизация завершена с ошибками";
-
+            StatusMessage = success ? "✅ Оптимизация завершена" : "⚠️ Завершена с ошибками";
+            _trayService.ShowNotification("GTA5 Optimizer", StatusMessage);
             await Logs.RefreshLogsCommand.ExecuteAsync(null);
         }
         catch (Exception ex)
@@ -186,10 +206,7 @@ public partial class MainWindowViewModel : ObservableObject
                 Exception = ex
             });
         }
-        finally
-        {
-            IsOptimizing = false;
-        }
+        finally { IsOptimizing = false; }
     }
 
     [RelayCommand]
@@ -201,13 +218,9 @@ public partial class MainWindowViewModel : ObservableObject
             var optimizer = scope.ServiceProvider.GetRequiredService<ISystemOptimizer>();
             var success = await optimizer.RestoreDefaultsAsync();
             StatusMessage = success ? "✅ Настройки восстановлены" : "⚠️ Ошибка восстановления";
-
             await Logs.RefreshLogsCommand.ExecuteAsync(null);
         }
-        catch (Exception ex)
-        {
-            StatusMessage = $"❌ Ошибка восстановления: {ex.Message}";
-        }
+        catch (Exception ex) { StatusMessage = $"❌ Ошибка: {ex.Message}"; }
     }
 
     [RelayCommand]
@@ -216,15 +229,19 @@ public partial class MainWindowViewModel : ObservableObject
         try
         {
             var metrics = await _performanceMonitor.GetCurrentMetricsAsync();
-
             CurrentFPS = metrics.CurrentFPS;
             CpuUsage = metrics.CPUUsage;
             GpuUsage = metrics.GPUUsage;
             RamUsage = metrics.RAMUsagePercent;
         }
-        catch
-        {
-            // Тихо игнорируем ошибки обновления метрик
-        }
+        catch { }
+    }
+
+    public void Dispose()
+    {
+        _metricsTimer.Stop();
+        _gameStatusTimer.Stop();
+        _trayUpdateTimer.Stop();
+        _overlayService.Dispose();
     }
 }
