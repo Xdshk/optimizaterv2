@@ -60,7 +60,7 @@ public class SystemOptimizer : ISystemOptimizer
 
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Information,
+                Level = GTA5LogLevel.Information,
                 Category = LogCategories.Optimization,
                 Message = $"Начало оптимизации — профиль: {profile}",
                 Properties = new Dictionary<string, object> { ["Profile"] = profile.ToString() }
@@ -70,7 +70,7 @@ public class SystemOptimizer : ISystemOptimizer
             await _registryManager.CreateRestorePointAsync($"GTA5Optimizer - {profile}");
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Information,
+                Level = GTA5LogLevel.Information,
                 Category = LogCategories.System,
                 Message = "Точка восстановления создана"
             });
@@ -84,7 +84,7 @@ public class SystemOptimizer : ISystemOptimizer
                 results.Add(powerResult);
                 await _loggerService.LogAsync(new LogEntry
                 {
-                    Level = powerResult.Success ? LogLevel.Information : LogLevel.Warning,
+                    Level = powerResult.Success ? GTA5LogLevel.Information : GTA5LogLevel.Warning,
                     Category = LogCategories.Optimization,
                     Message = powerResult.Message,
                     Details = powerResult.Details
@@ -95,7 +95,7 @@ public class SystemOptimizer : ISystemOptimizer
             results.Add(processResult);
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = processResult.Success ? LogLevel.Information : LogLevel.Warning,
+                Level = processResult.Success ? GTA5LogLevel.Information : GTA5LogLevel.Warning,
                 Category = LogCategories.Process,
                 Message = processResult.Message,
                 Details = processResult.Details
@@ -114,7 +114,7 @@ public class SystemOptimizer : ISystemOptimizer
                 results.Add(memOptResult);
                 await _loggerService.LogAsync(new LogEntry
                 {
-                    Level = memoryResult.Success ? LogLevel.Information : LogLevel.Warning,
+                    Level = memoryResult.Success ? GTA5LogLevel.Information : GTA5LogLevel.Warning,
                     Category = LogCategories.Memory,
                     Message = memoryResult.Success ? $"Память оптимизирована: {memoryResult.Details}" : "Ошибка оптимизации памяти",
                     Details = memoryResult.Details
@@ -125,7 +125,7 @@ public class SystemOptimizer : ISystemOptimizer
             results.Add(windowsResult);
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = windowsResult.Success ? LogLevel.Information : LogLevel.Warning,
+                Level = windowsResult.Success ? GTA5LogLevel.Information : GTA5LogLevel.Warning,
                 Category = LogCategories.System,
                 Message = windowsResult.Message,
                 Details = windowsResult.Details
@@ -135,7 +135,7 @@ public class SystemOptimizer : ISystemOptimizer
             results.Add(diskResult);
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = diskResult.Success ? LogLevel.Information : LogLevel.Warning,
+                Level = diskResult.Success ? GTA5LogLevel.Information : GTA5LogLevel.Warning,
                 Category = LogCategories.Disk,
                 Message = diskResult.Message,
                 Details = diskResult.Details
@@ -144,7 +144,7 @@ public class SystemOptimizer : ISystemOptimizer
             var allSuccess = results.All(r => r.Success);
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = allSuccess ? LogLevel.Information : LogLevel.Warning,
+                Level = allSuccess ? GTA5LogLevel.Information : GTA5LogLevel.Warning,
                 Category = LogCategories.Optimization,
                 Message = allSuccess ? "Оптимизация завершена успешно" : $"Оптимизация завершена с ошибками: {results.Count(r => !r.Success)} из {results.Count}",
                 Properties = new Dictionary<string, object>
@@ -162,7 +162,7 @@ public class SystemOptimizer : ISystemOptimizer
             _logger.LogError(ex, "Ошибка при применении оптимизаций");
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Error,
+                Level = GTA5LogLevel.Error,
                 Category = LogCategories.Optimization,
                 Message = "Критическая ошибка оптимизации",
                 Details = ex.Message,
@@ -179,7 +179,7 @@ public class SystemOptimizer : ISystemOptimizer
             _logger.LogInformation("Восстановление настроек по умолчанию");
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Information,
+                Level = GTA5LogLevel.Information,
                 Category = LogCategories.Rollback,
                 Message = "Начало восстановления настроек по умолчанию"
             });
@@ -187,7 +187,7 @@ public class SystemOptimizer : ISystemOptimizer
             await RestorePowerPlanAsync();
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Information,
+                Level = GTA5LogLevel.Information,
                 Category = LogCategories.Rollback,
                 Message = "Энергоплан восстановлен"
             });
@@ -195,7 +195,7 @@ public class SystemOptimizer : ISystemOptimizer
             await RestoreProcessPrioritiesAsync();
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Information,
+                Level = GTA5LogLevel.Information,
                 Category = LogCategories.Process,
                 Message = "Приоритеты процессов восстановлены"
             });
@@ -203,14 +203,14 @@ public class SystemOptimizer : ISystemOptimizer
             await _registryManager.RestoreRegistryKeyAsync(@"SOFTWARE\GTA5Optimizer");
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Information,
+                Level = GTA5LogLevel.Information,
                 Category = LogCategories.Registry,
                 Message = "Ключи реестра восстановлены"
             });
 
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Information,
+                Level = GTA5LogLevel.Information,
                 Category = LogCategories.Rollback,
                 Message = "Восстановление настроек завершено успешно"
             });
@@ -222,7 +222,7 @@ public class SystemOptimizer : ISystemOptimizer
             _logger.LogError(ex, "Ошибка при восстановлении настроек");
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Error,
+                Level = GTA5LogLevel.Error,
                 Category = LogCategories.Rollback,
                 Message = "Ошибка восстановления настроек",
                 Details = ex.Message,
