@@ -57,8 +57,22 @@ public class SystemOptimizer : ISystemOptimizer
         {
             _logger.LogInformation($"Применение оптимизаций для профиля: {profile}");
 
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = LogLevel.Information,
+                Category = LogCategories.Optimization,
+                Message = $"Начало оптимизации — профиль: {profile}",
+                Properties = new Dictionary<string, object> { ["Profile"] = profile.ToString() }
+            });
+
             // Создаем точку восстановления
             await _registryManager.CreateRestorePointAsync($"GTA5Optimizer - {profile}");
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = LogLevel.Information,
+                Category = LogCategories.System,
+                Message = "Точка восстановления создана"
+            });
 
             var config = ProfileConfig.GetDefaultProfile(profile);
             var results = new List<OptimizationResult>();
@@ -67,34 +81,92 @@ public class SystemOptimizer : ISystemOptimizer
             {
                 var powerResult = await ApplyPowerPlanAsync();
                 results.Add(powerResult);
+                await _loggerService.LogAsync(new LogEntry
+                {
+                    Level = powerResult.Success ? LogLevel.Information : LogLevel.Warning,
+                    Category = LogCategories.Optimization,
+                    Message = powerResult.Message,
+                    Details = powerResult.Details
+                });
             }
 
             var processResult = await ApplyProcessOptimizationsAsync(config);
             results.Add(processResult);
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = processResult.Success ? LogLevel.Information : LogLevel.Warning,
+                Category = LogCategories.Process,
+                Message = processResult.Message,
+                Details = processResult.Details
+            });
 
             if (config.EnableMemoryCleanup)
             {
                 var memoryResult = await _memoryManager.OptimizeMemoryAsync();
-                results.Add(new OptimizationResult
+                var memOptResult = new OptimizationResult
                 {
                     Success = memoryResult.Success,
                     Message = "Оптимизация памяти",
                     Details = memoryResult.Details,
                     Category = OptimizationCategory.MemoryCleanup
+                };
+                results.Add(memOptResult);
+                await _loggerService.LogAsync(new LogEntry
+                {
+                    Level = memoryResult.Success ? LogLevel.Information : LogLevel.Warning,
+                    Category = LogCategories.Memory,
+                    Message = memoryResult.Success ? $"Память оптимизирована: {memoryResult.Details}" : "Ошибка оптимизации памяти",
+                    Details = memoryResult.Details
                 });
             }
 
             var windowsResult = await ApplyWindowsOptimizationsAsync(config);
             results.Add(windowsResult);
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = windowsResult.Success ? LogLevel.Information : LogLevel.Warning,
+                Category = LogCategories.System,
+                Message = windowsResult.Message,
+                Details = windowsResult.Details
+            });
 
             var diskResult = await ApplyDiskOptimizationsAsync(config);
             results.Add(diskResult);
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = diskResult.Success ? LogLevel.Information : LogLevel.Warning,
+                Category = LogCategories.Disk,
+                Message = diskResult.Message,
+                Details = diskResult.Details
+            });
 
-            return results.All(r => r.Success);
+            var allSuccess = results.All(r => r.Success);
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = allSuccess ? LogLevel.Information : LogLevel.Warning,
+                Category = LogCategories.Optimization,
+                Message = allSuccess ? "Оптимизация завершена успешно" : $"Оптимизация завершена с ошибками: {results.Count(r => !r.Success)} из {results.Count}",
+                Properties = new Dictionary<string, object>
+                {
+                    ["Success"] = allSuccess,
+                    ["StepsTotal"] = results.Count,
+                    ["StepsFailed"] = results.Count(r => !r.Success)
+                }
+            });
+
+            return allSuccess;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Ошибка при применении оптимизаций");
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = LogLevel.Error,
+                Category = LogCategories.Optimization,
+                Message = "Критическая ошибка оптимизации",
+                Details = ex.Message,
+                Exception = ex
+            });
             return false;
         }
     }
