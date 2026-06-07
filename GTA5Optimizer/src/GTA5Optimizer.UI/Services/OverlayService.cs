@@ -102,8 +102,8 @@ public class OverlayService : IDisposable
         return new TextBlock
         {
             FontSize = fontSize,
-            FontFamily = new FontFamily("Consolas, Courier New, monospace"),
-            Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color)),
+            FontFamily = new System.Windows.Media.FontFamily("Consolas, Courier New, monospace"),
+            Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(color)),
             FontWeight = FontWeights.SemiBold,
             Margin = new Thickness(0, 1, 0, 1)
         };
