@@ -606,7 +606,7 @@
                                     <TextBlock Text="🏁  БЕНЧМАРК" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Длительность:" Foreground="#555570" FontSize="12" VerticalAlignment="Center" Width="100"/>
-                                        <ComboBox ItemsSource="{Binding Benchmark.DurationOptions}" SelectedItem="{Benchmark.SelectedDuration}"
+                                        <ComboBox ItemsSource="{Binding Benchmark.DurationOptions}" SelectedItem="{Binding Benchmark.SelectedDuration}"
                                                   Width="100" Height="36" FontSize="13" VerticalAlignment="Center"/>
                                         <TextBlock Text=" сек" Foreground="#555570" FontSize="12" VerticalAlignment="Center"/>
                                     </StackPanel>
