@@ -81,12 +81,12 @@ public sealed class LoggerService : ILoggerService, IDisposable
                 // Also log to Microsoft.Extensions.Logging at appropriate level
                 var logLevel = entry.Level switch
                 {
-                    LogLevel.Trace or LogLevel.Debug => Microsoft.Extensions.Logging.LogLevel.Debug,
-                    LogLevel.Information => Microsoft.Extensions.Logging.LogLevel.Information,
-                    LogLevel.Warning => Microsoft.Extensions.Logging.LogLevel.Warning,
-                    LogLevel.Error => Microsoft.Extensions.Logging.LogLevel.Error,
-                    LogLevel.Critical => Microsoft.Extensions.Logging.LogLevel.Critical,
-                    _ => Microsoft.Extensions.Logging.LogLevel.Information
+                    GTA5LogLevel.Trace or GTA5LogLevel.Debug => MEL.LogLevel.Debug,
+                    GTA5LogLevel.Information => MEL.LogLevel.Information,
+                    GTA5LogLevel.Warning => MEL.LogLevel.Warning,
+                    GTA5LogLevel.Error => MEL.LogLevel.Error,
+                    GTA5LogLevel.Critical => MEL.LogLevel.Critical,
+                    _ => MEL.LogLevel.Information
                 };
                 _logger.Log(logLevel, "[{Category}] {Message}", entry.Category, entry.Message);
             }
