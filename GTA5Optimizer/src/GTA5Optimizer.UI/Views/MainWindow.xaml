@@ -145,30 +145,46 @@
             </Setter>
         </Style>
 
-        <!-- TabItem -->
-        <Style x:Key="ModernTabItem" TargetType="TabItem">
+        <!-- Navigation Button Style -->
+        <Style x:Key="NavButtonStyle" TargetType="RadioButton">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#606080"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Padding" Value="18,14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="16,14"/>
+            <Setter Property="Margin" Value="4,2"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="TabItem">
-                        <Grid Background="Transparent">
-                            <Border x:Name="border" Background="Transparent" BorderThickness="0,0,0,2"
-                                    BorderBrush="Transparent" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </Grid>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                CornerRadius="10" Padding="{TemplateBinding Padding}"
+                                BorderThickness="0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock x:Name="icon" Text="{TemplateBinding Tag}" FontSize="20"
+                                           VerticalAlignment="Center" Width="36" TextAlignment="Center"/>
+                                <TextBlock x:Name="label" Text="{TemplateBinding Content}"
+                                           VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="#404060"/>
+                                <Setter TargetName="border" Property="Background" Value="#151525"/>
                                 <Setter Property="Foreground" Value="#A0A0C0"/>
                             </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#1E1E3A" Offset="0"/>
+                                            <GradientStop Color="#151525" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
                                 <Setter TargetName="border" Property="BorderBrush" Value="#6366F1"/>
-                                <Setter Property="Foreground" Value="#818CF8"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="2,0,0,0"/>
+                                <Setter Property="Foreground" Value="White"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
