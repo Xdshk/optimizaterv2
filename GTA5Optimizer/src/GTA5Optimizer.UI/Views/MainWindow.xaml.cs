@@ -19,7 +19,13 @@ public partial class MainWindow : Window
                 await viewModel.OptimizeCommand.ExecuteAsync(null);
         };
 
-        Loaded += (_, _) => _hotkeyService.Initialize(this);
+        Loaded += (_, _) =>
+        {
+            _hotkeyService.Initialize(this);
+            // Show initial page after all elements are loaded
+            if (FindName("PageOptimization") is System.Windows.FrameworkElement el)
+                el.Visibility = Visibility.Visible;
+        };
         Closed += (_, _) =>
         {
             _hotkeyService.Dispose();
