@@ -87,7 +87,7 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
             }
 
             // CPU
-            PopulateCpuMetrics(metrics);
+            await PopulateCpuMetricsAsync(metrics);
 
             // GPU
             PopulateGpuMetrics(metrics);
@@ -96,7 +96,7 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
             PopulateRamMetrics(metrics);
 
             // Disk
-            PopulateDiskMetrics(metrics);
+            await PopulateDiskMetricsAsync(metrics);
 
             // FPS
             metrics.CurrentFPS = _currentFps;
