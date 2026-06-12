@@ -190,7 +190,7 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
             {
                 using var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
                 cpuCounter.NextValue();
-                Task.Delay(200).Wait();
+                await Task.Delay(200);
                 metrics.CPUUsage = cpuCounter.NextValue();
             }
         }
