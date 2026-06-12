@@ -380,7 +380,7 @@ public sealed class GameDetector : IGameDetector
                 if (!string.IsNullOrEmpty(deviceIdStr))
                 {
                     // Get the disk drive from partition
-                    await using var diskSearcher = new ManagementObjectSearcher(
+                    using var diskSearcher = new ManagementObjectSearcher(
                         $"ASSOCIATORS OF {{Win32_DiskPartition.DeviceID='{deviceIdStr}'}}" +
                         "WHERE AssocClass=Win32_DiskDriveToDiskPartition");
 
