@@ -47,6 +47,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     public MonitorViewModel Monitor { get; }
     public LogsViewModel Logs { get; }
     public SettingsViewModel Settings { get; }
+    public DiagnosticsViewModel Diagnostics { get; }
+    public BenchmarkViewModel Benchmark { get; }
+    public ProfileViewModel Profile { get; }
 
     public bool OverlayEnabled
     {
