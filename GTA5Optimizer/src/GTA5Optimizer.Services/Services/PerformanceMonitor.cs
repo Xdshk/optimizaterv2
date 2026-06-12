@@ -416,14 +416,15 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         }
     }
 
-    private static float GetProcessCpuUsage(Process process)
+    private static async Task<float> GetProcessCpuUsageAsync(Process process)
     {
         try
         {
             var startTime = DateTime.UtcNow;
             var startCpu = process.TotalProcessorTime;
-            Task.Delay(500).Wait();
+            await Task.Delay(500);
             var endTime = DateTime.UtcNow;
+            process.Refresh();
             var endCpu = process.TotalProcessorTime;
             var cpuUsedMs = (endCpu - startCpu).TotalMilliseconds;
             var totalMs = (endTime - startTime).TotalMilliseconds;
