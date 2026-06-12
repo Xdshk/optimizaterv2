@@ -472,21 +472,25 @@ public sealed class GameDetector : IGameDetector
         return !string.IsNullOrEmpty(path) && File.Exists(Path.Combine(path, "GTA5.exe"));
     }
 
-    private static string? ReadRegistryValue(string keyPath, string valueName)
+    private string? ReadRegistryValue(string keyPath, string valueName)
     {
         try
         {
             using var key = Registry.LocalMachine.OpenSubKey(keyPath, false);
             return key?.GetValue(valueName)?.ToString();
         }
-        catch
+        catch (Exception ex)
         {
+            logger.LogTrace(ex, "Failed to read registry HKLM\\{KeyPath}\\{ValueName}", keyPath, valueName);
             try
             {
                 using var key = Registry.CurrentUser.OpenSubKey(keyPath, false);
                 return key?.GetValue(valueName)?.ToString();
             }
-            catch { }
+            catch (Exception ex2)
+            {
+                logger.LogTrace(ex2, "Failed to read registry HKCU\\{KeyPath}\\{ValueName}", keyPath, valueName);
+            }
         }
         return null;
     }
