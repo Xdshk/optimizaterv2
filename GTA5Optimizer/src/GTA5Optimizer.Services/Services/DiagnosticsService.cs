@@ -146,7 +146,7 @@ public sealed class DiagnosticsService : IDiagnosticsService
         }
 
         // Disk check
-        if (gameInfo.DriveType == DriveType.HDD)
+        if (gameInfo.DriveType == GTA5DriveType.HDD)
         {
             result.Issues.Add(new DiagnosticIssue
             {
