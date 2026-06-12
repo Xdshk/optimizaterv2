@@ -238,7 +238,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             GpuUsage = metrics.GPUUsage;
             RamUsage = metrics.RAMUsagePercent;
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Failed to refresh metrics");
+        }
     }
 
     public void Dispose()
