@@ -3,6 +3,8 @@ using GTA5Optimizer.Models.Logging;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Threading.Channels;
+using MEL = Microsoft.Extensions.Logging;
+using GTA5LogLevel = GTA5Optimizer.Models.Logging.LogLevel;
 
 namespace GTA5Optimizer.Services.Services;
 
