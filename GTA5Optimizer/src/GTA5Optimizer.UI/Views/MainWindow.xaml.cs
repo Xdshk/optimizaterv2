@@ -53,8 +53,12 @@ public partial class MainWindow : Window
     {
         if (sender is not System.Windows.Controls.RadioButton rb) return;
 
-        // Find pages by name — they may not be direct fields if nested in templates
-        var pages = new Dictionary<string, string>
+        // Find the ContentArea grid by walking the visual tree
+        var contentArea = FindVisualChild<Grid>(this, "ContentArea");
+        if (contentArea == null) return;
+
+        // Map radio button names to page names
+        var pageMap = new Dictionary<string, string>
         {
             { "NavOptimization", "PageOptimization" },
             { "NavMonitoring", "PageMonitoring" },
@@ -65,14 +69,32 @@ public partial class MainWindow : Window
         };
 
         // Hide all pages
-        foreach (var pageName in pages.Values)
+        foreach (var child in contentArea.Children.OfType<FrameworkElement>())
         {
-            if (FindName(pageName) is System.Windows.FrameworkElement el)
-                el.Visibility = Visibility.Collapsed;
+            if (pageMap.Values.Contains(child.Name))
+                child.Visibility = Visibility.Collapsed;
         }
 
         // Show selected page
-        if (pages.TryGetValue(rb.Name, out var target) && FindName(target) is System.Windows.FrameworkElement targetEl)
-            targetEl.Visibility = Visibility.Visible;
+        if (pageMap.TryGetValue(rb.Name, out var targetName))
+        {
+            var target = contentArea.Children.OfType<FrameworkElement>().FirstOrDefault(c => c.Name == targetName);
+            if (target != null)
+                target.Visibility = Visibility.Visible;
+        }
+    }
+
+    private static T? FindVisualChild<T>(DependencyObject parent, string name) where T : FrameworkElement
+    {
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T fe && fe.Name == name)
+                return fe;
+            var result = FindVisualChild<T>(child, name);
+            if (result != null)
+                return result;
+        }
+        return null;
     }
 }
