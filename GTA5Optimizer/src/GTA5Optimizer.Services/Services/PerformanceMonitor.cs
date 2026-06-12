@@ -146,7 +146,7 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         }
     }
 
-    private void PopulateCpuMetrics(PerformanceMetrics metrics)
+    private async Task PopulateCpuMetricsAsync(PerformanceMetrics metrics)
     {
         try
         {
