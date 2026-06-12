@@ -46,7 +46,7 @@ public sealed class AutoOptimizationService : BackgroundService
                 _logger.LogError(ex, "Error during auto-optimization");
                 await _loggerService.LogAsync(new LogEntry
                 {
-                    Level = LogLevel.Error,
+                    Level = GTA5LogLevel.Error,
                     Category = LogCategories.Optimization,
                     Message = "Auto-optimization error",
                     Details = ex.Message,
