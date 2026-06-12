@@ -299,7 +299,7 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         }
     }
 
-    private void PopulateDiskMetrics(PerformanceMetrics metrics)
+    private async Task PopulateDiskMetricsAsync(PerformanceMetrics metrics)
     {
         try
         {
