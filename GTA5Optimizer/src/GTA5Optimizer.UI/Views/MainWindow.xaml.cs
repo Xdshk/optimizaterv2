@@ -42,4 +42,40 @@ public partial class MainWindow : Window
     {
         DragMove();
     }
+
+    private void NavButton_Checked(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.RadioButton rb) return;
+
+        // Hide all pages
+        PageOptimization.Visibility = Visibility.Collapsed;
+        PageMonitoring.Visibility = Visibility.Collapsed;
+        PageDiagnostics.Visibility = Visibility.Collapsed;
+        PageBenchmark.Visibility = Visibility.Collapsed;
+        PageLogs.Visibility = Visibility.Collapsed;
+        PageSettings.Visibility = Visibility.Collapsed;
+
+        // Show the selected page
+        switch (rb.Name)
+        {
+            case "NavOptimization":
+                PageOptimization.Visibility = Visibility.Visible;
+                break;
+            case "NavMonitoring":
+                PageMonitoring.Visibility = Visibility.Visible;
+                break;
+            case "NavDiagnostics":
+                PageDiagnostics.Visibility = Visibility.Visible;
+                break;
+            case "NavBenchmark":
+                PageBenchmark.Visibility = Visibility.Visible;
+                break;
+            case "NavLogs":
+                PageLogs.Visibility = Visibility.Visible;
+                break;
+            case "NavSettings":
+                PageSettings.Visibility = Visibility.Visible;
+                break;
+        }
+    }
 }
