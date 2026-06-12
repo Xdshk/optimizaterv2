@@ -343,7 +343,7 @@
                 <Grid Grid.Column="1" x:Name="ContentArea">
 
                     <!-- PAGE: OPTIMIZATION -->
-                    <Border x:Name="PageOptimization" Visibility="Visible">
+                    <Border x:Name="PageOptimization" Visibility="Collapsed">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel Margin="16">
                                 <!-- Profile selector -->
