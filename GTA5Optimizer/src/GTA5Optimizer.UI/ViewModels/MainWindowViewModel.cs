@@ -170,7 +170,11 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 ? $"GTA V: запущена (PID: {gameInfo.ProcessId})"
                 : "GTA V: не запущена";
         }
-        catch { GameStatusText = "GTA V: статус неизвестен"; }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to check game status");
+            GameStatusText = "GTA V: статус неизвестен";
+        }
     }
 
     [RelayCommand]
