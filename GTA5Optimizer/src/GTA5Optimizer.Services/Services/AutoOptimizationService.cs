@@ -6,6 +6,7 @@ using GTA5Optimizer.Models.System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using GTA5LogLevel = GTA5Optimizer.Models.Logging.LogLevel;
 
 namespace GTA5Optimizer.Services.Services;
 
