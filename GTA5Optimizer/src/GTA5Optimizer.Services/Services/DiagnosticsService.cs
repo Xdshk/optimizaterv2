@@ -2,10 +2,10 @@ using GTA5Optimizer.Core.Interfaces;
 using GTA5Optimizer.Models.Enums;
 using GTA5Optimizer.Models.Monitoring;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using GTA5DriveType = GTA5Optimizer.Models.Enums.DriveType;
 
 namespace GTA5Optimizer.Services.Services;
 
