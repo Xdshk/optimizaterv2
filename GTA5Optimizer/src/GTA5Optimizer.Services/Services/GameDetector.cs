@@ -516,7 +516,7 @@ public sealed class GameDetector : IGameDetector
         return "Unknown";
     }
 
-    private static GameLauncher DetectLauncher()
+    private GameLauncher DetectLauncher()
     {
         try
         {
@@ -530,11 +530,14 @@ public sealed class GameDetector : IGameDetector
             if (Process.GetProcessesByName("MajesticRP").Length > 0)
                 return GameLauncher.MajesticRP;
         }
-        catch { }
+        catch (Exception ex)
+        {
+            logger.LogTrace(ex, "Failed to detect game launcher");
+        }
         return GameLauncher.Unknown;
     }
 
-    private static string? FindExeInDirectory(string rootDir, string exeName)
+    private string? FindExeInDirectory(string rootDir, string exeName)
     {
         try
         {
