@@ -45,6 +45,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IProfileManager, ProfileManager>();
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<IMajesticAnalyzer, MajesticAnalyzer>();
+        services.AddSingleton<IDiagnosticsService, DiagnosticsService>();
         services.AddSingleton<SystemInfoDetector>();
 
         // Background services - use IHostedService registration compatible with IServiceCollection
