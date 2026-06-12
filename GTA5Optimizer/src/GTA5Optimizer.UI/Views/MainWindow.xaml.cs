@@ -23,8 +23,13 @@ public partial class MainWindow : Window
         {
             _hotkeyService.Initialize(this);
             // Show initial page after all elements are loaded
-            if (FindName("PageOptimization") is System.Windows.FrameworkElement el)
-                el.Visibility = Visibility.Visible;
+            var area = FindVisualChild<Grid>(this, "ContentArea");
+            if (area != null)
+            {
+                var firstPage = area.Children.OfType<FrameworkElement>().FirstOrDefault(c => c.Name == "PageOptimization");
+                if (firstPage != null)
+                    firstPage.Visibility = Visibility.Visible;
+            }
         };
         Closed += (_, _) =>
         {
