@@ -111,9 +111,3 @@ public sealed class HardwareProfile
     public int TargetFPS { get; set; } = 144;
 }
 
-// ProcessRule is defined in GTA5Optimizer.Models.Optimization.ProfileConfig
-// This alias ensures backward compatibility for AppSettings.CustomProcessRules
-[Obsolete("Use GTA5Optimizer.Models.Optimization.ProcessRule instead")]
-public sealed class ProcessRule : GTA5Optimizer.Models.Optimization.ProcessRule
-{
-}
