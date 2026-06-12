@@ -121,7 +121,7 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
                 {
                     metrics.GameWorkingSet = gtaProcess.WorkingSet64;
                     metrics.GamePrivateBytes = gtaProcess.PrivateMemorySize64;
-                    metrics.CPUUsageGame = GetProcessCpuUsage(gtaProcess);
+                    metrics.CPUUsageGame = await GetProcessCpuUsageAsync(gtaProcess);
                 }
                 catch (Exception ex)
                 {
