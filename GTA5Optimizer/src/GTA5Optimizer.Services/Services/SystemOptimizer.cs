@@ -427,7 +427,7 @@ public class SystemOptimizer : ISystemOptimizer
         return result;
     }
 
-    private static Guid GetActivePowerScheme()
+    private Guid GetActivePowerScheme()
     {
         try
         {
