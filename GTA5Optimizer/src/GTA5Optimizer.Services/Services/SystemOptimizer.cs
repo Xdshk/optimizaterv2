@@ -486,7 +486,10 @@ public class SystemOptimizer : ISystemOptimizer
                     svc?.InvokeMethod("ChangeStartMode", new object[] { "Disabled" });
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to disable Xbox service {Service}", service);
+            }
         }
     }
 
