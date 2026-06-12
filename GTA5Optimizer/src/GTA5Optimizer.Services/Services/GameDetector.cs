@@ -292,7 +292,10 @@ public sealed class GameDetector : IGameDetector
                         }
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    logger.LogDebug(ex, "Failed to read Epic Games manifest file");
+                }
             }
         }
         catch (Exception ex)
