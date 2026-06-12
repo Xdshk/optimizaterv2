@@ -543,7 +543,10 @@ public sealed class GameDetector : IGameDetector
         {
             return Directory.GetFiles(rootDir, exeName, SearchOption.AllDirectories).FirstOrDefault();
         }
-        catch { }
+        catch (Exception ex)
+        {
+            logger.LogTrace(ex, "Failed to find {ExeName} in {RootDir}", exeName, rootDir);
+        }
         return null;
     }
 }
