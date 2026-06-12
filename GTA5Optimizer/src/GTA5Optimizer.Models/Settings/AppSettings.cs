@@ -113,4 +113,6 @@ public sealed class HardwareProfile
     public double MaxSafeCPUTemp { get; set; } = 85.0;
     public double MaxSafeGPUTemp { get; set; } = 83.0;
     public int TargetFPS { get; set; } = 60;
+
+    public long TotalRAM_GB => TotalRAMBytes / (1024L * 1024 * 1024);
 }
