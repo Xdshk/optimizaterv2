@@ -102,7 +102,7 @@ public sealed class ProcessManager : IProcessManager
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to resume PID {PID}", processId);
-            Task.FromResult(false);
+            return Task.FromResult(false);
         }
     }
 
