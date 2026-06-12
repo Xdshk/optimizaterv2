@@ -322,7 +322,7 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
             using var writeCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
             readCounter.NextValue();
             writeCounter.NextValue();
-            Task.Delay(200).Wait();
+            await Task.Delay(200);
             metrics.DiskReadSpeedMBps = readCounter.NextValue() / 1024 / 1024;
             metrics.DiskWriteSpeedMBps = writeCounter.NextValue() / 1024 / 1024;
         }
