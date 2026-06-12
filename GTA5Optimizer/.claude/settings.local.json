@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "Bash(dotnet --version)",
+      "Bash(./GTA5Optimizer.exe)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(taskkill /F /IM GTA5Optimizer.exe)",
+      "Bash(taskkill /F /IM dotnet.exe)"
+    ]
+  }
+}

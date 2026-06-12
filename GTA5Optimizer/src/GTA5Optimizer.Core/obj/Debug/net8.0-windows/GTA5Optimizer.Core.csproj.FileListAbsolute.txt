@@ -1,0 +1,16 @@
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\bin\Debug\net8.0-windows\GTA5Optimizer.Core.deps.json
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\bin\Debug\net8.0-windows\GTA5Optimizer.Core.dll
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\bin\Debug\net8.0-windows\GTA5Optimizer.Core.pdb
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\bin\Debug\net8.0-windows\GTA5Optimizer.Models.dll
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\bin\Debug\net8.0-windows\GTA5Optimizer.Models.pdb
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\obj\Debug\net8.0-windows\GTA5Optimizer.Core.csproj.AssemblyReference.cache
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\obj\Debug\net8.0-windows\GTA5Optimizer.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\obj\Debug\net8.0-windows\GTA5Optimizer.Core.AssemblyInfoInputs.cache
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\obj\Debug\net8.0-windows\GTA5Optimizer.Core.AssemblyInfo.cs
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\obj\Debug\net8.0-windows\GTA5Optimizer.Core.csproj.CoreCompileInputs.cache
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\obj\Debug\net8.0-windows\GTA5Optimizer.Core.sourcelink.json
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\obj\Debug\net8.0-windows\GTA5Opti.35A6420C.Up2Date
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\obj\Debug\net8.0-windows\GTA5Optimizer.Core.dll
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\obj\Debug\net8.0-windows\refint\GTA5Optimizer.Core.dll
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\obj\Debug\net8.0-windows\GTA5Optimizer.Core.pdb
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Core\obj\Debug\net8.0-windows\ref\GTA5Optimizer.Core.dll

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "vJ3SB5dAEvo=",
+  "dgSpecHash": "s7XZvpY7ixQ=",
   "success": true,
   "projectFilePath": "C:\\Users\\Burov\\Downloads\\majestic\\GTA5Optimizer\\src\\GTA5Optimizer.UI\\GTA5Optimizer.UI.csproj",
   "expectedPackageFiles": [
@@ -38,10 +38,7 @@
     "C:\\Users\\Burov\\.nuget\\packages\\system.diagnostics.eventlog\\8.0.1\\system.diagnostics.eventlog.8.0.1.nupkg.sha512",
     "C:\\Users\\Burov\\.nuget\\packages\\system.diagnostics.performancecounter\\8.0.0\\system.diagnostics.performancecounter.8.0.0.nupkg.sha512",
     "C:\\Users\\Burov\\.nuget\\packages\\system.management\\8.0.0\\system.management.8.0.0.nupkg.sha512",
-    "C:\\Users\\Burov\\.nuget\\packages\\system.security.cryptography.protecteddata\\8.0.0\\system.security.cryptography.protecteddata.8.0.0.nupkg.sha512",
-    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.27\\microsoft.netcore.app.runtime.win-x64.8.0.27.nupkg.sha512",
-    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.27\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.27.nupkg.sha512",
-    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.27\\microsoft.aspnetcore.app.runtime.win-x64.8.0.27.nupkg.sha512"
+    "C:\\Users\\Burov\\.nuget\\packages\\system.security.cryptography.protecteddata\\8.0.0\\system.security.cryptography.protecteddata.8.0.0.nupkg.sha512"
   ],
   "logs": []
 }

@@ -1,12 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "7SukpJpXLt8=",
+  "dgSpecHash": "3JT916mF9Hc=",
   "success": true,
   "projectFilePath": "C:\\Users\\Burov\\Downloads\\majestic\\GTA5Optimizer\\src\\GTA5Optimizer.Models\\GTA5Optimizer.Models.csproj",
-  "expectedPackageFiles": [
-    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.27\\microsoft.netcore.app.runtime.win-x64.8.0.27.nupkg.sha512",
-    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.27\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.27.nupkg.sha512",
-    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.27\\microsoft.aspnetcore.app.runtime.win-x64.8.0.27.nupkg.sha512"
-  ],
+  "expectedPackageFiles": [],
   "logs": []
 }
