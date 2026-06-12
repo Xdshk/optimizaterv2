@@ -99,7 +99,7 @@ public sealed class AutoOptimizationService : BackgroundService
 
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = memResult.Success ? LogLevel.Information : LogLevel.Warning,
+                Level = memResult.Success ? GTA5LogLevel.Information : LogLevel.Warning,
                 Category = LogCategories.Memory,
                 Message = $"Auto memory cleanup: RAM was {metrics.RAMUsagePercent:F1}%",
                 Details = memResult.Details,
