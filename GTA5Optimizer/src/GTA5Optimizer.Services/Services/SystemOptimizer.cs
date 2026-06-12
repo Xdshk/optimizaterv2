@@ -440,7 +440,10 @@ public class SystemOptimizer : ISystemOptimizer
                 return guid;
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to get active power scheme");
+        }
         return Guid.Empty;
     }
 
