@@ -286,543 +286,582 @@
             </Border>
 
             <!-- ===== CONTENT ===== -->
-            <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Padding="0">
-                <TabControl.Resources>
-                    <Style TargetType="TabControl" BasedOn="{x:Null}">
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="BorderThickness" Value="0"/>
-                        <Setter Property="Padding" Value="0"/>
-                    </Style>
-                    <Style TargetType="TabItem" BasedOn="{StaticResource ModernTabItem}"/>
-                </TabControl.Resources>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                <!-- DASHBOARD -->
-                <TabItem Header="⚡ Оптимизация">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Margin="16">
-                            <!-- Profile selector -->
-                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
-                                <Grid Margin="18">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="ПРОФИЛЬ ОПТИМИЗАЦИИ" Foreground="#555570" FontSize="9" FontWeight="Bold" Margin="0,0,0,6"/>
-                                        <ComboBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfileConfig}"
-                                                  DisplayMemberPath="Name" Width="240" HorizontalAlignment="Left" Height="40" FontSize="13"/>
-                                    </StackPanel>
-                                    <TextBlock Grid.Column="1" Text="{Binding SelectedProfileConfig.Description, TargetNullValue='Выберите профиль', FallbackValue='Выберите профиль'}"
-                                               Foreground="#606080" VerticalAlignment="Center" FontSize="12" Margin="20,0,0,0"/>
+                <!-- ===== SIDEBAR NAVIGATION ===== -->
+                <Border Grid.Column="0" Background="#0C0C16" BorderBrush="#151525" BorderThickness="0,0,1,0">
+                    <StackPanel Margin="8,12">
+                        <TextBlock Text="НАВИГАЦИЯ" Foreground="#333350" FontSize="9" FontWeight="Bold" Margin="12,0,0,8"/>
+
+                        <RadioButton x:Name="NavOptimization" Content="Оптимизация" Tag="⚡"
+                                     Style="{StaticResource NavButtonStyle}" IsChecked="True"
+                                     Checked="NavButton_Checked"/>
+                        <RadioButton x:Name="NavMonitoring" Content="Мониторинг" Tag="📊"
+                                     Style="{StaticResource NavButtonStyle}"
+                                     Checked="NavButton_Checked"/>
+                        <RadioButton x:Name="NavDiagnostics" Content="Диагностика" Tag="🔬"
+                                     Style="{StaticResource NavButtonStyle}"
+                                     Checked="NavButton_Checked"/>
+                        <RadioButton x:Name="NavBenchmark" Content="Бенчмарк" Tag="🏁"
+                                     Style="{StaticResource NavButtonStyle}"
+                                     Checked="NavButton_Checked"/>
+                        <RadioButton x:Name="NavLogs" Content="Логи" Tag="📋"
+                                     Style="{StaticResource NavButtonStyle}"
+                                     Checked="NavButton_Checked"/>
+                        <RadioButton x:Name="NavSettings" Content="Настройки" Tag="⚙"
+                                     Style="{StaticResource NavButtonStyle}"
+                                     Checked="NavButton_Checked"/>
+
+                        <Separator Background="#151525" Margin="8,16"/>
+
+                        <!-- Quick stats in sidebar -->
+                        <Border Background="#0E0E18" CornerRadius="10" Padding="12" Margin="4,0">
+                            <StackPanel>
+                                <TextBlock Text="БЫСТРАЯ СТАТИСТИКА" Foreground="#333350" FontSize="8" FontWeight="Bold" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="FPS" Foreground="#555570" FontSize="10"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentFPS, StringFormat={}{0:F0}}" Foreground="White" FontSize="10" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="CPU" Foreground="#555570" FontSize="10"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CpuUsage, StringFormat={}{0:F0}%}" Foreground="#6366F1" FontSize="10" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="GPU" Foreground="#555570" FontSize="10"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding GpuUsage, StringFormat={}{0:F0}%}" Foreground="#F59E0B" FontSize="10" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="RAM" Foreground="#555570" FontSize="10"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding RamUsage, StringFormat={}{0:F0}%}" Foreground="#EC4899" FontSize="10" FontWeight="SemiBold"/>
                                 </Grid>
-                            </Border>
-
-                            <!-- Action buttons -->
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <Button Content="⚡  ОПТИМИЗИРОВАТЬ" Command="{Binding OptimizeCommand}"
-                                        IsEnabled="{Binding IsOptimizing, Converter={StaticResource InverseBooleanConverter}}"
-                                        Height="50" Width="230" Style="{StaticResource PrimaryButtonStyle}"/>
-                                <Button Content="↩ Восстановить" Command="{Binding RestoreDefaultsCommand}"
-                                        IsEnabled="{Binding IsOptimizing, Converter={StaticResource InverseBooleanConverter}}"
-                                        Height="50" Width="160" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
-                                <Button Content="🔄 Метрики" Command="{Binding RefreshMetricsCommand}"
-                                        Height="50" Width="120" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
-                            </StackPanel>
-
-                            <!-- Metric cards -->
-                            <UniformGrid Columns="4" Margin="0,0,0,16">
-                                <Border Style="{StaticResource MetricCard}" Margin="0,0,6,0">
-                                    <StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                                            <TextBlock Text="FPS" Foreground="#555570" FontSize="10" FontWeight="Bold"/>
-                                            <Ellipse Width="6" Height="6" Fill="#22C55E"/>
-                                        </StackPanel>
-                                        <TextBlock Text="{Binding CurrentFPS, StringFormat={}{0:F0}, TargetNullValue=—}" Foreground="White" FontSize="38" FontWeight="Light" Margin="0,8,0,0"/>
-                                        <ProgressBar Value="{Binding CurrentFPS}" Maximum="144" Height="3" Margin="0,10,0,0" Foreground="#22C55E" Background="#1A1A2E"/>
-                                    </StackPanel>
-                                </Border>
-                                <Border Style="{StaticResource MetricCard}" Margin="6,0,6,0">
-                                    <StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                                            <TextBlock Text="CPU" Foreground="#555570" FontSize="10" FontWeight="Bold"/>
-                                            <Ellipse Width="6" Height="6" Fill="#6366F1"/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                            <TextBlock Text="{Binding CpuUsage, StringFormat={}{0:F0}}" Foreground="White" FontSize="38" FontWeight="Light"/>
-                                            <TextBlock Text="%" Foreground="#555570" FontSize="16" FontWeight="Light"/>
-                                        </StackPanel>
-                                        <ProgressBar Value="{Binding CpuUsage}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#6366F1" Background="#1A1A2E"/>
-                                    </StackPanel>
-                                </Border>
-                                <Border Style="{StaticResource MetricCard}" Margin="6,0,6,0">
-                                    <StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                                            <TextBlock Text="GPU" Foreground="#555570" FontSize="10" FontWeight="Bold"/>
-                                            <Ellipse Width="6" Height="6" Fill="#F59E0B"/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                            <TextBlock Text="{Binding GpuUsage, StringFormat={}{0:F0}}" Foreground="White" FontSize="38" FontWeight="Light"/>
-                                            <TextBlock Text="%" Foreground="#555570" FontSize="16" FontWeight="Light"/>
-                                        </StackPanel>
-                                        <ProgressBar Value="{Binding GpuUsage}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#F59E0B" Background="#1A1A2E"/>
-                                    </StackPanel>
-                                </Border>
-                                <Border Style="{StaticResource MetricCard}" Margin="6,0,0,0">
-                                    <StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                                            <TextBlock Text="RAM" Foreground="#555570" FontSize="10" FontWeight="Bold"/>
-                                            <Ellipse Width="6" Height="6" Fill="#EC4899"/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                            <TextBlock Text="{Binding RamUsage, StringFormat={}{0:F0}}" Foreground="White" FontSize="38" FontWeight="Light"/>
-                                            <TextBlock Text="%" Foreground="#555570" FontSize="16" FontWeight="Light"/>
-                                        </StackPanel>
-                                        <ProgressBar Value="{Binding RamUsage}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#EC4899" Background="#1A1A2E"/>
-                                    </StackPanel>
-                                </Border>
-                            </UniformGrid>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-
-                <!-- MONITORING -->
-                <TabItem Header="📊 Мониторинг">
-                    <Grid Margin="16">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <UniformGrid Grid.Row="0" Columns="3" Margin="0,0,0,12">
-                            <Border Style="{StaticResource CardStyle}" Margin="0,0,6,0">
-                                <StackPanel Margin="16">
-                                    <TextBlock Text="🖥  CPU" Foreground="#6366F1" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Загрузка" Foreground="#555570" FontSize="11"/>
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Monitor.Metrics.CPUUsage, StringFormat={}{0:F1}%}" Foreground="White" FontSize="11"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Игра" Foreground="#555570" FontSize="11"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Monitor.Metrics.CPUUsageGame, StringFormat={}{0:F1}%}" Foreground="White" FontSize="11"/>
-                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Температура" Foreground="#555570" FontSize="11"/>
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Monitor.Metrics.CPUTemperature, StringFormat={}{0:F0}°C}" Foreground="White" FontSize="11"/>
-                                    </Grid>
-                                    <ProgressBar Value="{Binding Monitor.Metrics.CPUUsage}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#6366F1" Background="#1A1A2E"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource CardStyle}" Margin="6,0,6,0">
-                                <StackPanel Margin="16">
-                                    <TextBlock Text="💾  RAM" Foreground="#EC4899" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Использовано" Foreground="#555570" FontSize="11"/>
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Foreground="White" FontSize="11">
-                                            <TextBlock.Text><Binding Path="Monitor.Metrics.UsedRAM" Converter="{StaticResource BytesToMBConverter}"/></TextBlock.Text>
-                                        </TextBlock>
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Standby" Foreground="#555570" FontSize="11"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Monitor.Metrics.StandbyMemoryMB, StringFormat={}{0:F0} MB, Mode=OneWay}" Foreground="White" FontSize="11"/>
-                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Игра" Foreground="#555570" FontSize="11"/>
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Monitor.Metrics.GameRAM_MB, StringFormat={}{0:F0} MB, Mode=OneWay}" Foreground="White" FontSize="11"/>
-                                    </Grid>
-                                    <ProgressBar Value="{Binding Monitor.Metrics.RAMUsagePercent, Mode=OneWay}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#EC4899" Background="#1A1A2E"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource CardStyle}" Margin="6,0,0,0">
-                                <StackPanel Margin="16">
-                                    <TextBlock Text="📡  Диск &amp; Сеть" Foreground="#F59E0B" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Чтение" Foreground="#555570" FontSize="11"/>
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Monitor.Metrics.DiskReadSpeedMBps, StringFormat={}{0:F1} MB/s}" Foreground="White" FontSize="11"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Запись" Foreground="#555570" FontSize="11"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Monitor.Metrics.DiskWriteSpeedMBps, StringFormat={}{0:F1} MB/s}" Foreground="White" FontSize="11"/>
-                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Пинг" Foreground="#555570" FontSize="11"/>
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Monitor.Metrics.CurrentPing, StringFormat={}{0:F0} ms}" Foreground="White" FontSize="11"/>
-                                    </Grid>
-                                    <ProgressBar Value="{Binding Monitor.Metrics.DiskActiveTimePercent}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#F59E0B" Background="#1A1A2E"/>
-                                </StackPanel>
-                            </Border>
-                        </UniformGrid>
-                        <Border Grid.Row="1" Style="{StaticResource CardStyle}">
-                            <StackPanel Margin="16">
-                                <TextBlock Text="🔍  АНАЛИЗ УЗКИХ МЕСТ" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <TextBlock Text="{Binding Monitor.Bottleneck.PrimaryBottleneck, StringFormat={}Основное ограничение: {0}, TargetNullValue='Анализ...', FallbackValue='Анализ...'}" Foreground="#555570" FontSize="11" Margin="0,0,0,12"/>
-                                <ItemsControl ItemsSource="{Binding Monitor.Bottleneck.Details}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Background="#0E0E18" CornerRadius="8" Padding="12" Margin="0,4">
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="{Binding Severity, StringFormat={}{0:F0}}" FontWeight="Bold" FontSize="14" Width="40"
-                                                                   Foreground="{Binding Severity, Converter={StaticResource SeverityToColorConverter}}"/>
-                                                        <TextBlock Text="{Binding Description}" Foreground="#A0A0C0" FontSize="12" VerticalAlignment="Center"/>
-                                                    </StackPanel>
-                                                    <TextBlock Text="{Binding Recommendation}" Foreground="#555570" FontSize="11" Margin="40,4,0,0"/>
-                                                </StackPanel>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                                <Border Margin="0,12,0,0" CornerRadius="8" Padding="12">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Background" Value="#0A1F0A"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Monitor.Metrics.IsPerformanceGood, Mode=OneWay}" Value="False">
-                                                    <Setter Property="Background" Value="#1F0A0A"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <TextBlock Text="{Binding Monitor.Metrics.PerformanceStatus, Mode=OneWay}" FontSize="18" FontWeight="Light" HorizontalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="#22C55E"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Monitor.Metrics.IsPerformanceGood, Mode=OneWay}" Value="False">
-                                                        <Setter Property="Foreground" Value="#EF4444"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Border>
                             </StackPanel>
                         </Border>
-                    </Grid>
-                </TabItem>
+                    </StackPanel>
+                </Border>
 
-                <!-- DIAGNOSTICS -->
-                <TabItem Header="🔬 Диагностика">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Margin="16">
-                            <!-- Run button -->
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <Button Content="🔬  Запустить диагностику" Command="{Binding Diagnostics.RunDiagnosticsCommand}"
-                                        IsEnabled="{Binding Diagnostics.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
-                                        Height="48" Width="240" Style="{StaticResource PrimaryButtonStyle}"/>
-                                <TextBlock Text="{Binding Diagnostics.StatusText}" Foreground="#606080" VerticalAlignment="Center" FontSize="12" Margin="16,0,0,0"/>
-                            </StackPanel>
+                <!-- ===== CONTENT PAGES ===== -->
+                <Grid Grid.Column="1" x:Name="ContentArea">
 
-                            <!-- PC Readiness Score -->
-                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12" Visibility="{Binding Diagnostics.ReadinessScore, Converter={StaticResource BoolToVis}}">
-                                <StackPanel Margin="18">
-                                    <TextBlock Text="🏆  ОЦЕНКА ГОТОВНОСТИ ПК" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                    <Grid>
+                    <!-- PAGE: OPTIMIZATION -->
+                    <Border x:Name="PageOptimization" Visibility="Visible">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="16">
+                                <!-- Profile selector -->
+                                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                                    <Grid Margin="18">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="0,0,24,0">
-                                            <TextBlock Text="{Binding Diagnostics.ReadinessScore.OverallScore}" FontSize="56" FontWeight="Light"
-                                                       Foreground="{Binding Diagnostics.ReadinessScore.OverallColor}" HorizontalAlignment="Center"/>
-                                            <TextBlock Text="из 100" Foreground="#555570" FontSize="12" HorizontalAlignment="Center"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1">
-                                            <TextBlock Text="{Binding Diagnostics.ReadinessScore.Summary}" Foreground="#A0A0C0" FontSize="13" Margin="0,0,0,8"/>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
-                                                <TextBlock Grid.Row="0" Grid.Column="0" Text="CPU" Foreground="#555570" FontSize="11"/>
-                                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Diagnostics.ReadinessScore.CpuScore, StringFormat={}{0}/100}" Foreground="White" FontSize="11"/>
-                                                <TextBlock Grid.Row="1" Grid.Column="0" Text="GPU" Foreground="#555570" FontSize="11"/>
-                                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Diagnostics.ReadinessScore.GpuScore, StringFormat={}{0}/100}" Foreground="White" FontSize="11"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="0" Text="RAM" Foreground="#555570" FontSize="11"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Diagnostics.ReadinessScore.RamScore, StringFormat={}{0}/100}" Foreground="White" FontSize="11"/>
-                                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Storage" Foreground="#555570" FontSize="11"/>
-                                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Diagnostics.ReadinessScore.StorageScore, StringFormat={}{0}/100}" Foreground="White" FontSize="11"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Network" Foreground="#555570" FontSize="11"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Diagnostics.ReadinessScore.NetworkScore, StringFormat={}{0}/100}" Foreground="White" FontSize="11"/>
-                                            </Grid>
-                                        </StackPanel>
-                                    </Grid>
-                                    <TextBlock Text="{Binding Diagnostics.ReadinessScore.CpuName}" Foreground="#606080" FontSize="10" Margin="0,8,0,0"/>
-                                    <TextBlock Text="{Binding Diagnostics.ReadinessScore.GpuName}" Foreground="#606080" FontSize="10"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Issues -->
-                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12" Visibility="{Binding Diagnostics.Issues.Count, Converter={StaticResource BoolToVis}}">
-                                <StackPanel Margin="18">
-                                    <TextBlock Text="⚠  ПРОБЛЕМЫ" Foreground="#EF4444" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                    <ItemsControl ItemsSource="{Binding Diagnostics.Issues}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background="#1A0A0A" CornerRadius="8" Padding="12" Margin="0,4" BorderBrush="#2A1010" BorderThickness="1">
-                                                    <StackPanel>
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <Ellipse Width="8" Height="8" Fill="{Binding SeverityColor}" Margin="0,0,8,0"/>
-                                                            <TextBlock Text="{Binding Title}" Foreground="White" FontSize="13" FontWeight="SemiBold"/>
-                                                        </StackPanel>
-                                                        <TextBlock Text="{Binding Description}" Foreground="#A0A0C0" FontSize="12" Margin="16,4,0,0"/>
-                                                        <TextBlock Text="{Binding Recommendation}" Foreground="#606080" FontSize="11" Margin="16,4,0,0" FontStyle="Italic"/>
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Warnings -->
-                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12" Visibility="{Binding Diagnostics.Warnings.Count, Converter={StaticResource BoolToVis}}">
-                                <StackPanel Margin="18">
-                                    <TextBlock Text="⚡ ПРЕДУПРЕЖДЕНИЯ" Foreground="#F59E0B" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                    <ItemsControl ItemsSource="{Binding Diagnostics.Warnings}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background="#1A150A" CornerRadius="8" Padding="12" Margin="0,4" BorderBrush="#2A2010" BorderThickness="1">
-                                                    <StackPanel>
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <Ellipse Width="8" Height="8" Fill="{Binding SeverityColor}" Margin="0,0,8,0"/>
-                                                            <TextBlock Text="{Binding Title}" Foreground="White" FontSize="13" FontWeight="SemiBold"/>
-                                                        </StackPanel>
-                                                        <TextBlock Text="{Binding Description}" Foreground="#A0A0C0" FontSize="12" Margin="16,4,0,0"/>
-                                                        <TextBlock Text="{Binding Recommendation}" Foreground="#606080" FontSize="11" Margin="16,4,0,0" FontStyle="Italic"/>
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- GTA V Settings Analysis -->
-                            <Border Style="{StaticResource CardStyle}" Visibility="{Binding Diagnostics.GtaVAnalysis, Converter={StaticResource BoolToVis}}">
-                                <StackPanel Margin="18">
-                                    <TextBlock Text="🎮  АНАЛИЗ НАСТРОЕК GTA V" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <TextBlock Text="Оценка настроек: " Foreground="#555570" FontSize="12"/>
-                                        <TextBlock Text="{Binding Diagnostics.GtaVAnalysis.PerformanceScore}" Foreground="White" FontSize="12" FontWeight="Bold"/>
-                                        <TextBlock Text="/100" Foreground="#555570" FontSize="12"/>
-                                    </StackPanel>
-                                    <ItemsControl ItemsSource="{Binding Diagnostics.GtaVAnalysis.TopRecommendations}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background="#0E0E18" CornerRadius="6" Padding="10" Margin="0,3">
-                                                    <TextBlock Text="{Binding}" Foreground="#A0A0C0" FontSize="11"/>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-
-                <!-- BENCHMARK -->
-                <TabItem Header="🏁 Бенчмарк">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Margin="16">
-                            <!-- Benchmark controls -->
-                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
-                                <StackPanel Margin="18">
-                                    <TextBlock Text="🏁  БЕНЧМАРК" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Длительность:" Foreground="#555570" FontSize="12" VerticalAlignment="Center" Width="100"/>
-                                        <ComboBox ItemsSource="{Binding Benchmark.DurationOptions}" SelectedItem="{Binding Benchmark.SelectedDuration}"
-                                                  Width="100" Height="36" FontSize="13" VerticalAlignment="Center"/>
-                                        <TextBlock Text=" сек" Foreground="#555570" FontSize="12" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                        <Button Content="▶ Запустить бенчмарк" Command="{Binding Benchmark.RunBenchmarkCommand}"
-                                                IsEnabled="{Binding Benchmark.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
-                                                Height="44" Width="200" Style="{StaticResource PrimaryButtonStyle}"/>
-                                        <Button Content="📸 Снять До" Command="{Binding Benchmark.CaptureBeforeCommand}"
-                                                IsEnabled="{Binding Benchmark.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
-                                                Height="44" Width="130" Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
-                                        <Button Content="📸 Снять После" Command="{Binding Benchmark.CaptureAfterCommand}"
-                                                IsEnabled="{Binding Benchmark.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
-                                                Height="44" Width="140" Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
-                                        <Button Content="🔄 Сброс" Command="{Binding Benchmark.ResetCommand}"
-                                                Height="44" Width="100" Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding Benchmark.StatusText}" Foreground="#606080" FontSize="11" Margin="0,8,0,0"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Benchmark result -->
-                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12" Visibility="{Binding Benchmark.Result, Converter={StaticResource BoolToVis}}">
-                                <StackPanel Margin="18">
-                                    <TextBlock Text="📊  РЕЗУЛЬТАТЫ" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                    <UniformGrid Columns="4">
-                                        <StackPanel>
-                                            <TextBlock Text="Средний FPS" Foreground="#555570" FontSize="10"/>
-                                            <TextBlock Text="{Binding Benchmark.Result.AverageFPS, StringFormat={}{0:F1}}" Foreground="White" FontSize="28" FontWeight="Light"/>
-                                        </StackPanel>
-                                        <StackPanel>
-                                            <TextBlock Text="1% Low" Foreground="#555570" FontSize="10"/>
-                                            <TextBlock Text="{Binding Benchmark.Result.OnePercentLowFPS, StringFormat={}{0:F1}}" Foreground="White" FontSize="28" FontWeight="Light"/>
-                                        </StackPanel>
-                                        <StackPanel>
-                                            <TextBlock Text="0.1% Low" Foreground="#555570" FontSize="10"/>
-                                            <TextBlock Text="{Binding Benchmark.Result.PointOnePercentLowFPS, StringFormat={}{0:F1}}" Foreground="White" FontSize="28" FontWeight="Light"/>
-                                        </StackPanel>
-                                        <StackPanel>
-                                            <TextBlock Text="Frametime" Foreground="#555570" FontSize="10"/>
-                                            <TextBlock Text="{Binding Benchmark.Result.AverageFrameTimeMs, StringFormat={}{0:F1} ms}" Foreground="White" FontSize="28" FontWeight="Light"/>
-                                        </StackPanel>
-                                    </UniformGrid>
-                                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                        <TextBlock Text="Оценка: " Foreground="#555570" FontSize="12"/>
-                                        <TextBlock Text="{Binding Benchmark.Result.PerformanceGrade}" Foreground="White" FontSize="12" FontWeight="Bold"/>
-                                        <TextBlock Text="  •  Фризы: " Foreground="#555570" FontSize="12" Margin="16,0,0,0"/>
-                                        <TextBlock Text="{Binding Benchmark.Result.StutterCount}" Foreground="White" FontSize="12"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Before/After comparison -->
-                            <Border Style="{StaticResource CardStyle}" Visibility="{Binding Benchmark.Comparison.BeforeSnapshot, Converter={StaticResource BoolToVis}}">
-                                <StackPanel Margin="18">
-                                    <TextBlock Text="⚖  СРАВНЕНИЕ ДО / ПОСЛЕ" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                    <TextBlock Text="{Binding Benchmark.Comparison.Summary}" Foreground="#818CF8" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                                         <StackPanel Grid.Column="0">
-                                            <TextBlock Text="ДО" Foreground="#555570" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
-                                            <TextBlock Text="{Binding Benchmark.Comparison.BeforeSnapshot.FPS, StringFormat=FPS: {0:F1}}" Foreground="White" FontSize="12"/>
-                                            <TextBlock Text="{Binding Benchmark.Comparison.BeforeSnapshot.CPUUsage, StringFormat=CPU: {0:F1}%}" Foreground="#A0A0C0" FontSize="11"/>
-                                            <TextBlock Text="{Binding Benchmark.Comparison.BeforeSnapshot.GPUUsage, StringFormat=GPU: {0:F1}%}" Foreground="#A0A0C0" FontSize="11"/>
-                                            <TextBlock Text="{Binding Benchmark.Comparison.BeforeSnapshot.RAMUsage, StringFormat=RAM: {0:F1}%}" Foreground="#A0A0C0" FontSize="11"/>
+                                            <TextBlock Text="ПРОФИЛЬ ОПТИМИЗАЦИИ" Foreground="#555570" FontSize="9" FontWeight="Bold" Margin="0,0,0,6"/>
+                                            <ComboBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfileConfig}"
+                                                      DisplayMemberPath="Name" Width="240" HorizontalAlignment="Left" Height="40" FontSize="13"/>
                                         </StackPanel>
-                                        <TextBlock Grid.Column="1" Text="→" Foreground="#555570" FontSize="24" VerticalAlignment="Center" Margin="16,0"/>
-                                        <StackPanel Grid.Column="2" Visibility="{Binding Benchmark.Comparison.AfterSnapshot, Converter={StaticResource BoolToVis}}">
-                                            <TextBlock Text="ПОСЛЕ" Foreground="#555570" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
-                                            <TextBlock Text="{Binding Benchmark.Comparison.AfterSnapshot.FPS, StringFormat=FPS: {0:F1}}" Foreground="White" FontSize="12"/>
-                                            <TextBlock Text="{Binding Benchmark.Comparison.AfterSnapshot.CPUUsage, StringFormat=CPU: {0:F1}%}" Foreground="#A0A0C0" FontSize="11"/>
-                                            <TextBlock Text="{Binding Benchmark.Comparison.AfterSnapshot.GPUUsage, StringFormat=GPU: {0:F1}%}" Foreground="#A0A0C0" FontSize="11"/>
-                                            <TextBlock Text="{Binding Benchmark.Comparison.AfterSnapshot.RAMUsage, StringFormat=RAM: {0:F1}%}" Foreground="#A0A0C0" FontSize="11"/>
-                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding SelectedProfileConfig.Description, TargetNullValue='Выберите профиль', FallbackValue='Выберите профиль'}"
+                                                   Foreground="#606080" VerticalAlignment="Center" FontSize="12" Margin="20,0,0,0"/>
                                     </Grid>
+                                </Border>
+
+                                <!-- Action buttons -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                    <Button Content="⚡  ОПТИМИЗИРОВАТЬ" Command="{Binding OptimizeCommand}"
+                                            IsEnabled="{Binding IsOptimizing, Converter={StaticResource InverseBooleanConverter}}"
+                                            Height="50" Width="230" Style="{StaticResource PrimaryButtonStyle}"/>
+                                    <Button Content="↩ Восстановить" Command="{Binding RestoreDefaultsCommand}"
+                                            IsEnabled="{Binding IsOptimizing, Converter={StaticResource InverseBooleanConverter}}"
+                                            Height="50" Width="160" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
+                                    <Button Content="🔄 Метрики" Command="{Binding RefreshMetricsCommand}"
+                                            Height="50" Width="120" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
+                                </StackPanel>
+
+                                <!-- Metric cards -->
+                                <UniformGrid Columns="4" Margin="0,0,0,16">
+                                    <Border Style="{StaticResource MetricCard}" Margin="0,0,6,0">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                                <TextBlock Text="FPS" Foreground="#555570" FontSize="10" FontWeight="Bold"/>
+                                                <Ellipse Width="6" Height="6" Fill="#22C55E"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding CurrentFPS, StringFormat={}{0:F0}, TargetNullValue=—}" Foreground="White" FontSize="38" FontWeight="Light" Margin="0,8,0,0"/>
+                                            <ProgressBar Value="{Binding CurrentFPS}" Maximum="144" Height="3" Margin="0,10,0,0" Foreground="#22C55E" Background="#1A1A2E"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource MetricCard}" Margin="6,0,6,0">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                                <TextBlock Text="CPU" Foreground="#555570" FontSize="10" FontWeight="Bold"/>
+                                                <Ellipse Width="6" Height="6" Fill="#6366F1"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                <TextBlock Text="{Binding CpuUsage, StringFormat={}{0:F0}}" Foreground="White" FontSize="38" FontWeight="Light"/>
+                                                <TextBlock Text="%" Foreground="#555570" FontSize="16" FontWeight="Light"/>
+                                            </StackPanel>
+                                            <ProgressBar Value="{Binding CpuUsage}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#6366F1" Background="#1A1A2E"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource MetricCard}" Margin="6,0,6,0">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                                <TextBlock Text="GPU" Foreground="#555570" FontSize="10" FontWeight="Bold"/>
+                                                <Ellipse Width="6" Height="6" Fill="#F59E0B"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                <TextBlock Text="{Binding GpuUsage, StringFormat={}{0:F0}}" Foreground="White" FontSize="38" FontWeight="Light"/>
+                                                <TextBlock Text="%" Foreground="#555570" FontSize="16" FontWeight="Light"/>
+                                            </StackPanel>
+                                            <ProgressBar Value="{Binding GpuUsage}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#F59E0B" Background="#1A1A2E"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource MetricCard}" Margin="6,0,0,0">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                                <TextBlock Text="RAM" Foreground="#555570" FontSize="10" FontWeight="Bold"/>
+                                                <Ellipse Width="6" Height="6" Fill="#EC4899"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                <TextBlock Text="{Binding RamUsage, StringFormat={}{0:F0}}" Foreground="White" FontSize="38" FontWeight="Light"/>
+                                                <TextBlock Text="%" Foreground="#555570" FontSize="16" FontWeight="Light"/>
+                                            </StackPanel>
+                                            <ProgressBar Value="{Binding RamUsage}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#EC4899" Background="#1A1A2E"/>
+                                        </StackPanel>
+                                    </Border>
+                                </UniformGrid>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+
+                    <!-- PAGE: MONITORING -->
+                    <Border x:Name="PageMonitoring" Visibility="Collapsed">
+                        <Grid Margin="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <UniformGrid Grid.Row="0" Columns="3" Margin="0,0,0,12">
+                                <Border Style="{StaticResource CardStyle}" Margin="0,0,6,0">
+                                    <StackPanel Margin="16">
+                                        <TextBlock Text="🖥  CPU" Foreground="#6366F1" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Загрузка" Foreground="#555570" FontSize="11"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Monitor.Metrics.CPUUsage, StringFormat={}{0:F1}%}" Foreground="White" FontSize="11"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Игра" Foreground="#555570" FontSize="11"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Monitor.Metrics.CPUUsageGame, StringFormat={}{0:F1}%}" Foreground="White" FontSize="11"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Температура" Foreground="#555570" FontSize="11"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Monitor.Metrics.CPUTemperature, StringFormat={}{0:F0}°C}" Foreground="White" FontSize="11"/>
+                                        </Grid>
+                                        <ProgressBar Value="{Binding Monitor.Metrics.CPUUsage}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#6366F1" Background="#1A1A2E"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource CardStyle}" Margin="6,0,6,0">
+                                    <StackPanel Margin="16">
+                                        <TextBlock Text="💾  RAM" Foreground="#EC4899" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Использовано" Foreground="#555570" FontSize="11"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="1" Foreground="White" FontSize="11">
+                                                <TextBlock.Text><Binding Path="Monitor.Metrics.UsedRAM" Converter="{StaticResource BytesToMBConverter}"/></TextBlock.Text>
+                                            </TextBlock>
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Standby" Foreground="#555570" FontSize="11"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Monitor.Metrics.StandbyMemoryMB, StringFormat={}{0:F0} MB, Mode=OneWay}" Foreground="White" FontSize="11"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Игра" Foreground="#555570" FontSize="11"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Monitor.Metrics.GameRAM_MB, StringFormat={}{0:F0} MB, Mode=OneWay}" Foreground="White" FontSize="11"/>
+                                        </Grid>
+                                        <ProgressBar Value="{Binding Monitor.Metrics.RAMUsagePercent, Mode=OneWay}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#EC4899" Background="#1A1A2E"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource CardStyle}" Margin="6,0,0,0">
+                                    <StackPanel Margin="16">
+                                        <TextBlock Text="📡  Диск &amp; Сеть" Foreground="#F59E0B" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Чтение" Foreground="#555570" FontSize="11"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Monitor.Metrics.DiskReadSpeedMBps, StringFormat={}{0:F1} MB/s}" Foreground="White" FontSize="11"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Запись" Foreground="#555570" FontSize="11"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Monitor.Metrics.DiskWriteSpeedMBps, StringFormat={}{0:F1} MB/s}" Foreground="White" FontSize="11"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Пинг" Foreground="#555570" FontSize="11"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Monitor.Metrics.CurrentPing, StringFormat={}{0:F0} ms}" Foreground="White" FontSize="11"/>
+                                        </Grid>
+                                        <ProgressBar Value="{Binding Monitor.Metrics.DiskActiveTimePercent}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#F59E0B" Background="#1A1A2E"/>
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+                            <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+                                <StackPanel Margin="16">
+                                    <TextBlock Text="🔍  АНАЛИЗ УЗКИХ МЕСТ" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding Monitor.Bottleneck.PrimaryBottleneck, StringFormat={}Основное ограничение: {0}, TargetNullValue='Анализ...', FallbackValue='Анализ...'}" Foreground="#555570" FontSize="11" Margin="0,0,0,12"/>
+                                    <ItemsControl ItemsSource="{Binding Monitor.Bottleneck.Details}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#0E0E18" CornerRadius="8" Padding="12" Margin="0,4">
+                                                    <StackPanel>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Severity, StringFormat={}{0:F0}}" FontWeight="Bold" FontSize="14" Width="40"
+                                                                       Foreground="{Binding Severity, Converter={StaticResource SeverityToColorConverter}}"/>
+                                                            <TextBlock Text="{Binding Description}" Foreground="#A0A0C0" FontSize="12" VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                        <TextBlock Text="{Binding Recommendation}" Foreground="#555570" FontSize="11" Margin="40,4,0,0"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Border Margin="0,12,0,0" CornerRadius="8" Padding="12">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#0A1F0A"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Monitor.Metrics.IsPerformanceGood, Mode=OneWay}" Value="False">
+                                                        <Setter Property="Background" Value="#1F0A0A"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Monitor.Metrics.PerformanceStatus, Mode=OneWay}" FontSize="18" FontWeight="Light" HorizontalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#22C55E"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Monitor.Metrics.IsPerformanceGood, Mode=OneWay}" Value="False">
+                                                            <Setter Property="Foreground" Value="#EF4444"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
                                 </StackPanel>
                             </Border>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
+                        </Grid>
+                    </Border>
 
-                <!-- LOGS -->
-                <TabItem Header="📋 Логи">
-                    <Grid Margin="16">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                            <Button Content="↻ Обновить" Command="{Binding Logs.RefreshCommand}" Style="{StaticResource SecondaryButtonStyle}" Height="32" Width="110"/>
-                            <Button Content="🗑 Очистить" Command="{Binding Logs.ClearCommand}" Style="{StaticResource SecondaryButtonStyle}" Height="32" Width="100" Margin="8,0,0,0"/>
-                            <TextBlock Foreground="#555570" VerticalAlignment="Center" FontSize="11" Margin="15,0,0,0">
-                                <Run Text="Записей: "/><Run Text="{Binding Logs.Logs.Count, Mode=OneWay}"/>
-                            </TextBlock>
-                        </StackPanel>
-                        <Border Grid.Row="1" Style="{StaticResource CardStyle}">
-                            <ListView ItemsSource="{Binding Logs.Logs}" Background="Transparent" BorderThickness="0"
-                                      Foreground="#A0A0C0" FontSize="12" FontFamily="Consolas, 'Courier New', monospace"
-                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="Padding" Value="12,5"/>
-                                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                                        <Setter Property="BorderBrush" Value="#151525"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#12121E"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ListView.ItemContainerStyle>
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
+                    <!-- PAGE: DIAGNOSTICS -->
+                    <Border x:Name="PageDiagnostics" Visibility="Collapsed">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="16">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                    <Button Content="🔬  Запустить диагностику" Command="{Binding Diagnostics.RunDiagnosticsCommand}"
+                                            IsEnabled="{Binding Diagnostics.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
+                                            Height="48" Width="240" Style="{StaticResource PrimaryButtonStyle}"/>
+                                    <TextBlock Text="{Binding Diagnostics.StatusText}" Foreground="#606080" VerticalAlignment="Center" FontSize="12" Margin="16,0,0,0"/>
+                                </StackPanel>
+
+                                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12" Visibility="{Binding Diagnostics.ReadinessScore, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="🏆  ОЦЕНКА ГОТОВНОСТИ ПК" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="75"/>
-                                                <ColumnDefinition Width="85"/>
-                                                <ColumnDefinition Width="90"/>
+                                                <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="{Binding ShortTime}" Foreground="#444460" FontSize="11"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding Level}" FontSize="11" FontWeight="SemiBold">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="#666680"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Level}" Value="Information"><Setter Property="Foreground" Value="#6366F1"/></DataTrigger>
-                                                            <DataTrigger Binding="{Binding Level}" Value="Warning"><Setter Property="Foreground" Value="#F59E0B"/></DataTrigger>
-                                                            <DataTrigger Binding="{Binding Level}" Value="Error"><Setter Property="Foreground" Value="#EF4444"/></DataTrigger>
-                                                            <DataTrigger Binding="{Binding Level}" Value="Critical"><Setter Property="Foreground" Value="#DC2626"/></DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                            <TextBlock Grid.Column="2" Text="{Binding Category}" Foreground="#333350" FontSize="11"/>
-                                            <TextBlock Grid.Column="3" Text="{Binding Message}" Foreground="#808090" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                            <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="0,0,24,0">
+                                                <TextBlock Text="{Binding Diagnostics.ReadinessScore.OverallScore}" FontSize="56" FontWeight="Light"
+                                                           Foreground="{Binding Diagnostics.ReadinessScore.OverallColor}" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="из 100" Foreground="#555570" FontSize="12" HorizontalAlignment="Center"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding Diagnostics.ReadinessScore.Summary}" Foreground="#A0A0C0" FontSize="13" Margin="0,0,0,8"/>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="CPU" Foreground="#555570" FontSize="11"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Diagnostics.ReadinessScore.CpuScore, StringFormat={}{0}/100}" Foreground="White" FontSize="11"/>
+                                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="GPU" Foreground="#555570" FontSize="11"/>
+                                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Diagnostics.ReadinessScore.GpuScore, StringFormat={}{0}/100}" Foreground="White" FontSize="11"/>
+                                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="RAM" Foreground="#555570" FontSize="11"/>
+                                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Diagnostics.ReadinessScore.RamScore, StringFormat={}{0}/100}" Foreground="White" FontSize="11"/>
+                                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Storage" Foreground="#555570" FontSize="11"/>
+                                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Diagnostics.ReadinessScore.StorageScore, StringFormat={}{0}/100}" Foreground="White" FontSize="11"/>
+                                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Network" Foreground="#555570" FontSize="11"/>
+                                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Diagnostics.ReadinessScore.NetworkScore, StringFormat={}{0}/100}" Foreground="White" FontSize="11"/>
+                                                </Grid>
+                                            </StackPanel>
                                         </Grid>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
-                        </Border>
-                    </Grid>
-                </TabItem>
-
-                <!-- SETTINGS -->
-                <TabItem Header="⚙ Настройки">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="16">
-                        <StackPanel MaxWidth="600" HorizontalAlignment="Left">
-                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,10">
-                                <StackPanel Margin="18">
-                                    <TextBlock Text="⚙ ПРОФИЛЬ ПО УМОЛЧАНИЮ" Foreground="White" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                                    <ComboBox ItemsSource="{Binding Settings.AvailableProfiles}" SelectedItem="{Binding Settings.SelectedProfileName}"
-                                              Width="280" Height="36" HorizontalAlignment="Left" FontSize="13"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,10">
-                                <StackPanel Margin="18">
-                                    <TextBlock Text="🔄 АВТООПТИМИЗАЦИЯ" Foreground="White" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                                    <CheckBox Content="Включить автооптимизацию" IsChecked="{Binding Settings.EnableAutoOptimization}" Foreground="#A0A0C0" FontSize="12" Margin="0,0,0,10"/>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="Интервал:" Foreground="#555570" FontSize="12" VerticalAlignment="Center" Width="80"/>
-                                        <TextBlock Text="{Binding Settings.AutoOptimizationInterval}" Foreground="White" FontSize="12" VerticalAlignment="Center"/>
-                                        <TextBlock Text=" сек" Foreground="#555570" FontSize="12" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Diagnostics.ReadinessScore.CpuName}" Foreground="#606080" FontSize="10" Margin="0,8,0,0"/>
+                                        <TextBlock Text="{Binding Diagnostics.ReadinessScore.GpuName}" Foreground="#606080" FontSize="10"/>
                                     </StackPanel>
-                                </StackPanel>
-                            </Border>
+                                </Border>
 
-                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,10">
-                                <StackPanel Margin="18">
-                                    <TextBlock Text="🎮 ИГРОВЫЕ ФУНКЦИИ" Foreground="White" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding OverlayEnabled}" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Оверлей в игре (FPS, CPU, GPU)" Foreground="#A0A0C0" FontSize="12" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12" Visibility="{Binding Diagnostics.Issues.Count, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="⚠  ПРОБЛЕМЫ" Foreground="#EF4444" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                        <ItemsControl ItemsSource="{Binding Diagnostics.Issues}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#1A0A0A" CornerRadius="8" Padding="12" Margin="0,4" BorderBrush="#2A1010" BorderThickness="1">
+                                                        <StackPanel>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Ellipse Width="8" Height="8" Fill="{Binding SeverityColor}" Margin="0,0,8,0"/>
+                                                                <TextBlock Text="{Binding Title}" Foreground="White" FontSize="13" FontWeight="SemiBold"/>
+                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding Description}" Foreground="#A0A0C0" FontSize="12" Margin="16,4,0,0"/>
+                                                            <TextBlock Text="{Binding Recommendation}" Foreground="#606080" FontSize="11" Margin="16,4,0,0" FontStyle="Italic"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                        <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding AutoStartEnabled}" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Автозапуск с Windows" Foreground="#A0A0C0" FontSize="12" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12" Visibility="{Binding Diagnostics.Warnings.Count, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="⚡ ПРЕДУПРЕЖДЕНИЯ" Foreground="#F59E0B" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                        <ItemsControl ItemsSource="{Binding Diagnostics.Warnings}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#1A150A" CornerRadius="8" Padding="12" Margin="0,4" BorderBrush="#2A2010" BorderThickness="1">
+                                                        <StackPanel>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Ellipse Width="8" Height="8" Fill="{Binding SeverityColor}" Margin="0,0,8,0"/>
+                                                                <TextBlock Text="{Binding Title}" Foreground="White" FontSize="13" FontWeight="SemiBold"/>
+                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding Description}" Foreground="#A0A0C0" FontSize="12" Margin="16,4,0,0"/>
+                                                            <TextBlock Text="{Binding Recommendation}" Foreground="#606080" FontSize="11" Margin="16,4,0,0" FontStyle="Italic"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                     </StackPanel>
-                                    <TextBlock Text="Горячая клавиша: Ctrl+Alt+O — быстрая оптимизация" Foreground="#444460" FontSize="10" Margin="0,4,0,0"/>
-                                </StackPanel>
-                            </Border>
+                                </Border>
 
-                            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,10">
-                                <StackPanel Margin="18">
-                                    <TextBlock Text="🎯 ДОПОЛНИТЕЛЬНО" Foreground="White" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                                    <CheckBox Content="Закрывать браузеры" IsChecked="{Binding Settings.CloseBrowsers}" Foreground="#A0A0C0" FontSize="12" Margin="0,0,0,6"/>
-                                    <CheckBox Content="Отключать Discord Overlay" IsChecked="{Binding Settings.CloseDiscordOverlay}" Foreground="#A0A0C0" FontSize="12" Margin="0,0,0,6"/>
-                                    <CheckBox Content="Очищать память" IsChecked="{Binding Settings.EnableMemoryCleanup}" Foreground="#A0A0C0" FontSize="12"/>
-                                </StackPanel>
-                            </Border>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                <Button Content="💾 Сохранить" Command="{Binding Settings.SaveCommand}" Style="{StaticResource PrimaryButtonStyle}" Height="40" Width="150"/>
-                                <Button Content="↩ Сбросить" Command="{Binding Settings.ResetCommand}" Style="{StaticResource SecondaryButtonStyle}" Height="40" Width="130" Margin="10,0,0,0"/>
+                                <Border Style="{StaticResource CardStyle}" Visibility="{Binding Diagnostics.GtaVAnalysis, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="🎮  АНАЛИЗ НАСТРОЕК GTA V" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                            <TextBlock Text="Оценка настроек: " Foreground="#555570" FontSize="12"/>
+                                            <TextBlock Text="{Binding Diagnostics.GtaVAnalysis.PerformanceScore}" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                                            <TextBlock Text="/100" Foreground="#555570" FontSize="12"/>
+                                        </StackPanel>
+                                        <ItemsControl ItemsSource="{Binding Diagnostics.GtaVAnalysis.TopRecommendations}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#0E0E18" CornerRadius="6" Padding="10" Margin="0,3">
+                                                        <TextBlock Text="{Binding}" Foreground="#A0A0C0" FontSize="11"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
+                        </ScrollViewer>
+                    </Border>
 
-            </TabControl>
+                    <!-- PAGE: BENCHMARK -->
+                    <Border x:Name="PageBenchmark" Visibility="Collapsed">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="16">
+                                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="🏁  БЕНЧМАРК" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Длительность:" Foreground="#555570" FontSize="12" VerticalAlignment="Center" Width="100"/>
+                                            <ComboBox ItemsSource="{Binding Benchmark.DurationOptions}" SelectedItem="{Binding Benchmark.SelectedDuration}"
+                                                      Width="100" Height="36" FontSize="13" VerticalAlignment="Center"/>
+                                            <TextBlock Text=" сек" Foreground="#555570" FontSize="12" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                            <Button Content="▶ Запустить бенчмарк" Command="{Binding Benchmark.RunBenchmarkCommand}"
+                                                    IsEnabled="{Binding Benchmark.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
+                                                    Height="44" Width="200" Style="{StaticResource PrimaryButtonStyle}"/>
+                                            <Button Content="📸 Снять До" Command="{Binding Benchmark.CaptureBeforeCommand}"
+                                                    IsEnabled="{Binding Benchmark.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
+                                                    Height="44" Width="130" Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
+                                            <Button Content="📸 Снять После" Command="{Binding Benchmark.CaptureAfterCommand}"
+                                                    IsEnabled="{Binding Benchmark.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
+                                                    Height="44" Width="140" Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
+                                            <Button Content="🔄 Сброс" Command="{Binding Benchmark.ResetCommand}"
+                                                    Height="44" Width="100" Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Benchmark.StatusText}" Foreground="#606080" FontSize="11" Margin="0,8,0,0"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12" Visibility="{Binding Benchmark.Result, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="📊  РЕЗУЛЬТАТЫ" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                        <UniformGrid Columns="4">
+                                            <StackPanel>
+                                                <TextBlock Text="Средний FPS" Foreground="#555570" FontSize="10"/>
+                                                <TextBlock Text="{Binding Benchmark.Result.AverageFPS, StringFormat={}{0:F1}}" Foreground="White" FontSize="28" FontWeight="Light"/>
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock Text="1% Low" Foreground="#555570" FontSize="10"/>
+                                                <TextBlock Text="{Binding Benchmark.Result.OnePercentLowFPS, StringFormat={}{0:F1}}" Foreground="White" FontSize="28" FontWeight="Light"/>
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock Text="0.1% Low" Foreground="#555570" FontSize="10"/>
+                                                <TextBlock Text="{Binding Benchmark.Result.PointOnePercentLowFPS, StringFormat={}{0:F1}}" Foreground="White" FontSize="28" FontWeight="Light"/>
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock Text="Frametime" Foreground="#555570" FontSize="10"/>
+                                                <TextBlock Text="{Binding Benchmark.Result.AverageFrameTimeMs, StringFormat={}{0:F1} ms}" Foreground="White" FontSize="28" FontWeight="Light"/>
+                                            </StackPanel>
+                                        </UniformGrid>
+                                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                            <TextBlock Text="Оценка: " Foreground="#555570" FontSize="12"/>
+                                            <TextBlock Text="{Binding Benchmark.Result.PerformanceGrade}" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                                            <TextBlock Text="  •  Фризы: " Foreground="#555570" FontSize="12" Margin="16,0,0,0"/>
+                                            <TextBlock Text="{Binding Benchmark.Result.StutterCount}" Foreground="White" FontSize="12"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}" Visibility="{Binding Benchmark.Comparison.BeforeSnapshot, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="⚖  СРАВНЕНИЕ ДО / ПОСЛЕ" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                        <TextBlock Text="{Binding Benchmark.Comparison.Summary}" Foreground="#818CF8" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="ДО" Foreground="#555570" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBlock Text="{Binding Benchmark.Comparison.BeforeSnapshot.FPS, StringFormat=FPS: {0:F1}}" Foreground="White" FontSize="12"/>
+                                                <TextBlock Text="{Binding Benchmark.Comparison.BeforeSnapshot.CPUUsage, StringFormat=CPU: {0:F1}%}" Foreground="#A0A0C0" FontSize="11"/>
+                                                <TextBlock Text="{Binding Benchmark.Comparison.BeforeSnapshot.GPUUsage, StringFormat=GPU: {0:F1}%}" Foreground="#A0A0C0" FontSize="11"/>
+                                                <TextBlock Text="{Binding Benchmark.Comparison.BeforeSnapshot.RAMUsage, StringFormat=RAM: {0:F1}%}" Foreground="#A0A0C0" FontSize="11"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="→" Foreground="#555570" FontSize="24" VerticalAlignment="Center" Margin="16,0"/>
+                                            <StackPanel Grid.Column="2" Visibility="{Binding Benchmark.Comparison.AfterSnapshot, Converter={StaticResource BoolToVis}}">
+                                                <TextBlock Text="ПОСЛЕ" Foreground="#555570" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBlock Text="{Binding Benchmark.Comparison.AfterSnapshot.FPS, StringFormat=FPS: {0:F1}}" Foreground="White" FontSize="12"/>
+                                                <TextBlock Text="{Binding Benchmark.Comparison.AfterSnapshot.CPUUsage, StringFormat=CPU: {0:F1}%}" Foreground="#A0A0C0" FontSize="11"/>
+                                                <TextBlock Text="{Binding Benchmark.Comparison.AfterSnapshot.GPUUsage, StringFormat=GPU: {0:F1}%}" Foreground="#A0A0C0" FontSize="11"/>
+                                                <TextBlock Text="{Binding Benchmark.Comparison.AfterSnapshot.RAMUsage, StringFormat=RAM: {0:F1}%}" Foreground="#A0A0C0" FontSize="11"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+
+                    <!-- PAGE: LOGS -->
+                    <Border x:Name="PageLogs" Visibility="Collapsed">
+                        <Grid Margin="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                                <Button Content="↻ Обновить" Command="{Binding Logs.RefreshCommand}" Style="{StaticResource SecondaryButtonStyle}" Height="32" Width="110"/>
+                                <Button Content="🗑 Очистить" Command="{Binding Logs.ClearCommand}" Style="{StaticResource SecondaryButtonStyle}" Height="32" Width="100" Margin="8,0,0,0"/>
+                                <TextBlock Foreground="#555570" VerticalAlignment="Center" FontSize="11" Margin="15,0,0,0">
+                                    <Run Text="Записей: "/><Run Text="{Binding Logs.Logs.Count, Mode=OneWay}"/>
+                                </TextBlock>
+                            </StackPanel>
+                            <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+                                <ListView ItemsSource="{Binding Logs.Logs}" Background="Transparent" BorderThickness="0"
+                                          Foreground="#A0A0C0" FontSize="12" FontFamily="Consolas, 'Courier New', monospace"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="Padding" Value="12,5"/>
+                                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                            <Setter Property="BorderBrush" Value="#151525"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#12121E"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="75"/>
+                                                    <ColumnDefinition Width="85"/>
+                                                    <ColumnDefinition Width="90"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding ShortTime}" Foreground="#444460" FontSize="11"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Level}" FontSize="11" FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="#666680"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Level}" Value="Information"><Setter Property="Foreground" Value="#6366F1"/></DataTrigger>
+                                                                <DataTrigger Binding="{Binding Level}" Value="Warning"><Setter Property="Foreground" Value="#F59E0B"/></DataTrigger>
+                                                                <DataTrigger Binding="{Binding Level}" Value="Error"><Setter Property="Foreground" Value="#EF4444"/></DataTrigger>
+                                                                <DataTrigger Binding="{Binding Level}" Value="Critical"><Setter Property="Foreground" Value="#DC2626"/></DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Grid.Column="2" Text="{Binding Category}" Foreground="#333350" FontSize="11"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding Message}" Foreground="#808090" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- PAGE: SETTINGS -->
+                    <Border x:Name="PageSettings" Visibility="Collapsed">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="16">
+                            <StackPanel MaxWidth="600" HorizontalAlignment="Left">
+                                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,10">
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="⚙ ПРОФИЛЬ ПО УМОЛЧАНИЮ" Foreground="White" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                                        <ComboBox ItemsSource="{Binding Settings.AvailableProfiles}" SelectedItem="{Binding Settings.SelectedProfileName}"
+                                                  Width="280" Height="36" HorizontalAlignment="Left" FontSize="13"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,10">
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="🔄 АВТООПТИМИЗАЦИЯ" Foreground="White" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                                        <CheckBox Content="Включить автооптимизацию" IsChecked="{Binding Settings.EnableAutoOptimization}" Foreground="#A0A0C0" FontSize="12" Margin="0,0,0,10"/>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="Интервал:" Foreground="#555570" FontSize="12" VerticalAlignment="Center" Width="80"/>
+                                            <TextBlock Text="{Binding Settings.AutoOptimizationInterval}" Foreground="White" FontSize="12" VerticalAlignment="Center"/>
+                                            <TextBlock Text=" сек" Foreground="#555570" FontSize="12" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,10">
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="🎮 ИГРОВЫЕ ФУНКЦИИ" Foreground="White" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                            <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding OverlayEnabled}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Оверлей в игре (FPS, CPU, GPU)" Foreground="#A0A0C0" FontSize="12" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                            <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding AutoStartEnabled}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Автозапуск с Windows" Foreground="#A0A0C0" FontSize="12" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                        </StackPanel>
+                                        <TextBlock Text="Горячая клавиша: Ctrl+Alt+O — быстрая оптимизация" Foreground="#444460" FontSize="10" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,10">
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="🎯 ДОПОЛНИТЕЛЬНО" Foreground="White" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                                        <CheckBox Content="Закрывать браузеры" IsChecked="{Binding Settings.CloseBrowsers}" Foreground="#A0A0C0" FontSize="12" Margin="0,0,0,6"/>
+                                        <CheckBox Content="Отключать Discord Overlay" IsChecked="{Binding Settings.CloseDiscordOverlay}" Foreground="#A0A0C0" FontSize="12" Margin="0,0,0,6"/>
+                                        <CheckBox Content="Очищать память" IsChecked="{Binding Settings.EnableMemoryCleanup}" Foreground="#A0A0C0" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                    <Button Content="💾 Сохранить" Command="{Binding Settings.SaveCommand}" Style="{StaticResource PrimaryButtonStyle}" Height="40" Width="150"/>
+                                    <Button Content="↩ Сбросить" Command="{Binding Settings.ResetCommand}" Style="{StaticResource SecondaryButtonStyle}" Height="40" Width="130" Margin="10,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+
+                </Grid>
+            </Grid>
 
             <!-- STATUS BAR -->
             <Border Grid.Row="2" Background="#0E0E18" BorderBrush="#151525" BorderThickness="0,1,0,0">
