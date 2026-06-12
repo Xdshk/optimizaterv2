@@ -28,6 +28,9 @@ namespace GTA5Optimizer.UI
                     services.AddSingleton<LogsViewModel>();
                     services.AddSingleton<MonitorViewModel>();
                     services.AddSingleton<SettingsViewModel>();
+                    services.AddSingleton<DiagnosticsViewModel>();
+                    services.AddSingleton<BenchmarkViewModel>();
+                    services.AddSingleton<ProfileViewModel>();
                     services.AddSingleton<MainWindowViewModel>();
 
                     // Views
