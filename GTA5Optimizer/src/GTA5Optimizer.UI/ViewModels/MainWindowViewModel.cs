@@ -92,7 +92,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         OverlayService overlayService,
         MonitorViewModel monitor,
         LogsViewModel logs,
-        SettingsViewModel settings)
+        SettingsViewModel settings,
+        DiagnosticsViewModel diagnostics,
+        BenchmarkViewModel benchmark,
+        ProfileViewModel profile)
     {
         _serviceProvider = serviceProvider;
         _loggerService = loggerService;
@@ -104,6 +107,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         Monitor = monitor;
         Logs = logs;
         Settings = settings;
+        Diagnostics = diagnostics;
+        Benchmark = benchmark;
+        Profile = profile;
 
         _autoStartEnabled = AutoStartService.IsEnabled;
 
