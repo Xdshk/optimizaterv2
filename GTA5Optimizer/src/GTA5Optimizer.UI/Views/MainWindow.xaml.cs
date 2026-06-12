@@ -47,35 +47,26 @@ public partial class MainWindow : Window
     {
         if (sender is not System.Windows.Controls.RadioButton rb) return;
 
-        // Hide all pages
-        PageOptimization.Visibility = Visibility.Collapsed;
-        PageMonitoring.Visibility = Visibility.Collapsed;
-        PageDiagnostics.Visibility = Visibility.Collapsed;
-        PageBenchmark.Visibility = Visibility.Collapsed;
-        PageLogs.Visibility = Visibility.Collapsed;
-        PageSettings.Visibility = Visibility.Collapsed;
-
-        // Show the selected page
-        switch (rb.Name)
+        // Find pages by name — they may not be direct fields if nested in templates
+        var pages = new Dictionary<string, string>
         {
-            case "NavOptimization":
-                PageOptimization.Visibility = Visibility.Visible;
-                break;
-            case "NavMonitoring":
-                PageMonitoring.Visibility = Visibility.Visible;
-                break;
-            case "NavDiagnostics":
-                PageDiagnostics.Visibility = Visibility.Visible;
-                break;
-            case "NavBenchmark":
-                PageBenchmark.Visibility = Visibility.Visible;
-                break;
-            case "NavLogs":
-                PageLogs.Visibility = Visibility.Visible;
-                break;
-            case "NavSettings":
-                PageSettings.Visibility = Visibility.Visible;
-                break;
+            { "NavOptimization", "PageOptimization" },
+            { "NavMonitoring", "PageMonitoring" },
+            { "NavDiagnostics", "PageDiagnostics" },
+            { "NavBenchmark", "PageBenchmark" },
+            { "NavLogs", "PageLogs" },
+            { "NavSettings", "PageSettings" },
+        };
+
+        // Hide all pages
+        foreach (var pageName in pages.Values)
+        {
+            if (FindName(pageName) is System.Windows.FrameworkElement el)
+                el.Visibility = Visibility.Collapsed;
         }
+
+        // Show selected page
+        if (pages.TryGetValue(rb.Name, out var target) && FindName(target) is System.Windows.FrameworkElement targetEl)
+            targetEl.Visibility = Visibility.Visible;
     }
 }
