@@ -11,7 +11,6 @@ public partial class BenchmarkViewModel : ObservableObject
 
     [ObservableProperty] private bool _isRunning;
     [ObservableProperty] private int _selectedDuration = 30;
-    public int SelectedDurationValue => SelectedDuration;
     [ObservableProperty] private BenchmarkResultDto? _result;
     [ObservableProperty] private BenchmarkComparisonDto? _comparison;
     [ObservableProperty] private string _statusText = "Выберите длительность и нажмите 'Запустить'";
