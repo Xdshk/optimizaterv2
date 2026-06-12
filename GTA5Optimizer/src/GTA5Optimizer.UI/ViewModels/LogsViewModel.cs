@@ -42,9 +42,9 @@ public partial class LogsViewModel : ObservableObject
             var logs = await _loggerService.GetRecentLogsAsync(200);
             Logs = new ObservableCollection<LogEntry>(logs);
         }
-        catch
+        catch (Exception ex)
         {
-            // Тихо игнорируем
+            System.Diagnostics.Debug.WriteLine($"Logs error: {ex.Message}");
         }
     }
 
@@ -56,9 +56,9 @@ public partial class LogsViewModel : ObservableObject
             await _loggerService.ClearLogsAsync();
             Logs.Clear();
         }
-        catch
+        catch (Exception ex)
         {
-            // Тихо игнорируем
+            System.Diagnostics.Debug.WriteLine($"Logs error: {ex.Message}");
         }
     }
 
