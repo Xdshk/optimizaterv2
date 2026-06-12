@@ -454,8 +454,9 @@ public class SystemOptimizer : ISystemOptimizer
             var result = PowerSetActiveScheme(IntPtr.Zero, ref schemeGuid);
             return Task.FromResult(result == 0);
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Failed to set power plan");
             return Task.FromResult(false);
         }
     }
