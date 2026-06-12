@@ -82,6 +82,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     public MainWindowViewModel(
         IServiceProvider serviceProvider,
         ILoggerService loggerService,
+        ILogger<MainWindowViewModel> logger,
         IPerformanceMonitor performanceMonitor,
         IGameDetector gameDetector,
         TrayService trayService,
@@ -92,6 +93,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         _serviceProvider = serviceProvider;
         _loggerService = loggerService;
+        _logger = logger;
         _performanceMonitor = performanceMonitor;
         _gameDetector = gameDetector;
         _trayService = trayService;
