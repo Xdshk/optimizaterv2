@@ -1,26 +1,48 @@
 using GTA5Optimizer.Core.Interfaces;
 using GTA5Optimizer.Models.Monitoring;
+using LibreHardwareMonitor.Hardware;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Management;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 
 namespace GTA5Optimizer.Services.Services;
 
-/// <summary>
-/// Монитор производительности в реальном времени
-/// </summary>
-public class PerformanceMonitor : IPerformanceMonitor
+public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
 {
     private readonly ILogger<PerformanceMonitor> _logger;
+    private readonly Computer _computer;
+    private readonly SemaphoreSlim _updateLock = new(1, 1);
+    private readonly CancellationTokenSource _cts = new();
     private Timer? _monitoringTimer;
     private readonly object _timerLock = new();
+
+    // FPS tracking
+    private readonly Stopwatch _fpsStopwatch = new();
+    private long _frameCount;
+    private double _currentFps;
+    private readonly Queue<double> _frameTimes = new();
+    private const int MaxFrameHistory = 600; // 10 seconds at 60fps
+    private DateTime _lastFrameTime = DateTime.UtcNow;
 
     public event Action<PerformanceMetrics>? OnMetricsUpdated;
 
     public PerformanceMonitor(ILogger<PerformanceMonitor> logger)
     {
         _logger = logger;
+
+        _computer = new Computer
+        {
+            IsCpuEnabled = true,
+            IsGpuEnabled = true,
+            IsMemoryEnabled = true,
+            IsStorageEnabled = true,
+            IsMotherboardEnabled = true
+        };
+        _computer.Open();
+
+        _fpsStopwatch.Start();
     }
 
     public void StartMonitoring()
@@ -31,7 +53,7 @@ public class PerformanceMonitor : IPerformanceMonitor
                 async _ => await UpdateMetricsAsync(),
                 null,
                 TimeSpan.Zero,
-                TimeSpan.FromMilliseconds(500));
+                TimeSpan.FromMilliseconds(1000));
         }
     }
 
@@ -51,50 +73,368 @@ public class PerformanceMonitor : IPerformanceMonitor
 
     private async Task<PerformanceMetrics> UpdateMetricsAsync()
     {
-        var metrics = new PerformanceMetrics();
+        if (!await _updateLock.WaitAsync(0))
+            return new PerformanceMetrics();
 
         try
         {
-            // CPU
-            metrics.CPUUsage = GetCPUUsage();
+            var metrics = new PerformanceMetrics { Timestamp = DateTime.Now };
 
-            // RAM
-            GetRAMInfo(out var totalRAM, out var availableRAM);
-            metrics.TotalRAM = totalRAM;
-            metrics.AvailableRAM = availableRAM;
-            metrics.UsedRAM = totalRAM - availableRAM;
-            metrics.StandbyMemory = GetStandbyMemory();
+            // Update LibreHardwareMonitor
+            foreach (var hardware in _computer.Hardware)
+            {
+                hardware.Update();
+            }
+
+            // CPU
+            PopulateCpuMetrics(metrics);
 
             // GPU
-            metrics.GPUUsage = GetGPUUsage();
-            metrics.GPUTemperature = GetGPUTemperature();
+            PopulateGpuMetrics(metrics);
+
+            // RAM
+            PopulateRamMetrics(metrics);
 
             // Disk
-            metrics.DiskReadSpeedMBps = GetDiskReadSpeed();
-            metrics.DiskWriteSpeedMBps = GetDiskWriteSpeed();
+            PopulateDiskMetrics(metrics);
 
-            // Network
-            metrics.CurrentPing = await GetPingAsync();
+            // FPS
+            metrics.CurrentFPS = _currentFps;
+            metrics.FrameTimeMs = _currentFps > 0 ? (int)(1000.0 / _currentFps) : 0;
 
-            // Game specific
+            // Calculate 1% and 0.1% lows
+            if (_frameTimes.Count > 0)
+            {
+                var sorted = _frameTimes.OrderByDescending(f => f).ToList();
+                int onePercentIdx = Math.Max(1, sorted.Count / 100);
+                int pointOnePercentIdx = Math.Max(1, sorted.Count / 1000);
+                metrics.OnePercentLow = sorted.Take(onePercentIdx).Min();
+                metrics.PointOnePercentLow = sorted.Take(pointOnePercentIdx).Min();
+                metrics.AverageFPS = sorted.Count > 0 ? 1000.0 / sorted.Average() : 0;
+            }
+
+            // Game process
             var gtaProcess = Process.GetProcessesByName("GTA5").FirstOrDefault();
             if (gtaProcess != null)
             {
-                metrics.GameWorkingSet = gtaProcess.WorkingSet64;
-                metrics.GamePrivateBytes = gtaProcess.PrivateMemorySize64;
-                metrics.CPUUsageGame = GetProcessCPUUsage(gtaProcess);
+                try
+                {
+                    metrics.GameWorkingSet = gtaProcess.WorkingSet64;
+                    metrics.GamePrivateBytes = gtaProcess.PrivateMemorySize64;
+                    metrics.CPUUsageGame = GetProcessCpuUsage(gtaProcess);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Could not read GTA5 process metrics");
+                }
             }
 
-            metrics.CurrentFPS = GetCurrentFPS();
+            // Network ping
+            metrics.CurrentPing = await GetPingAsync();
 
             OnMetricsUpdated?.Invoke(metrics);
+            return metrics;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Ошибка при обновлении метрик");
+            _logger.LogError(ex, "Error updating performance metrics");
+            return new PerformanceMetrics();
+        }
+        finally
+        {
+            _updateLock.Release();
+        }
+    }
+
+    private void PopulateCpuMetrics(PerformanceMetrics metrics)
+    {
+        try
+        {
+            foreach (var hardware in _computer.Hardware)
+            {
+                if (hardware.HardwareType == HardwareType.Cpu)
+                {
+                    foreach (var sensor in hardware.Sensors)
+                    {
+                        if (sensor.SensorType == SensorType.Load && sensor.Name.Contains("Total"))
+                        {
+                            metrics.CPUUsage = sensor.Value ?? 0;
+                        }
+                        else if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("CPU Package"))
+                        {
+                            metrics.CPUTemperature = sensor.Value ?? 0;
+                        }
+                        else if (sensor.SensorType == SensorType.Clock && sensor.Name.Contains("CPU Core #1"))
+                        {
+                            metrics.CPUClock = (sensor.Value ?? 0) * 1000; // MHz
+                        }
+                    }
+
+                    // Per-core usage
+                    var coreUsages = new List<double>();
+                    foreach (var sensor in hardware.Sensors)
+                    {
+                        if (sensor.SensorType == SensorType.Load && sensor.Name.Contains("Core"))
+                        {
+                            coreUsages.Add(sensor.Value ?? 0);
+                        }
+                    }
+                    metrics.PerCoreUsage = coreUsages.ToArray();
+                    metrics.CPUThreadCount = coreUsages.Count;
+                    break;
+                }
+            }
+
+            // Fallback: PerformanceCounter for CPU usage if LHM didn't find it
+            if (metrics.CPUUsage == 0)
+            {
+                using var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+                cpuCounter.NextValue();
+                Task.Delay(200).Wait();
+                metrics.CPUUsage = cpuCounter.NextValue();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to read CPU metrics from LibreHardwareMonitor");
+        }
+    }
+
+    private void PopulateGpuMetrics(PerformanceMetrics metrics)
+    {
+        try
+        {
+            foreach (var hardware in _computer.Hardware)
+            {
+                if (hardware.HardwareType == HardwareType.GpuNvidia ||
+                    hardware.HardwareType == HardwareType.GpuAmd ||
+                    hardware.HardwareType == HardwareType.GpuIntel)
+                {
+                    foreach (var sensor in hardware.Sensors)
+                    {
+                        switch (sensor.SensorType)
+                        {
+                            case SensorType.Load when sensor.Name.Contains("GPU Core"):
+                                metrics.GPUUsage = sensor.Value ?? 0;
+                                break;
+                            case SensorType.Temperature when sensor.Name.Contains("GPU Hot Spot"):
+                                metrics.GPUTemperature = sensor.Value ?? 0;
+                                break;
+                            case SensorType.Temperature when sensor.Name.Contains("GPU Core") && metrics.GPUTemperature == 0:
+                                metrics.GPUTemperature = sensor.Value ?? 0;
+                                break;
+                            case SensorType.SmallData when sensor.Name.Contains("GPU Memory Used"):
+                                metrics.GPUMemoryUsed = (long)(sensor.Value ?? 0) * 1024 * 1024;
+                                break;
+                            case SensorType.SmallData when sensor.Name.Contains("GPU Memory Total"):
+                                metrics.GPUMemoryTotal = (long)(sensor.Value ?? 0) * 1024 * 1024;
+                                break;
+                            case SensorType.Clock when sensor.Name.Contains("GPU Core"):
+                                metrics.GPUEngineClock = (int)(sensor.Value ?? 0);
+                                break;
+                            case SensorType.Clock when sensor.Name.Contains("GPU Memory"):
+                                metrics.GPUMemoryClock = (int)(sensor.Value ?? 0);
+                                break;
+                            case SensorType.Power when sensor.Name.Contains("GPU Power"):
+                                metrics.GPUPowerDraw = sensor.Value ?? 0;
+                                break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to read GPU metrics from LibreHardwareMonitor");
+        }
+    }
+
+    private void PopulateRamMetrics(PerformanceMetrics metrics)
+    {
+        try
+        {
+            long totalRam = 0;
+            long availableRam = 0;
+
+            foreach (var hardware in _computer.Hardware)
+            {
+                if (hardware.HardwareType == HardwareType.Memory)
+                {
+                    foreach (var sensor in hardware.Sensors)
+                    {
+                        if (sensor.SensorType == SensorType.Data && sensor.Name.Contains("Memory Used"))
+                        {
+                            totalRam += (long)(sensor.Value ?? 0) * 1024 * 1024;
+                        }
+                        if (sensor.SensorType == SensorType.Data && sensor.Name.Contains("Memory Available"))
+                        {
+                            availableRam += (long)(sensor.Value ?? 0) * 1024 * 1024;
+                        }
+                    }
+                }
+            }
+
+            if (totalRam > 0)
+            {
+                metrics.TotalRAM = totalRam + availableRam;
+                metrics.AvailableRAM = availableRam;
+                metrics.UsedRAM = totalRam;
+            }
+            else
+            {
+                // Fallback to WMI
+                GetRamInfo(out var wmiTotal, out var wmiAvailable);
+                metrics.TotalRAM = wmiTotal;
+                metrics.AvailableRAM = wmiAvailable;
+                metrics.UsedRAM = wmiTotal - wmiAvailable;
+            }
+
+            // Standby memory
+            metrics.StandbyMemory = GetStandbyMemory();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to read RAM metrics");
+        }
+    }
+
+    private void PopulateDiskMetrics(PerformanceMetrics metrics)
+    {
+        try
+        {
+            foreach (var hardware in _computer.Hardware)
+            {
+                if (hardware.HardwareType == HardwareType.Storage)
+                {
+                    foreach (var sensor in hardware.Sensors)
+                    {
+                        if (sensor.SensorType == SensorType.Load && sensor.Name.Contains("Activity"))
+                        {
+                            metrics.DiskActiveTimePercent = sensor.Value ?? 0;
+                        }
+                    }
+                }
+            }
+
+            // Performance counters for read/write speeds
+            using var readCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
+            using var writeCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
+            readCounter.NextValue();
+            writeCounter.NextValue();
+            Task.Delay(200).Wait();
+            metrics.DiskReadSpeedMBps = readCounter.NextValue() / 1024 / 1024;
+            metrics.DiskWriteSpeedMBps = writeCounter.NextValue() / 1024 / 1024;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to read disk metrics");
+        }
+    }
+
+    /// <summary>
+    /// Report a frame for FPS calculation. Call this from a game hook or overlay.
+    /// </summary>
+    public void ReportFrame()
+    {
+        var now = DateTime.UtcNow;
+        var elapsed = (now - _lastFrameTime).TotalMilliseconds;
+        _lastFrameTime = now;
+
+        if (elapsed > 0 && elapsed < 1000) // Sanity check
+        {
+            lock (_frameTimes)
+            {
+                _frameTimes.Enqueue(elapsed);
+                while (_frameTimes.Count > MaxFrameHistory)
+                    _frameTimes.Dequeue();
+            }
         }
 
-        return metrics;
+        _frameCount++;
+        if (_fpsStopwatch.ElapsedMilliseconds >= 1000)
+        {
+            _currentFps = _frameCount * 1000.0 / _fpsStopwatch.ElapsedMilliseconds;
+            _frameCount = 0;
+            _fpsStopwatch.Restart();
+        }
+    }
+
+    private static void GetRamInfo(out long totalRAM, out long availableRAM)
+    {
+        totalRAM = 0;
+        availableRAM = 0;
+        try
+        {
+            using var searcher = new ManagementObjectSearcher(
+                "SELECT TotalVisibleMemorySize, FreePhysicalMemory FROM Win32_OperatingSystem");
+            foreach (ManagementObject? mo in searcher.Get())
+            {
+                totalRAM = Convert.ToInt64(mo["TotalVisibleMemorySize"]) * 1024;
+                availableRAM = Convert.ToInt64(mo["FreePhysicalMemory"]) * 1024;
+                break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to get RAM info: {ex.Message}");
+        }
+    }
+
+    private static long GetStandbyMemory()
+    {
+        try
+        {
+            using var searcher = new ManagementObjectSearcher(
+                "SELECT StandbyCacheNormalPrioritySize, StandbyCacheReserveSize FROM Win32_PerfFormattedData_PerfOS_Memory");
+            foreach (ManagementObject? mo in searcher.Get())
+            {
+                var normal = Convert.ToInt64(mo["StandbyCacheNormalPrioritySize"]);
+                var reserve = Convert.ToInt64(mo["StandbyCacheReserveSize"]);
+                return normal + reserve;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to get standby memory: {ex.Message}");
+        }
+        return 0;
+    }
+
+    private static async Task<float> GetPingAsync()
+    {
+        try
+        {
+            using var ping = new Ping();
+            var reply = await ping.SendPingAsync("8.8.8.8", 3000);
+            return reply.Status == IPStatus.Success ? reply.RoundtripTime : 0;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to get ping: {ex.Message}");
+            return 0;
+        }
+    }
+
+    private static float GetProcessCpuUsage(Process process)
+    {
+        try
+        {
+            var startTime = DateTime.UtcNow;
+            var startCpu = process.TotalProcessorTime;
+            Task.Delay(500).Wait();
+            var endTime = DateTime.UtcNow;
+            var endCpu = process.TotalProcessorTime;
+            var cpuUsedMs = (endCpu - startCpu).TotalMilliseconds;
+            var totalMs = (endTime - startTime).TotalMilliseconds;
+            var cpuUsage = cpuUsedMs / (Environment.ProcessorCount * totalMs);
+            return (float)(cpuUsage * 100);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to get process CPU: {ex.Message}");
+            return 0;
+        }
     }
 
     public Task<BottleneckAnalysis> AnalyzeBottlenecksAsync(PerformanceMetrics metrics)
@@ -111,8 +451,8 @@ public class PerformanceMonitor : IPerformanceMonitor
                 CurrentValue = metrics.CPUUsage,
                 ThresholdValue = 90,
                 Severity = Math.Min(100, metrics.CPUUsage - 80),
-                Description = $"Высокая нагрузка на CPU: {metrics.CPUUsage:F1}%",
-                Recommendation = "Закройте фоновые приложения, уменьшите разрешение или частоту кадров"
+                Description = $"High CPU load: {metrics.CPUUsage:F1}%",
+                Recommendation = "Close background applications, reduce resolution or frame rate limit"
             });
         }
 
@@ -125,8 +465,8 @@ public class PerformanceMonitor : IPerformanceMonitor
                 CurrentValue = metrics.GPUUsage,
                 ThresholdValue = 95,
                 Severity = Math.Min(100, metrics.GPUUsage - 90),
-                Description = $"GPU перегружен: {metrics.GPUUsage:F1}%",
-                Recommendation = "Уменьшите настройки графики, обновите драйвера"
+                Description = $"GPU overloaded: {metrics.GPUUsage:F1}%",
+                Recommendation = "Lower graphics settings, update GPU drivers"
             });
         }
 
@@ -139,22 +479,36 @@ public class PerformanceMonitor : IPerformanceMonitor
                 CurrentValue = metrics.RAMUsagePercent,
                 ThresholdValue = 85,
                 Severity = Math.Min(100, metrics.RAMUsagePercent - 80),
-                Description = $"Низкий уровень свободной памяти: {100 - metrics.RAMUsagePercent:F1}%",
-                Recommendation = "Закройте приложения, увеличьте очистку standby памяти"
+                Description = $"Low free memory: {100 - metrics.RAMUsagePercent:F1}%",
+                Recommendation = "Close applications, run memory cleanup"
             });
         }
 
-        if (metrics.DiskReadSpeedMBps < 100 && metrics.IsTextureStreamingBottleneck)
+        if (metrics.GPUMemoryUsagePercent > 90)
+        {
+            bottlenecks.Add(new BottleneckDetail
+            {
+                Type = BottleneckType.GPU,
+                Component = "VRAM",
+                CurrentValue = metrics.GPUMemoryUsagePercent,
+                ThresholdValue = 90,
+                Severity = Math.Min(100, (int)metrics.GPUMemoryUsagePercent - 85),
+                Description = $"VRAM nearly full: {metrics.GPUMemoryUsagePercent:F1}%",
+                Recommendation = "Lower texture quality, reduce resolution"
+            });
+        }
+
+        if (metrics.DiskReadSpeedMBps < 50 && metrics.DiskActiveTimePercent > 80)
         {
             bottlenecks.Add(new BottleneckDetail
             {
                 Type = BottleneckType.Disk,
                 Component = "Disk",
                 CurrentValue = metrics.DiskReadSpeedMBps,
-                ThresholdValue = 100,
-                Severity = 90,
-                Description = "Замедленная загрузка текстур из-за медленного диска",
-                Recommendation = "Перенесите игру на SSD или уменьшите качество текстур"
+                ThresholdValue = 50,
+                Severity = 80,
+                Description = "Slow disk causing texture streaming issues",
+                Recommendation = "Move game to SSD, reduce texture quality"
             });
         }
 
@@ -167,8 +521,22 @@ public class PerformanceMonitor : IPerformanceMonitor
                 CurrentValue = Math.Max(metrics.CPUTemperature, metrics.GPUTemperature),
                 ThresholdValue = 85,
                 Severity = 85,
-                Description = $"Высокая температура: CPU {metrics.CPUTemperature:F0}°C, GPU {metrics.GPUTemperature:F0}°C",
-                Recommendation = "Проверьте кулеры, очистите систему охлаждения"
+                Description = $"High temperature: CPU {metrics.CPUTemperature:F0}°C, GPU {metrics.GPUTemperature:F0}°C",
+                Recommendation = "Check cooling, clean dust from fans"
+            });
+        }
+
+        if (metrics.FrameTimeMs > 33 && metrics.CurrentFPS > 0) // < 30 FPS sustained
+        {
+            bottlenecks.Add(new BottleneckDetail
+            {
+                Type = BottleneckType.GameEngine,
+                Component = "Game",
+                CurrentValue = metrics.FrameTimeMs,
+                ThresholdValue = 33,
+                Severity = Math.Min(100, metrics.FrameTimeMs * 2),
+                Description = $"Low framerate: {metrics.CurrentFPS:F0} FPS ({metrics.FrameTimeMs}ms)",
+                Recommendation = "Run optimization or lower game settings"
             });
         }
 
@@ -180,117 +548,12 @@ public class PerformanceMonitor : IPerformanceMonitor
         return Task.FromResult(analysis);
     }
 
-    #region Helper methods
-    private static float GetCPUUsage()
+    public void Dispose()
     {
-        using var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-        cpuCounter.NextValue();
-        Thread.Sleep(100);
-        return cpuCounter.NextValue();
+        _cts.Cancel();
+        _monitoringTimer?.Dispose();
+        _updateLock.Dispose();
+        _cts.Dispose();
+        _computer.Close();
     }
-
-    private static void GetRAMInfo(out long totalRAM, out long availableRAM)
-    {
-        totalRAM = 0;
-        availableRAM = 0;
-        try
-        {
-            using var searcher = new ManagementObjectSearcher(
-                "SELECT TotalVisibleMemorySize, FreePhysicalMemory FROM Win32_OperatingSystem");
-            foreach (ManagementObject? mo in searcher.Get())
-            {
-                // Values are in KB
-                totalRAM = Convert.ToInt64(mo["TotalVisibleMemorySize"]) * 1024;
-                availableRAM = Convert.ToInt64(mo["FreePhysicalMemory"]) * 1024;
-                break;
-            }
-        }
-        catch { }
-    }
-
-    private static long GetStandbyMemory()
-    {
-        try
-        {
-            using var searcher = new ManagementObjectSearcher(
-                "SELECT StandbyListSize FROM Win32_PerfFormattedData_PerfOS_Memory");
-            foreach (ManagementObject? mo in searcher.Get())
-            {
-                return Convert.ToInt64(mo["StandbyListSize"]) * 1024;
-            }
-        }
-        catch { }
-        return 0;
-    }
-
-    private static float GetGPUTemperature()
-    {
-        // Requires third-party library (e.g., LibreHardwareMonitor) or NVIDIA/AMD SDK
-        return 0f;
-    }
-
-    private static float GetGPUUsage()
-    {
-        // Requires third-party library (e.g., LibreHardwareMonitor) or NVIDIA/AMD SDK
-        return 0f;
-    }
-
-    private static float GetDiskReadSpeed()
-    {
-        try
-        {
-            using var counter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
-            counter.NextValue();
-            Thread.Sleep(100);
-            return counter.NextValue() / 1024 / 1024;
-        }
-        catch { return 0; }
-    }
-
-    private static float GetDiskWriteSpeed()
-    {
-        try
-        {
-            using var counter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
-            counter.NextValue();
-            Thread.Sleep(100);
-            return counter.NextValue() / 1024 / 1024;
-        }
-        catch { return 0; }
-    }
-
-    private static async Task<float> GetPingAsync()
-    {
-        try
-        {
-            using var ping = new Ping();
-            var reply = await ping.SendPingAsync("8.8.8.8", 3000);
-            return reply.Status == IPStatus.Success ? reply.RoundtripTime : 0;
-        }
-        catch { return 0; }
-    }
-
-    private static float GetProcessCPUUsage(Process process)
-    {
-        try
-        {
-            var startTime = DateTime.Now;
-            var startCpuUsage = process.TotalProcessorTime;
-            Thread.Sleep(500);
-            var endTime = DateTime.Now;
-            var endCpuUsage = process.TotalProcessorTime;
-            var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
-            var totalMsPassed = (endTime - startTime).TotalMilliseconds;
-            var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
-            return (float)(cpuUsageTotal * 100);
-        }
-        catch { return 0; }
-    }
-
-    private static float GetCurrentFPS()
-    {
-        // FPS requires special hooking (e.g., RTSS, PresentMon, or in-game overlay API)
-        return 0f;
-    }
-    #endregion
 }
