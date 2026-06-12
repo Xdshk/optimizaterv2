@@ -79,7 +79,7 @@ public sealed class AppSettings
     };
 
     // Custom process rules
-    public ObservableCollection<ProcessRule> CustomProcessRules { get; set; } = new();
+    public ObservableCollection<GTA5Optimizer.Models.Optimization.ProcessRule> CustomProcessRules { get; set; } = new();
 
     // Theme
     public string Theme { get; set; } = "Dark"; // Dark, System
