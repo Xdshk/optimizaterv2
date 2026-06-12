@@ -99,7 +99,7 @@ public sealed class AutoOptimizationService : BackgroundService
 
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = memResult.Success ? GTA5LogLevel.Information : LogLevel.Warning,
+                Level = memResult.Success ? GTA5LogLevel.Information : GTA5LogLevel.Warning,
                 Category = LogCategories.Memory,
                 Message = $"Auto memory cleanup: RAM was {metrics.RAMUsagePercent:F1}%",
                 Details = memResult.Details,
@@ -128,7 +128,7 @@ public sealed class AutoOptimizationService : BackgroundService
                 metrics.CPUTemperature, metrics.GPUTemperature);
             await _loggerService.LogAsync(new LogEntry
             {
-                Level = LogLevel.Warning,
+                Level = GTA5LogLevel.Warning,
                 Category = LogCategories.System,
                 Message = $"High temperature: CPU {metrics.CPUTemperature:F0}°C, GPU {metrics.GPUTemperature:F0}°C"
             });
