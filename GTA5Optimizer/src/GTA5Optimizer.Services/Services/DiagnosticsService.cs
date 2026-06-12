@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using System.Diagnostics;
 using GTA5DriveType = GTA5Optimizer.Models.Enums.DriveType;
 
 namespace GTA5Optimizer.Services.Services;
