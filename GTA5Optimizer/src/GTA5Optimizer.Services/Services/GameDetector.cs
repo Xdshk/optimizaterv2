@@ -428,7 +428,10 @@ public sealed class GameDetector : IGameDetector
                                     return GTA5Optimizer.Models.Enums.DriveType.SSD;
                             }
                         }
-                        catch { }
+                                catch (Exception ex)
+                        {
+                            logger.LogTrace(ex, "Failed to get physical disk details");
+                        }
 
                         // Spindle speed check via Win32_DiskDrive
                         var spindleSpeed = diskObj["DefaultBlockSize"];
