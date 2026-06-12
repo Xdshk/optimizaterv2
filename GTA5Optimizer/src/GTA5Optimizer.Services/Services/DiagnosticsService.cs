@@ -382,9 +382,9 @@ public sealed class DiagnosticsService : IDiagnosticsService
         var gameInfo = await _gameDetector.DetectGameAsync();
         score.StorageScore = gameInfo.DriveType switch
         {
-            DriveType.NVMe => 100,
-            DriveType.SSD => 85,
-            DriveType.HDD => 40,
+            GTA5DriveType.NVMe => 100,
+            GTA5DriveType.SSD => 85,
+            GTA5DriveType.HDD => 40,
             _ => 50
         };
 
