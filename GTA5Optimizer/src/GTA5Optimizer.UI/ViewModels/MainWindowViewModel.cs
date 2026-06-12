@@ -18,6 +18,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILoggerService _loggerService;
+    private readonly ILogger<MainWindowViewModel> _logger;
     private readonly IPerformanceMonitor _performanceMonitor;
     private readonly IGameDetector _gameDetector;
     private readonly TrayService _trayService;
