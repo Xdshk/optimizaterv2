@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
         builder.Services.AddSingleton<IProfileManager, ProfileManager>();
         builder.Services.AddSingleton<ISettingsService, SettingsService>();
         builder.Services.AddSingleton<IMajesticAnalyzer, MajesticAnalyzer>();
+        builder.Services.AddSingleton<IDiagnosticsService, DiagnosticsService>();
         builder.Services.AddSingleton<SystemInfoDetector>();
 
         // Background services
