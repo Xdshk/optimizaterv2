@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
         builder.Services.AddSingleton<ISettingsService, SettingsService>();
         builder.Services.AddSingleton<IMajesticAnalyzer, MajesticAnalyzer>();
         builder.Services.AddSingleton<IDiagnosticsService, DiagnosticsService>();
+        builder.Services.AddSingleton<IBenchmarkService, BenchmarkService>();
         builder.Services.AddSingleton<SystemInfoDetector>();
 
         // Background services
