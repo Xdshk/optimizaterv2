@@ -111,13 +111,9 @@ public sealed class HardwareProfile
     public int TargetFPS { get; set; } = 144;
 }
 
-public sealed class ProcessRule
+// ProcessRule is defined in GTA5Optimizer.Models.Optimization.ProfileConfig
+// This alias ensures backward compatibility for AppSettings.CustomProcessRules
+[Obsolete("Use GTA5Optimizer.Models.Optimization.ProcessRule instead")]
+public sealed class ProcessRule : GTA5Optimizer.Models.Optimization.ProcessRule
 {
-    public string ProcessName { get; set; } = string.Empty;
-    public string Action { get; set; } = "EcoMode"; // IncreasePriority, DecreasePriority, EcoMode, Close, Suspend
-    public int PriorityClass { get; set; } = 64;
-    public bool IsEnabled { get; set; } = true;
-    public string? WindowTitleContains { get; set; }
-    public string Description { get; set; } = string.Empty;
-    public bool IsCustom { get; set; } = true;
 }
