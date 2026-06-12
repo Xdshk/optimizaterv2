@@ -224,7 +224,18 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             StatusMessage = success ? "✅ Настройки восстановлены" : "⚠️ Ошибка восстановления";
             await Logs.RefreshLogsCommand.ExecuteAsync(null);
         }
-        catch (Exception ex) { StatusMessage = $"❌ Ошибка: {ex.Message}"; }
+        catch (Exception ex)
+        {
+            StatusMessage = $"❌ Ошибка: {ex.Message}";
+            await _loggerService.LogAsync(new LogEntry
+            {
+                Level = GTA5LogLevel.Error,
+                Category = LogCategories.Rollback,
+                Message = "Ошибка восстановления настроек",
+                Details = ex.Message,
+                Exception = ex
+            });
+        }
     }
 
     [RelayCommand]
