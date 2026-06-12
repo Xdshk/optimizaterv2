@@ -16,6 +16,19 @@ public sealed class SystemInfoDetector
     [DllImport("kernel32.dll")]
     private static extern bool GetPhysicallyInstalledSystemMemory(out long totalMemoryKB);
 
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetDC(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+
+    [DllImport("gdi32.dll")]
+    private static extern int GetDeviceCaps(IntPtr hDC, int nIndex);
+
+    private const int HORZRES = 8;
+    private const int VERTRES = 10;
+    private const int VREFRESH = 116;
+
     public SystemInfoDetector(ILogger<SystemInfoDetector> logger)
     {
         _logger = logger;
@@ -31,10 +44,10 @@ public sealed class SystemInfoDetector
             ScreenWidth = DetectScreenWidth(),
             ScreenHeight = DetectScreenHeight(),
             RefreshRate = DetectRefreshRate(),
-            TargetFPS = DetectRefreshRate(), // Default target = monitor refresh
+            TargetFPS = DetectRefreshRate(),
         };
 
-        _logger.LogInformation("Hardware detected: CPU={CPU}, GPU={GPU}, RAM={RAM}GB, Screen={Wx}H@{Hz}",
+        _logger.LogInformation("Hardware detected: CPU={CPU}, GPU={GPU}, RAM={RAM}GB, Screen={W}x{H}@{Hz}",
             profile.CPUName, profile.GPUName, profile.TotalRAMBytes / (1024L * 1024 * 1024),
             profile.ScreenWidth, profile.ScreenHeight, profile.RefreshRate);
 
@@ -123,7 +136,10 @@ public sealed class SystemInfoDetector
     {
         try
         {
-            return System.Windows.Forms.Screen.PrimaryScreen?.Bounds.Width ?? 1920;
+            var hDC = GetDC(IntPtr.Zero);
+            var width = GetDeviceCaps(hDC, HORZRES);
+            ReleaseDC(IntPtr.Zero, hDC);
+            return width > 0 ? width : 1920;
         }
         catch
         {
@@ -135,7 +151,10 @@ public sealed class SystemInfoDetector
     {
         try
         {
-            return System.Windows.Forms.Screen.PrimaryScreen?.Bounds.Height ?? 1080;
+            var hDC = GetDC(IntPtr.Zero);
+            var height = GetDeviceCaps(hDC, VERTRES);
+            ReleaseDC(IntPtr.Zero, hDC);
+            return height > 0 ? height : 1080;
         }
         catch
         {
