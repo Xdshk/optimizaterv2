@@ -369,7 +369,7 @@ public sealed class GameDetector : IGameDetector
                 return GTA5Optimizer.Models.Enums.DriveType.Unknown;
 
             // Map volume to physical disk
-            await using var volumeToPartitionSearcher = new ManagementObjectSearcher(
+            using var volumeToPartitionSearcher = new ManagementObjectSearcher(
                 $"ASSOCIATORS OF {{Win32_LogicalDisk.DeviceID='{driveLetter}'}}" +
                 "WHERE_assocClass=Win32_LogicalDiskToPartition");
 
