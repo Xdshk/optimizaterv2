@@ -1,0 +1,31 @@
+# Build results
+bin/
+obj/
+publish/
+out/
+
+# IDE
+.vs/
+*.user
+*.suo
+*.userprefs
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NuGet
+*.nupkg
+packages/
+
+# Logs
+*.log
+logs/
+
+# Local app data
+appsettings.Development.json
+
+# Misc
+*.cache
+*.tmp
