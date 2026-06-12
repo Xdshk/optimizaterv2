@@ -27,8 +27,7 @@ public static class AutoStartService
     {
         try
         {
-            var exePath = System.Reflection.Assembly.GetExecutingAssembly().Location
-                .Replace(".dll", ".exe");
+            var exePath = System.IO.Path.Combine(AppContext.BaseDirectory, "GTA5Optimizer.exe");
             using var key = Registry.CurrentUser.OpenSubKey(RegistryKey, true);
             key?.SetValue(AppName, $"\"{exePath}\"");
         }
