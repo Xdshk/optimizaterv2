@@ -321,7 +321,7 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         }
     }
 
-    private async Task PopulateDiskMetricsAsync(PerformanceMetrics metrics)
+    private async Task PopulateDiskMetricsCachedAsync(PerformanceMetrics metrics)
     {
         try
         {
@@ -339,19 +339,36 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
                 }
             }
 
-            // Performance counters for read/write speeds
-            using var readCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
-            using var writeCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
-            readCounter.NextValue();
-            writeCounter.NextValue();
-            await Task.Delay(200);
-            metrics.DiskReadSpeedMBps = readCounter.NextValue() / 1024 / 1024;
-            metrics.DiskWriteSpeedMBps = writeCounter.NextValue() / 1024 / 1024;
+            // Disk speeds are expensive (need 200ms delay) — cache them
+            var now = DateTime.UtcNow;
+            if ((now - _lastDiskTime).TotalMilliseconds < DiskCacheMs)
+            {
+                metrics.DiskReadSpeedMBps = _cachedDiskRead;
+                metrics.DiskWriteSpeedMBps = _cachedDiskWrite;
+            }
+            else
+            {
+                using var readCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
+                using var writeCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
+                readCounter.NextValue();
+                writeCounter.NextValue();
+                await Task.Delay(200);
+                _cachedDiskRead = readCounter.NextValue() / 1024 / 1024;
+                _cachedDiskWrite = writeCounter.NextValue() / 1024 / 1024;
+                _lastDiskTime = now;
+                metrics.DiskReadSpeedMBps = _cachedDiskRead;
+                metrics.DiskWriteSpeedMBps = _cachedDiskWrite;
+            }
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to read disk metrics");
         }
+    }
+
+    private async Task PopulateDiskMetricsAsync(PerformanceMetrics metrics)
+    {
+        await PopulateDiskMetricsCachedAsync(metrics);
     }
 
     /// <summary>
