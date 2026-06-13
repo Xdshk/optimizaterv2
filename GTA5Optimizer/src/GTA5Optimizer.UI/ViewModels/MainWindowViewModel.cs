@@ -23,7 +23,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly IGameDetector _gameDetector;
     private readonly TrayService _trayService;
     private readonly OverlayService _overlayService;
-    private readonly DispatcherTimer _metricsTimer;
     private readonly DispatcherTimer _gameStatusTimer;
     private readonly DispatcherTimer _trayUpdateTimer;
 
