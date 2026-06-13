@@ -750,8 +750,8 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                                <Button Content="↻ Обновить" Command="{Binding Logs.RefreshCommand}" Style="{StaticResource SecondaryButtonStyle}" Height="32" Width="110"/>
-                                <Button Content="🗑 Очистить" Command="{Binding Logs.ClearCommand}" Style="{StaticResource SecondaryButtonStyle}" Height="32" Width="100" Margin="8,0,0,0"/>
+                                <Button Content="↻ Обновить" Command="{Binding Logs.RefreshCommand}" MinHeight="38" MinWidth="120" Padding="18,10" Style="{StaticResource SecondaryButtonStyle}"/>
+                                <Button Content="🗑 Очистить" Command="{Binding Logs.ClearCommand}" MinHeight="38" MinWidth="120" Padding="18,10" Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
                                 <TextBlock Foreground="#555570" VerticalAlignment="Center" FontSize="11" Margin="15,0,0,0">
                                     <Run Text="Записей: "/><Run Text="{Binding Logs.Logs.Count, Mode=OneWay}"/>
                                 </TextBlock>
