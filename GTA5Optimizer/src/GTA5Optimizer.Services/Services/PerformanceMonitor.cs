@@ -123,29 +123,20 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
             // Disk (cached to avoid heavy PerfCounter every second)
             await PopulateDiskMetricsCachedAsync(metrics);
 
-            // FPS — prefer screen counter (DWM/RTSS) over legacy manual counter
+            // FPS — use RTSS/DWM when available, otherwise estimate from process frame pacing.
             var screenFps = _fpsCounter?.CurrentFPS ?? 0;
             if (screenFps > 0)
             {
                 metrics.CurrentFPS = screenFps;
-                _currentFps = screenFps; // Keep legacy in sync
+                AddFpsSample(screenFps);
             }
             else
             {
-                metrics.CurrentFPS = _currentFps;
+                metrics.CurrentFPS = GetProcessFps();
             }
-            metrics.FrameTimeMs = metrics.CurrentFPS > 0 ? (int)(1000.0 / metrics.CurrentFPS) : 0;
 
-            // Calculate 1% and 0.1% lows
-            if (_frameTimes.Count > 0)
-            {
-                var sorted = _frameTimes.OrderByDescending(f => f).ToList();
-                int onePercentIdx = Math.Max(1, sorted.Count / 100);
-                int pointOnePercentIdx = Math.Max(1, sorted.Count / 1000);
-                metrics.OnePercentLow = sorted.Take(onePercentIdx).Min();
-                metrics.PointOnePercentLow = sorted.Take(pointOnePercentIdx).Min();
-                metrics.AverageFPS = sorted.Count > 0 ? 1000.0 / sorted.Average() : 0;
-            }
+            metrics.FrameTimeMs = metrics.CurrentFPS > 0 ? (int)(1000.0 / metrics.CurrentFPS) : 0;
+            PopulateFpsHistory(metrics);
 
             // Game process
             var gtaProcess = Process.GetProcessesByName("GTA5").FirstOrDefault();
