@@ -15,6 +15,7 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" xmlns:converters="clr-namespace:GTA5Optimizer.UI.Converters"/>
+        <converters:HasContentToVisibilityConverter x:Key="HasContentToVisibilityConverter" xmlns:converters="clr-namespace:GTA5Optimizer.UI.Converters"/>
         <converters:SeverityToColorConverter x:Key="SeverityToColorConverter" xmlns:converters="clr-namespace:GTA5Optimizer.UI.Converters"/>
         <converters:BytesToMBConverter x:Key="BytesToMBConverter" xmlns:converters="clr-namespace:GTA5Optimizer.UI.Converters"/>
 
