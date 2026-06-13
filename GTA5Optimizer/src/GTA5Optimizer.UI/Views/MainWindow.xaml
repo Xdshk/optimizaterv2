@@ -587,7 +587,7 @@
                                     </StackPanel>
                                 </Border>
 
-                                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12" Visibility="{Binding Diagnostics.Issues.Count, Converter={StaticResource BoolToVis}}">
+                                <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12" Visibility="{Binding Diagnostics.HasIssues, Converter={StaticResource BoolToVis}}">
                                     <StackPanel Margin="18">
                                         <TextBlock Text="⚠  ПРОБЛЕМЫ" Foreground="#EF4444" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
                                         <ItemsControl ItemsSource="{Binding Diagnostics.Issues}">
