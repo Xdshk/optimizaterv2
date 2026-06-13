@@ -631,7 +631,7 @@
                                     </StackPanel>
                                 </Border>
 
-                                <Border Style="{StaticResource CardStyle}" Visibility="{Binding Diagnostics.GtaVAnalysis, Converter={StaticResource BoolToVis}}">
+                                <Border Style="{StaticResource CardStyle}" Visibility="{Binding Diagnostics.HasGtaVAnalysis, Converter={StaticResource BoolToVis}}">
                                     <StackPanel Margin="18">
                                         <TextBlock Text="🎮  АНАЛИЗ НАСТРОЕК GTA V" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
