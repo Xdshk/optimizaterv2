@@ -45,7 +45,6 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     {
         if (_captureThread != null) return;
 
-        _dwmStopwatch.Start();
         _captureThread = new Thread(CaptureLoop)
         {
             IsBackground = true,
