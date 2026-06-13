@@ -118,16 +118,16 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
             // Disk (cached to avoid heavy PerfCounter every second)
             await PopulateDiskMetricsCachedAsync(metrics);
 
-            // FPS — use RTSS/DWM when available, otherwise estimate from process frame pacing.
+            // FPS — use RTSS/DWM when available, otherwise keep the last external frame report.
             var screenFps = _fpsCounter?.CurrentFPS ?? 0;
-            if (screenFps > 0)
+            if (screenFps > 0 && screenFps <= 1000)
             {
                 metrics.CurrentFPS = screenFps;
                 AddFpsSample(screenFps);
             }
             else
             {
-                metrics.CurrentFPS = GetProcessFps();
+                metrics.CurrentFPS = GetLastReportedFps();
             }
 
             metrics.FrameTimeMs = metrics.CurrentFPS > 0 ? (int)(1000.0 / metrics.CurrentFPS) : 0;
