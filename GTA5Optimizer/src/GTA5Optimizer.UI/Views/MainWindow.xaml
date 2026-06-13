@@ -373,7 +373,7 @@
                                             IsEnabled="{Binding IsOptimizing, Converter={StaticResource InverseBooleanConverter}}"
                                             Height="50" Width="160" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
                                     <Button Content="🔄 Обновить" Command="{Binding RefreshMetricsCommand}"
-                                            Height="50" Width="120" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
+                                            MinHeight="50" MinWidth="130" Padding="18,12" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
                                 </StackPanel>
 
                                 <!-- Metric cards -->
