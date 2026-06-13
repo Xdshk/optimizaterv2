@@ -5,18 +5,34 @@ using GTA5Optimizer.Models.Monitoring;
 namespace GTA5Optimizer.UI.ViewModels;
 
 /// <summary>
-/// ViewModel для вкладки мониторинга
+/// ViewModel для вкладки мониторинга.
+/// Подписывается на PerformanceMonitor.OnMetricsUpdated и обновляет
+/// сглаженные метрики для UI (предотвращает мерцание).
 /// </summary>
 public partial class MonitorViewModel : ObservableObject
 {
     private readonly IPerformanceMonitor _monitor;
     private readonly System.Windows.Threading.DispatcherTimer _analysisTimer;
 
+    // Raw metrics from PerformanceMonitor (updated by event)
     [ObservableProperty]
     private PerformanceMetrics _metrics = new();
 
+    // Smoothed values for UI bindings (prevents flickering)
+    [ObservableProperty]
+    private double _smoothedCpu;
+    [ObservableProperty]
+    private double _smoothedGpu;
+    [ObservableProperty]
+    private double _smoothedRam;
+    [ObservableProperty]
+    private double _smoothedFps;
+
     [ObservableProperty]
     private BottleneckAnalysis _bottleneck = new();
+
+    // EMA smoothing factor (0 = no change, 1 = no smoothing)
+    private const double Alpha = 0.35;
 
     public MonitorViewModel(IPerformanceMonitor monitor)
     {
@@ -37,20 +53,27 @@ public partial class MonitorViewModel : ObservableObject
         System.Windows.Application.Current?.Dispatcher.Invoke(() =>
         {
             Metrics = metrics;
+
+            // Apply exponential moving average to prevent UI flickering
+            SmoothedFps = Smooth(SmoothedFps, metrics.CurrentFPS);
+            SmoothedCpu = Smooth(SmoothedCpu, metrics.CPUUsage);
+            SmoothedGpu = Smooth(SmoothedGpu, metrics.GPUUsage);
+            SmoothedRam = Smooth(SmoothedRam, metrics.RAMUsagePercent);
         });
+    }
+
+    private static double Smooth(double current, double newValue)
+    {
+        if (current == 0) return newValue;
+        if (newValue == 0) return current * 0.9; // Decay to 0 gradually
+        return current * (1 - Alpha) + newValue * Alpha;
     }
 
     private async Task UpdateBottleneckAsync()
     {
         try
         {
-            // Use cached metrics — don't trigger a fresh heavy update
-            PerformanceMetrics snapshot;
-            lock (this)
-            {
-                snapshot = Metrics;
-            }
-
+            var snapshot = Metrics;
             if (snapshot != null)
             {
                 var analysis = await _monitor.AnalyzeBottlenecksAsync(snapshot);
