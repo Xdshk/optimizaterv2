@@ -20,6 +20,23 @@ public class BytesToMBConverter : IValueConverter
         => throw new NotImplementedException();
 }
 
+public class HasContentToVisibilityConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        return value switch
+        {
+            int count => count > 0,
+            bool flag => flag,
+            null => false,
+            _ => true
+        };
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
 public class SeverityToColorConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
