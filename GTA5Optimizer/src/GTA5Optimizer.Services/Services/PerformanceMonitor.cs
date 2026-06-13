@@ -70,6 +70,9 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
                 TimeSpan.Zero,
                 TimeSpan.FromMilliseconds(1000));
         }
+
+        // Start screen FPS counter if available
+        _fpsCounter?.StartCapture();
     }
 
     public void StopMonitoring()
@@ -79,6 +82,8 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
             _monitoringTimer?.Dispose();
             _monitoringTimer = null;
         }
+
+        _fpsCounter?.StopCapture();
     }
 
     public Task<PerformanceMetrics> GetCurrentMetricsAsync()
