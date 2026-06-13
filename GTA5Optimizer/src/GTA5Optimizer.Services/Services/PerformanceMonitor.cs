@@ -18,6 +18,10 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
     private Timer? _monitoringTimer;
     private readonly object _timerLock = new();
 
+    // Cached metrics — returned when update is in progress
+    private PerformanceMetrics? _cachedMetrics;
+    private readonly object _cacheLock = new();
+
     // FPS tracking
     private readonly Stopwatch _fpsStopwatch = new();
     private long _frameCount;
@@ -25,6 +29,15 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
     private readonly Queue<double> _frameTimes = new();
     private const int MaxFrameHistory = 600; // 10 seconds at 60fps
     private DateTime _lastFrameTime = DateTime.UtcNow;
+
+    // Heavy operation caching
+    private DateTime _lastPingTime = DateTime.MinValue;
+    private double _cachedPing;
+    private DateTime _lastDiskTime = DateTime.MinValue;
+    private double _cachedDiskRead;
+    private double _cachedDiskWrite;
+    private const int PingCacheMs = 5000;
+    private const int DiskCacheMs = 2000;
 
     public event Action<PerformanceMetrics>? OnMetricsUpdated;
 
