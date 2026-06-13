@@ -446,7 +446,7 @@
                                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                             <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
                                             <TextBlock Grid.Row="0" Grid.Column="0" Text="Загрузка" Foreground="#555570" FontSize="11"/>
-                                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Monitor.Metrics.CPUUsage, StringFormat={}{0:F1}%}" Foreground="White" FontSize="11"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Monitor.SmoothedCpu, StringFormat={}{0:F1}%}" Foreground="White" FontSize="11"/>
                                             <TextBlock Grid.Row="1" Grid.Column="0" Text="Игра" Foreground="#555570" FontSize="11"/>
                                             <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Monitor.Metrics.CPUUsageGame, StringFormat={}{0:F1}%}" Foreground="White" FontSize="11"/>
                                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Температура" Foreground="#555570" FontSize="11"/>
