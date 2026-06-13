@@ -50,10 +50,11 @@ public partial class DiagnosticsViewModel : ObservableObject
             foreach (var warning in result.Warnings)
                 Warnings.Add(new DiagnosticIssueDto(warning));
 
+            HasIssues = Issues.Count > 0;
+            HasWarnings = Warnings.Count > 0;
+
             TotalScore = result.TotalScore;
-            StatusText = result.HasCriticalIssues
-                ? $"Обнаружено {result.Issues.Count} критических проблем"
-                : $"Диагностика завершена. Оценка: {TotalScore}/100";
+            StatusText = BuildStatusText(result.HasCriticalIssues, result.Issues.Count, result.Warnings.Count);
 
             // Run GTA V settings analysis
             var gameInfo = await _gameDetector.DetectGameAsync();
