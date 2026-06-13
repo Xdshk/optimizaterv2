@@ -36,9 +36,9 @@ public partial class SmoothedMetrics : ObservableObject
         RamUsagePercent = Smooth(RamUsagePercent, ram);
 
         if (cpuGame >= 0) CpuUsageGame = Smooth(CpuUsageGame, cpuGame);
-        if (cpuTemp >= 0) CPUTemperature = Smooth(CPUTemperature, cpuTemp);
-        if (gpuTemp >= 0) GPUTemperature = Smooth(GPUTemperature, gpuTemp);
-        if (gpuUsage >= 0) GPUUsagePercent = Smooth(GPUUsagePercent, gpuUsage);
+        if (cpuTemp >= 0) CpuTemperature = Smooth(CpuTemperature, cpuTemp);
+        if (gpuTemp >= 0) GpuTemperature = Smooth(GpuTemperature, gpuTemp);
+        if (gpuUsage >= 0) GpuUsagePercent = Smooth(GpuUsagePercent, gpuUsage);
         if (diskActive >= 0) DiskActiveTimePercent = Smooth(DiskActiveTimePercent, diskActive);
         if (ping >= 0) CurrentPing = Smooth(CurrentPing, ping);
     }
