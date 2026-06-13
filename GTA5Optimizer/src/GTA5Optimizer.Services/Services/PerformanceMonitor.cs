@@ -23,11 +23,9 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
     private PerformanceMetrics? _cachedMetrics;
     private readonly object _cacheLock = new();
 
-    // FPS tracking from screen counter and process frame pacing
+    // FPS tracking from screen counter or external ReportFrame calls
     private readonly Queue<double> _fpsSamples = new();
     private readonly Queue<double> _frameTimes = new();
-    private DateTime _lastProcessFpsTime = DateTime.UtcNow;
-    private long _lastProcessFrameCounter;
     private const int MaxFpsHistory = 600;
 
     // Heavy operation caching
