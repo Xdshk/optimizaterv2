@@ -15,6 +15,9 @@ public partial class DiagnosticsViewModel : ObservableObject
     [ObservableProperty] private int _totalScore;
     [ObservableProperty] private ObservableCollection<DiagnosticIssueDto> _issues = new();
     [ObservableProperty] private ObservableCollection<DiagnosticIssueDto> _warnings = new();
+    [ObservableProperty] private bool _hasIssues;
+    [ObservableProperty] private bool _hasWarnings;
+    [ObservableProperty] private bool _hasGtaVAnalysis;
     [ObservableProperty] private GtaVSettingsDto? _gtaVAnalysis;
     [ObservableProperty] private PcReadinessDto? _readinessScore;
     [ObservableProperty] private string _statusText = "Нажмите 'Запустить диагностику' для анализа системы";
