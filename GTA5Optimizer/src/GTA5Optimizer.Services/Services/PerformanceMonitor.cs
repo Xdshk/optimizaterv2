@@ -463,32 +463,18 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         await PopulateDiskMetricsCachedAsync(metrics);
     }
 
-    /// <summary>
-    /// Report a frame for FPS calculation. Call this from a game hook or overlay.
-    /// </summary>
     public void ReportFrame()
     {
         var now = DateTime.UtcNow;
-        var elapsed = (now - _lastFrameTime).TotalMilliseconds;
-        _lastFrameTime = now;
+        var elapsed = (now - _lastReportedFrameTime).TotalMilliseconds;
+        _lastReportedFrameTime = now;
 
-        if (elapsed > 0 && elapsed < 1000) // Sanity check
-        {
-            lock (_frameTimes)
-            {
-                _frameTimes.Enqueue(elapsed);
-                while (_frameTimes.Count > MaxFrameHistory)
-                    _frameTimes.Dequeue();
-            }
-        }
+        if (elapsed <= 0 || elapsed >= 1000)
+            return;
 
-        _frameCount++;
-        if (_fpsStopwatch.ElapsedMilliseconds >= 1000)
-        {
-            _currentFps = _frameCount * 1000.0 / _fpsStopwatch.ElapsedMilliseconds;
-            _frameCount = 0;
-            _fpsStopwatch.Restart();
-        }
+        var fps = 1000.0 / elapsed;
+        AddFpsSample(fps);
+        AddFrameTime(elapsed);
     }
 
     private static void GetRamInfo(out long totalRAM, out long availableRAM)
