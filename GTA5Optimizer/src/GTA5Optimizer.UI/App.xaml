@@ -5,6 +5,7 @@
     <Application.Resources>
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
         <converters:BytesToMBConverter x:Key="BytesToMBConverter"/>
+        <converters:HasContentToVisibilityConverter x:Key="HasContentToVisibilityConverter"/>
         <converters:SeverityToColorConverter x:Key="SeverityToColorConverter"/>
     </Application.Resources>
 </Application>
