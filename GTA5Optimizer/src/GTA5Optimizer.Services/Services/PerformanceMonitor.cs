@@ -81,6 +81,12 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
 
     public Task<PerformanceMetrics> GetCurrentMetricsAsync()
     {
+        // Return cached metrics if available, otherwise trigger a fresh update
+        lock (_cacheLock)
+        {
+            if (_cachedMetrics != null)
+                return Task.FromResult(_cachedMetrics);
+        }
         return UpdateMetricsAsync();
     }
 
