@@ -54,7 +54,6 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         };
         _computer.Open();
 
-        _fpsStopwatch.Start();
     }
 
     public void StartMonitoring()
@@ -68,7 +67,6 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
                 TimeSpan.FromMilliseconds(1000));
         }
 
-        // Start screen FPS counter if available
         _fpsCounter?.StartCapture();
     }
 
