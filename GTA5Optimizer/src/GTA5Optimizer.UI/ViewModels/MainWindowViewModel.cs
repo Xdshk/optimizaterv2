@@ -245,6 +245,20 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
     }
 
+    [RelayCommand]
+    private async Task RefreshMetricsAsync()
+    {
+        try
+        {
+            var metrics = await _performanceMonitor.GetCurrentMetricsAsync();
+            OnMetricsUpdated(metrics);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Failed to refresh metrics");
+        }
+    }
+
     public void Dispose()
     {
         _gameStatusTimer.Stop();
