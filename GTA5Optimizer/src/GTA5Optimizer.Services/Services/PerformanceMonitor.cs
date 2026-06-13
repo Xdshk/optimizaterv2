@@ -26,6 +26,8 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
     // FPS tracking from screen counter and process frame pacing
     private readonly Queue<double> _fpsSamples = new();
     private readonly Queue<double> _frameTimes = new();
+    private DateTime _lastProcessFpsTime = DateTime.UtcNow;
+    private long _lastProcessFrameCounter;
     private const int MaxFpsHistory = 600;
 
     // Heavy operation caching
