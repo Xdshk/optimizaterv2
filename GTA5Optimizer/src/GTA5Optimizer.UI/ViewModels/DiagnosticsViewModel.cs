@@ -62,6 +62,11 @@ public partial class DiagnosticsViewModel : ObservableObject
             {
                 var analysis = await _diagnostics.AnalyzeGtaVSettingsAsync(gameInfo.InstallPath);
                 GtaVAnalysis = new GtaVSettingsDto(analysis);
+                HasGtaVAnalysis = true;
+            }
+            else
+            {
+                HasGtaVAnalysis = false;
             }
 
             // Run PC readiness score
