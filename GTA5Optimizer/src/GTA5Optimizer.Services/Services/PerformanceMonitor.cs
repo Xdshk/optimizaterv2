@@ -633,10 +633,12 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
 
     public void Dispose()
     {
+        StopMonitoring();
         _cts.Cancel();
         _monitoringTimer?.Dispose();
         _updateLock.Dispose();
         _cts.Dispose();
         _computer.Close();
+        _fpsCounter?.StopCapture();
     }
 }
