@@ -246,26 +246,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
     }
 
-    [RelayCommand]
-    private async Task RefreshMetricsAsync()
-    {
-        try
-        {
-            var metrics = await _performanceMonitor.GetCurrentMetricsAsync();
-            CurrentFPS = metrics.CurrentFPS;
-            CpuUsage = metrics.CPUUsage;
-            GpuUsage = metrics.GPUUsage;
-            RamUsage = metrics.RAMUsagePercent;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug(ex, "Failed to refresh metrics");
-        }
-    }
-
     public void Dispose()
     {
-        _metricsTimer.Stop();
         _gameStatusTimer.Stop();
         _trayUpdateTimer.Stop();
         _overlayService.Dispose();
