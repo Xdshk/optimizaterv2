@@ -25,13 +25,15 @@ public class HasContentToVisibilityConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        return value switch
+        var isVisible = value switch
         {
             int count => count > 0,
             bool flag => flag,
             null => false,
             _ => true
         };
+
+        return isVisible ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
