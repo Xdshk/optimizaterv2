@@ -13,6 +13,7 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
 {
     private readonly ILogger<PerformanceMonitor> _logger;
     private readonly Computer _computer;
+    private readonly IScreenFpsCounter? _fpsCounter;
     private readonly SemaphoreSlim _updateLock = new(1, 1);
     private readonly CancellationTokenSource _cts = new();
     private Timer? _monitoringTimer;
@@ -22,7 +23,7 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
     private PerformanceMetrics? _cachedMetrics;
     private readonly object _cacheLock = new();
 
-    // FPS tracking
+    // FPS tracking (legacy manual ReportFrame)
     private readonly Stopwatch _fpsStopwatch = new();
     private long _frameCount;
     private double _currentFps;
