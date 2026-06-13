@@ -115,10 +115,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _performanceMonitor.StartMonitoring();
         _performanceMonitor.OnMetricsUpdated += OnMetricsUpdated;
 
-        _metricsTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
-        _metricsTimer.Tick += async (_, _) => await RefreshMetricsAsync();
-        _metricsTimer.Start();
-
         _gameStatusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _gameStatusTimer.Tick += async (_, _) => await CheckGameStatusAsync();
         _gameStatusTimer.Start();
