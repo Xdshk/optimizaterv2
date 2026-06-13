@@ -176,6 +176,86 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         }
     }
 
+    private void AddFpsSample(double fps)
+    {
+        if (fps <= 0 || fps > 1000)
+            return;
+
+        lock (_fpsSamples)
+        {
+            _fpsSamples.Enqueue(fps);
+            while (_fpsSamples.Count > MaxFpsHistory)
+                _fpsSamples.Dequeue();
+        }
+    }
+
+    private void PopulateFpsHistory(PerformanceMetrics metrics)
+    {
+        double[] samples;
+        lock (_fpsSamples)
+            samples = _fpsSamples.ToArray();
+
+        if (samples.Length == 0)
+            return;
+
+        var frameTimes = samples
+            .Where(fps => fps > 0 && fps <= 1000)
+            .Select(fps => 1000.0 / fps)
+            .ToArray();
+
+        if (frameTimes.Length == 0)
+            return;
+
+        lock (_frameTimes)
+        {
+            foreach (var frameTime in frameTimes)
+            {
+                _frameTimes.Enqueue(frameTime);
+                while (_frameTimes.Count > MaxFpsHistory)
+                    _frameTimes.Dequeue();
+            }
+        }
+
+        var sortedFrameTimes = frameTimes.OrderByDescending(t => t).ToArray();
+        int onePercentIdx = Math.Max(1, (int)Math.Ceiling(sortedFrameTimes.Length * 0.01));
+        int pointOnePercentIdx = Math.Max(1, (int)Math.Ceiling(sortedFrameTimes.Length * 0.001));
+
+        metrics.OnePercentLow = Math.Min(1000.0 / sortedFrameTimes.Take(onePercentIdx).Max(), metrics.CurrentFPS);
+        metrics.PointOnePercentLow = Math.Min(1000.0 / sortedFrameTimes.Take(pointOnePercentIdx).Max(), metrics.CurrentFPS);
+        metrics.AverageFPS = samples.Average();
+    }
+
+    private double GetProcessFps()
+    {
+        var process = Process.GetProcessesByName("GTA5").FirstOrDefault();
+        if (process == null)
+            return 0;
+
+        try
+        {
+            process.Refresh();
+            var cpuUsage = process.TotalProcessorTime.TotalMilliseconds;
+            var workingSet = process.WorkingSet64;
+            var now = DateTime.UtcNow;
+
+            lock (_fpsSamples)
+            {
+                if (_fpsSamples.Count == 0)
+                    return 0;
+
+                var latest = _fpsSamples.Last();
+                var estimated = Math.Min(latest, 240);
+                AddFpsSample(estimated);
+                return estimated;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Could not estimate GTA5 process FPS");
+            return 0;
+        }
+    }
+
     private async Task PopulateCpuMetricsAsync(PerformanceMetrics metrics)
     {
         try
