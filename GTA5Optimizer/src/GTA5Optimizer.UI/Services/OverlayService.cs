@@ -17,8 +17,8 @@ public class OverlayService : IDisposable
     private TextBlock? _cpuText;
     private TextBlock? _gpuText;
     private TextBlock? _ramText;
-    private DispatcherTimer? _updateTimer;
     private bool _isVisible;
+    private bool _disposed;
 
     public bool IsVisible
     {
@@ -34,11 +34,13 @@ public class OverlayService : IDisposable
     public OverlayService(IPerformanceMonitor monitor)
     {
         _monitor = monitor;
+        // Subscribe to metrics updates instead of polling
+        _monitor.OnMetricsUpdated += OnMetricsUpdated;
     }
 
     private void Show()
     {
-        if (_overlayWindow != null) return;
+        if (_overlayWindow != null || _disposed) return;
 
         _overlayWindow = new Window
         {
@@ -92,9 +94,8 @@ public class OverlayService : IDisposable
         }
         catch { }
 
-        _updateTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
-        _updateTimer.Tick += async (_, _) => await UpdateOverlayAsync();
-        _updateTimer.Start();
+        // Get initial values
+        UpdateOverlayImmediate();
     }
 
     private static TextBlock CreateTextBlock(double fontSize, string color)
@@ -109,11 +110,33 @@ public class OverlayService : IDisposable
         };
     }
 
-    private async Task UpdateOverlayAsync()
+    private void OnMetricsUpdated(Models.Monitoring.PerformanceMetrics metrics)
     {
         try
         {
-            var metrics = await _monitor.GetCurrentMetricsAsync();
+            // Only update if overlay is visible
+            if (!_isVisible || _overlayWindow == null) return;
+
+            _overlayWindow.Dispatcher.Invoke(() =>
+            {
+                UpdateOverlayImmediate(metrics);
+            });
+        }
+        catch { }
+    }
+
+    private void UpdateOverlayImmediate(Models.Monitoring.PerformanceMetrics? metrics = null)
+    {
+        try
+        {
+            if (metrics == null)
+            {
+                // Fallback: get cached metrics
+                var task = _monitor.GetCurrentMetricsAsync();
+                task.Wait();
+                metrics = task.Result;
+            }
+
             if (_fpsText != null) _fpsText.Text = $"FPS: {metrics.CurrentFPS:F0}";
             if (_cpuText != null) _cpuText.Text = $"CPU: {metrics.CPUUsage:F0}%";
             if (_gpuText != null) _gpuText.Text = $"GPU: {metrics.GPUUsage:F0}%";
@@ -124,14 +147,16 @@ public class OverlayService : IDisposable
 
     private void Hide()
     {
-        _updateTimer?.Stop();
-        _updateTimer = null;
         try { _overlayWindow?.Close(); } catch { }
         _overlayWindow = null;
     }
 
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
+
+        _monitor.OnMetricsUpdated -= OnMetricsUpdated;
         Hide();
     }
 }
