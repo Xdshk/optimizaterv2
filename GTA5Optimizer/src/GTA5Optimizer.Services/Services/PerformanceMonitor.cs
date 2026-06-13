@@ -184,6 +184,19 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         }
     }
 
+    private double GetLastReportedFps()
+    {
+        lock (_fpsSamples)
+        {
+            if (_fpsSamples.Count == 0)
+                return 0;
+
+            var latest = _fpsSamples.Last();
+            var elapsedSeconds = (DateTime.UtcNow - _lastValidFpsTime).TotalSeconds;
+            return elapsedSeconds > 5 ? Math.Max(0, latest - Math.Min(20, elapsedSeconds * 2)) : latest;
+        }
+    }
+
     private void PopulateFpsHistory(PerformanceMetrics metrics)
     {
         double[] samples;
