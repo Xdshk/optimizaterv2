@@ -27,9 +27,7 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
     private readonly Queue<double> _fpsSamples = new();
     private readonly Queue<double> _frameTimes = new();
     private DateTime _lastReportedFrameTime = DateTime.MinValue;
-    private long _reportedFrameCount;
     private DateTime _lastProcessFpsTime = DateTime.UtcNow;
-    private long _lastProcessFrameCounter;
     private const int MaxFpsHistory = 600;
 
     // Heavy operation caching
