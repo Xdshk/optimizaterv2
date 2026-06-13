@@ -1,6 +1,7 @@
 using GTA5Optimizer.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 using System.Threading;
 
