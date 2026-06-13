@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
         builder.Services.AddSingleton<ISystemOptimizer, SystemOptimizer>();
         builder.Services.AddSingleton<IGameDetector, GameDetector>();
         builder.Services.AddSingleton<IPerformanceMonitor, PerformanceMonitor>();
+        builder.Services.AddSingleton<IScreenFpsCounter, ScreenFpsCounter>();
         builder.Services.AddSingleton<IRegistryManager, RegistryManager>();
         builder.Services.AddSingleton<IMemoryManager, MemoryManager>();
         builder.Services.AddSingleton<IProcessManager, ProcessManager>();
@@ -39,6 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ISystemOptimizer, SystemOptimizer>();
         services.AddSingleton<IGameDetector, GameDetector>();
         services.AddSingleton<IPerformanceMonitor, PerformanceMonitor>();
+        services.AddSingleton<IScreenFpsCounter, ScreenFpsCounter>();
         services.AddSingleton<IRegistryManager, RegistryManager>();
         services.AddSingleton<IMemoryManager, MemoryManager>();
         services.AddSingleton<IProcessManager, ProcessManager>();
