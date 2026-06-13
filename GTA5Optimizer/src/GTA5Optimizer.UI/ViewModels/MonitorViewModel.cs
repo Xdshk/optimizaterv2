@@ -10,7 +10,7 @@ namespace GTA5Optimizer.UI.ViewModels;
 public partial class MonitorViewModel : ObservableObject
 {
     private readonly IPerformanceMonitor _monitor;
-    private readonly System.Windows.Threading.DispatcherTimer _updateTimer;
+    private readonly System.Windows.Threading.DispatcherTimer _analysisTimer;
 
     [ObservableProperty]
     private PerformanceMetrics _metrics = new();
@@ -21,30 +21,54 @@ public partial class MonitorViewModel : ObservableObject
     public MonitorViewModel(IPerformanceMonitor monitor)
     {
         _monitor = monitor;
+
+        // Subscribe to real-time metrics updates from PerformanceMonitor
         _monitor.OnMetricsUpdated += OnMetricsUpdated;
 
-        _updateTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
-        _updateTimer.Tick += async (_, _) => await UpdateMetricsAsync();
-        _updateTimer.Start();
-    }
-
-    private async Task UpdateMetricsAsync()
-    {
-        var metrics = await _monitor.GetCurrentMetricsAsync();
-        Metrics = metrics;
-
-        var analysis = await _monitor.AnalyzeBottlenecksAsync(metrics);
-        Bottleneck = analysis;
+        // Bottleneck analysis runs less frequently (every 2s) — it's CPU-heavy
+        _analysisTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        _analysisTimer.Tick += async (_, _) => await UpdateBottleneckAsync();
+        _analysisTimer.Start();
     }
 
     private void OnMetricsUpdated(PerformanceMetrics metrics)
     {
-        Metrics = metrics;
+        // This is called from PerformanceMonitor's background thread — dispatch to UI
+        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+        {
+            Metrics = metrics;
+        });
+    }
+
+    private async Task UpdateBottleneckAsync()
+    {
+        try
+        {
+            // Use cached metrics — don't trigger a fresh heavy update
+            PerformanceMetrics snapshot;
+            lock (this)
+            {
+                snapshot = Metrics;
+            }
+
+            if (snapshot != null)
+            {
+                var analysis = await _monitor.AnalyzeBottlenecksAsync(snapshot);
+                System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    Bottleneck = analysis;
+                });
+            }
+        }
+        catch (Exception)
+        {
+            // Silently ignore — bottleneck analysis is non-critical
+        }
     }
 
     public void Dispose()
     {
-        _updateTimer?.Stop();
+        _analysisTimer?.Stop();
         _monitor.OnMetricsUpdated -= OnMetricsUpdated;
     }
 }
