@@ -27,8 +27,6 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     private readonly object _fpsLock = new();
 
     // DWM timing
-    private long _lastDwmFrame;
-    private long _lastDwmRefresh;
     private readonly Stopwatch _dwmStopwatch = new();
     private double _dwmFpsAccum;
     private int _dwmFpsFrames;
