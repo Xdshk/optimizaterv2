@@ -42,9 +42,10 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
 
     public event Action<PerformanceMetrics>? OnMetricsUpdated;
 
-    public PerformanceMonitor(ILogger<PerformanceMonitor> logger)
+    public PerformanceMonitor(ILogger<PerformanceMonitor> logger, IScreenFpsCounter? fpsCounter = null)
     {
         _logger = logger;
+        _fpsCounter = fpsCounter;
 
         _computer = new Computer
         {
