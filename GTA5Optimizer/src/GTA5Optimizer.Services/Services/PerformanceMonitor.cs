@@ -87,7 +87,11 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
     private async Task<PerformanceMetrics> UpdateMetricsAsync()
     {
         if (!await _updateLock.WaitAsync(0))
-            return new PerformanceMetrics();
+        {
+            // Return cached metrics instead of empty object
+            lock (_cacheLock)
+                return _cachedMetrics ?? new PerformanceMetrics();
+        }
 
         try
         {
@@ -108,8 +112,8 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
             // RAM
             PopulateRamMetrics(metrics);
 
-            // Disk
-            await PopulateDiskMetricsAsync(metrics);
+            // Disk (cached to avoid heavy PerfCounter every second)
+            await PopulateDiskMetricsCachedAsync(metrics);
 
             // FPS
             metrics.CurrentFPS = _currentFps;
@@ -142,8 +146,12 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
                 }
             }
 
-            // Network ping
-            metrics.CurrentPing = await GetPingAsync();
+            // Network ping (cached)
+            metrics.CurrentPing = await GetPingCachedAsync();
+
+            // Cache the result
+            lock (_cacheLock)
+                _cachedMetrics = metrics;
 
             OnMetricsUpdated?.Invoke(metrics);
             return metrics;
@@ -151,7 +159,8 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating performance metrics");
-            return new PerformanceMetrics();
+            lock (_cacheLock)
+                return _cachedMetrics ?? new PerformanceMetrics();
         }
         finally
         {
