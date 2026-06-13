@@ -128,9 +128,18 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
             // Disk (cached to avoid heavy PerfCounter every second)
             await PopulateDiskMetricsCachedAsync(metrics);
 
-            // FPS
-            metrics.CurrentFPS = _currentFps;
-            metrics.FrameTimeMs = _currentFps > 0 ? (int)(1000.0 / _currentFps) : 0;
+            // FPS — prefer screen counter (DWM/RTSS) over legacy manual counter
+            var screenFps = _fpsCounter?.CurrentFPS ?? 0;
+            if (screenFps > 0)
+            {
+                metrics.CurrentFPS = screenFps;
+                _currentFps = screenFps; // Keep legacy in sync
+            }
+            else
+            {
+                metrics.CurrentFPS = _currentFps;
+            }
+            metrics.FrameTimeMs = metrics.CurrentFPS > 0 ? (int)(1000.0 / metrics.CurrentFPS) : 0;
 
             // Calculate 1% and 0.1% lows
             if (_frameTimes.Count > 0)
