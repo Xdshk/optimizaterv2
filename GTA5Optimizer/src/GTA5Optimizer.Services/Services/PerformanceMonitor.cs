@@ -440,6 +440,27 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         return 0;
     }
 
+    private async Task<float> GetPingCachedAsync()
+    {
+        var now = DateTime.UtcNow;
+        if ((now - _lastPingTime).TotalMilliseconds < PingCacheMs)
+            return (float)_cachedPing;
+
+        try
+        {
+            using var ping = new Ping();
+            var reply = await ping.SendPingAsync("8.8.8.8", 3000);
+            _cachedPing = reply.Status == IPStatus.Success ? reply.RoundtripTime : 0;
+            _lastPingTime = now;
+            return (float)_cachedPing;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to get ping: {ex.Message}");
+            return (float)_cachedPing;
+        }
+    }
+
     private static async Task<float> GetPingAsync()
     {
         try
