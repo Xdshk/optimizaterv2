@@ -82,6 +82,23 @@ public partial class DiagnosticsViewModel : ObservableObject
             IsRunning = false;
         }
     }
+
+    private static string BuildStatusText(bool hasCriticalIssues, int issueCount, int warningCount)
+    {
+        if (hasCriticalIssues)
+            return $"Критические проблемы: {issueCount}. Проверьте блок «Проблемы».";
+
+        if (issueCount > 0 && warningCount > 0)
+            return $"Диагностика завершена. Найдено проблем: {issueCount}, предупреждений: {warningCount}.";
+
+        if (issueCount > 0)
+            return $"Диагностика завершена. Найдено проблем: {issueCount}.";
+
+        if (warningCount > 0)
+            return $"Диагностика завершена. Предупреждения: {warningCount}.";
+
+        return $"Диагностика завершена. Оценка: {TotalScore}/100";
+    }
 }
 
 public sealed class DiagnosticIssueDto
