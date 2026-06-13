@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 using MediaColor = System.Windows.Media.Color;
 using MediaSolidColorBrush = System.Windows.Media.SolidColorBrush;
