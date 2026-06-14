@@ -472,13 +472,13 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         var now = DateTime.UtcNow;
         var elapsed = (now - _lastReportedFrameTime).TotalMilliseconds;
         _lastReportedFrameTime = now;
+        _lastValidFpsTime = now;
 
         if (elapsed <= 0 || elapsed >= 1000)
             return;
 
         var fps = 1000.0 / elapsed;
         AddFpsSample(fps);
-        AddFrameTime(elapsed);
     }
 
     private static void GetRamInfo(out long totalRAM, out long availableRAM)
