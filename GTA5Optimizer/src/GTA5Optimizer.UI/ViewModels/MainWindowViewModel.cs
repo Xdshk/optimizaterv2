@@ -89,6 +89,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         IGameDetector gameDetector,
         TrayService trayService,
         OverlayService overlayService,
+        IScreenFpsCounter fpsCounter,
         MonitorViewModel monitor,
         LogsViewModel logs,
         SettingsViewModel settings,
@@ -102,6 +103,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _gameDetector = gameDetector;
         _trayService = trayService;
         _overlayService = overlayService;
+        _fpsCounter = fpsCounter;
         Monitor = monitor;
         Logs = logs;
         Settings = settings;
@@ -120,6 +122,11 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _trayUpdateTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
         _trayUpdateTimer.Tick += (_, _) => UpdateTrayTooltip();
         _trayUpdateTimer.Start();
+
+        // Debug FPS status timer — updates every 2 seconds
+        _fpsStatusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        _fpsStatusTimer.Tick += (_, _) => UpdateFpsStatus();
+        _fpsStatusTimer.Start();
 
         _trayService.OptimizeRequested += async () => await OptimizeAsync();
 
