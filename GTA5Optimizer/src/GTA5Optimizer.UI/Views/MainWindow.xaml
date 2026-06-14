@@ -852,7 +852,7 @@
                                 </Border>
 
                                 <!-- GTA V Analysis placeholder when game not found -->
-                                <Border Style="{StaticResource CardStyle}" Visibility="{Binding Diagnostics.HasGtaVAnalysis, Converter={StaticResource InverseBoolToVis}}">
+                                <Border Style="{StaticResource CardStyle}" Visibility="{Binding Diagnostics.GtaVAnalysis, Converter={StaticResource HasContentToVisibilityConverter}, ConverterParameter=Invert}">
                                     <StackPanel Margin="18">
                                         <TextBlock Text="🎮  АНАЛИЗ НАСТРОЕК GTA V" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,8"/>
                                         <TextBlock Text="GTA V не обнаружена. Анализ настроек графики будет доступен после обнаружения игры." Foreground="#606080" FontSize="12" TextWrapping="Wrap"/>
