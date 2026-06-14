@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Management;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace GTA5Optimizer.Services.Services;
 
