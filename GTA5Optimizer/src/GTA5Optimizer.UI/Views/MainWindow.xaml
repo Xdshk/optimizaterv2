@@ -363,6 +363,10 @@
             </Setter>
         </Style>
 
+        <!-- Implicit ScrollViewer style — applies to ALL ScrollViewers -->
+        <Style TargetType="ScrollViewer" BasedOn="{StaticResource HudScrollViewer}"/>
+        <Style TargetType="ScrollBar" BasedOn="{StaticResource HudScrollBar}"/>
+
         <!-- ===== BENCHMARK HUD BUTTONS ===== -->
         <Style x:Key="BenchmarkPrimaryButton" TargetType="Button">
             <Setter Property="Background">
