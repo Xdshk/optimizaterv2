@@ -29,7 +29,7 @@ public class ProfileManager : IProfileManager
         try
         {
             _logger.LogInformation($"Применение профиля: {profile}");
-            _activeProfile = ProfileConfig.GetDefaultProfile(profile);
+            _activeProfile = ProfileConfig.GetDefaultProfile(OptimizationProfile.MaximumFPS);
             return true;
         }
         catch (Exception ex)
@@ -43,9 +43,6 @@ public class ProfileManager : IProfileManager
     {
         return await Task.FromResult(new List<ProfileConfig>
         {
-            ProfileConfig.GetDefaultProfile(OptimizationProfile.Everyday),
-            ProfileConfig.GetDefaultProfile(OptimizationProfile.RPMode),
-            ProfileConfig.GetDefaultProfile(OptimizationProfile.MassiveOnline),
             ProfileConfig.GetDefaultProfile(OptimizationProfile.MaximumFPS)
         });
     }
