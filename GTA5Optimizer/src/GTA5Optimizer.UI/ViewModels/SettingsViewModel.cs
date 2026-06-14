@@ -58,14 +58,6 @@ public partial class SettingsViewModel : ObservableObject
                 var settings = JsonSerializer.Deserialize<AppSettings>(json);
                 if (settings != null)
                 {
-                    SelectedProfileName = settings.ActiveProfile switch
-                    {
-                        OptimizationProfile.Everyday => "Everyday Mode",
-                        OptimizationProfile.RPMode => "RP Mode",
-                        OptimizationProfile.MassiveOnline => "Massive Online Mode",
-                        OptimizationProfile.MaximumFPS => "Maximum FPS Mode",
-                        _ => "RP Mode"
-                    };
                     AutoOptimizationInterval = settings.AutoOptimizationIntervalSeconds;
                     EnableAutoOptimization = settings.EnableAutoOptimization;
                 }
