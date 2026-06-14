@@ -22,7 +22,8 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
 {
     private readonly ILogger<ScreenFpsCounter> _logger;
     private Thread? _captureThread;
-    private readonly CancellationTokenSource _cts = new();
+    private CancellationTokenSource? _cts;
+    private readonly object _captureLock = new();
     private double _currentFps;
     private readonly object _fpsLock = new();
 
