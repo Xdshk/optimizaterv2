@@ -251,6 +251,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         _gameStatusTimer.Stop();
         _trayUpdateTimer.Stop();
+        _fpsStatusTimer.Stop();
         _overlayService.Dispose();
     }
 }
