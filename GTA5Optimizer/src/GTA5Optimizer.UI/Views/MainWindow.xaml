@@ -437,7 +437,17 @@
                         <Separator Background="#151525" Margin="8,16"/>
 
                         <!-- Quick stats in sidebar -->
-                        <Border Background="#0E0E18" CornerRadius="10" Padding="12" Margin="4,0">
+                        <Border CornerRadius="14" Padding="12" Margin="4,0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#11111E" Offset="0"/>
+                                    <GradientStop Color="#0A0A10" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Border.BorderBrush>
+                                <SolidColorBrush Color="#1D1D32"/>
+                            </Border.BorderBrush>
+                            <Border.BorderThickness>1</Border.BorderThickness>
                             <StackPanel>
                                 <TextBlock Text="БЫСТРАЯ СТАТИСТИКА" Foreground="#333350" FontSize="8" FontWeight="Bold" Margin="0,0,0,8"/>
                                 <Grid>
