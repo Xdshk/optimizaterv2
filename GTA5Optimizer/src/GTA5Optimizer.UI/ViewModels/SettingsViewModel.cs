@@ -5,7 +5,6 @@ using GTA5Optimizer.Models.Enums;
 using GTA5Optimizer.Models.Settings;
 using GTA5LogLevel = GTA5Optimizer.Models.Logging.LogLevel;
 using LogEntry = GTA5Optimizer.Models.Logging.LogEntry;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
 
