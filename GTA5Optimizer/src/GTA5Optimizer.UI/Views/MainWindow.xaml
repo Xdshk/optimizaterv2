@@ -350,7 +350,7 @@
                                     </EventTrigger>
                                 </Ellipse.Triggers>
                             </Ellipse>
-                            <TextBlock Text="{Binding StatusMessage}" Foreground="#555570" FontSize="11" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding StatusMessage}" Foreground="#A0A4BD" FontSize="12" VerticalAlignment="Center"/>
                         </StackPanel>
 
                         <Button Content="─" Width="32" Height="32" Background="Transparent" Foreground="#444460"
