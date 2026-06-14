@@ -1,5 +1,6 @@
 using GTA5Optimizer.UI.Services;
 using GTA5Optimizer.UI.ViewModels;
+using System.Diagnostics;
 
 namespace GTA5Optimizer.UI.Views;
 
