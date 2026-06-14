@@ -149,7 +149,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private void UpdateFpsStatus()
     {
         var counterFps = _fpsCounter.CurrentFPS;
-        FpsStatus = $"counter: {counterFps:F1} | monitor: {CurrentFPS:F1} | {DateTime.Now:HH:mm:ss}";
+        var metrics = _performanceMonitor.GetCurrentMetricsAsync().Result;
+            CpuTemp = metrics.CPUTempStr;
+            GpuTemp = metrics.GPUTempStr;
+            FpsStatus = $"counter: {counterFps:F1} | monitor: {CurrentFPS:F1} | CPU {CpuTemp} GPU {GpuTemp} | {DateTime.Now:HH:mm:ss}";
     }
 
     private void UpdateTrayTooltip()
