@@ -57,7 +57,7 @@ public partial class MainWindow : Window
 
     private void SocialButton_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button button) return;
+        if (sender is not System.Windows.Controls.Button button) return;
 
         var url = button.Tag?.ToString();
         if (string.IsNullOrWhiteSpace(url) || url.StartsWith("TODO:")) return;
