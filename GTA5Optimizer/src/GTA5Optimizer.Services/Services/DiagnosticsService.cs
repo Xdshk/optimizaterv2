@@ -294,6 +294,14 @@ public sealed class DiagnosticsService : IDiagnosticsService
                     Description = "Секция GFX не найдена в settings.xml.",
                     Severity = SettingsIssueSeverity.Info
                 });
+                analysis.Recommendations.Add(new SettingsRecommendation
+                {
+                    Title = "Проверить settings.xml",
+                    Description = "Файл существует, но не содержит секцию GFX с настройками графики.",
+                    Action = "Откройте settings.xml и убедитесь, что есть секция GFX",
+                    ExpectedFpsGain = 0
+                });
+                analysis.PerformanceScore = 50;
                 return analysis;
             }
 
