@@ -55,6 +55,15 @@ public partial class MainWindow : Window
         DragMove();
     }
 
+    private void SocialButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button) return;
+
+        var url = button.Tag?.ToString();
+        if (!string.IsNullOrWhiteSpace(url))
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+    }
+
     private void NavButton_Checked(object sender, RoutedEventArgs e)
     {
         if (sender is not System.Windows.Controls.RadioButton rb) return;
