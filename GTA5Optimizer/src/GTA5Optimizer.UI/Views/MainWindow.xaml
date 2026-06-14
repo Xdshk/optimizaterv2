@@ -590,14 +590,18 @@
                                     <Border Style="{StaticResource MetricCard}" Margin="6,0,6,0">
                                         <StackPanel>
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                                                <TextBlock Text="GPU" Foreground="#555570" FontSize="10" FontWeight="Bold"/>
-                                                <Ellipse Width="6" Height="6" Fill="#F59E0B"/>
+                                                <TextBlock Text="GPU" Foreground="#8B90A8" FontSize="11" FontWeight="SemiBold"/>
+                                                <Ellipse Width="7" Height="7" Margin="8,0,0,0" Fill="#F59E0B">
+                                                    <Ellipse.Effect>
+                                                        <DropShadowEffect Color="#F59E0B" BlurRadius="10" ShadowDepth="0" Opacity="0.55"/>
+                                                    </Ellipse.Effect>
+                                                </Ellipse>
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                                <TextBlock Text="{Binding GpuUsage, StringFormat={}{0:F0}}" Foreground="White" FontSize="38" FontWeight="Light"/>
-                                                <TextBlock Text="%" Foreground="#555570" FontSize="16" FontWeight="Light"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                <TextBlock Text="{Binding GpuUsage, StringFormat={}{0:F0}}" Foreground="#F5F7FF" FontSize="42" FontWeight="SemiBold"/>
+                                                <TextBlock Text="%" Foreground="#8B90A8" FontSize="18" FontWeight="SemiBold"/>
                                             </StackPanel>
-                                            <ProgressBar Value="{Binding GpuUsage}" Maximum="100" Height="3" Margin="0,10,0,0" Foreground="#F59E0B" Background="#1A1A2E"/>
+                                            <ProgressBar Value="{Binding GpuUsage}" Maximum="100" Height="4" Margin="0,12,0,0" Foreground="#F59E0B" Background="#151526"/>
                                         </StackPanel>
                                     </Border>
                                     <Border Style="{StaticResource MetricCard}" Margin="6,0,0,0">
