@@ -8,19 +8,15 @@ using System.Threading;
 namespace GTA5Optimizer.Services.Services;
 
 /// <summary>
-/// Считает FPS экрана через DWM (Desktop Window Manager) composition timing
-/// + fallback на RTSS (RivaTuner Statistics Server) shared memory.
-///
-/// DWM метод: отслеживает реальные кадры композиции через DwmGetCompositionTimingInfo.
-/// Для полноэкранной игры в exclusive fullscreen это = игровой FPS.
-/// Для borderless/windowed — близко к реальному FPS.
-///
-/// RTSS метод: если установлен RivaTuner/MSI Afterburner, читает точный FPS
-/// из shared memory.
+/// Считает FPS игры через несколько методов (в порядке приоритета):
+/// 1. PresentMon — перехватывает DXGI Present calls (работает всегда)
+/// 2. RTSS shared memory — если установлен MSI Afterburner/RivaTuner
+/// 3. DWM composition timing — только для borderless/windowed
 /// </summary>
 public sealed class ScreenFpsCounter : IScreenFpsCounter
 {
     private readonly ILogger<ScreenFpsCounter> _logger;
+    private readonly PresentMonFpsCounter? _presentMon;
     private Thread? _captureThread;
     private CancellationTokenSource? _cts;
     private readonly object _captureLock = new();
@@ -39,6 +35,19 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     public ScreenFpsCounter(ILogger<ScreenFpsCounter> logger)
     {
         _logger = logger;
+
+        // Try to create PresentMon counter
+        try
+        {
+            var presentMonLogger = LoggerFactory.Create(b => b.AddConsole().SetMinimumLevel(LogLevel.Debug))
+                .CreateLogger<PresentMonFpsCounter>();
+            _presentMon = new PresentMonFpsCounter(presentMonLogger, "GTA5");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "PresentMon not available");
+            _presentMon = null;
+        }
     }
 
     public void StartCapture()
@@ -46,6 +55,9 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
         lock (_captureLock)
         {
             if (_captureThread != null) return;
+
+            // Start PresentMon if available
+            _presentMon?.StartCapture();
 
             _cts = new CancellationTokenSource();
             var token = _cts.Token;
@@ -70,6 +82,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
             _captureThread = null;
         }
 
+        _presentMon?.StopCapture();
         cts?.Cancel();
         cts?.Dispose();
     }
@@ -82,10 +95,19 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
             {
                 double fps = 0;
 
-                // Method 1: RTSS shared memory (most accurate for games)
-                fps = TryReadRtssFps();
+                // Method 1: PresentMon (most reliable — works in any mode)
+                if (_presentMon != null)
+                {
+                    fps = _presentMon.CurrentFPS;
+                }
 
-                // Method 2: DWM composition timing
+                // Method 2: RTSS shared memory (if PresentMon not available)
+                if (fps <= 0)
+                {
+                    fps = TryReadRtssFps();
+                }
+
+                // Method 3: DWM composition timing (last resort — borderless only)
                 if (fps <= 0)
                 {
                     fps = ReadDwmComposedFps();
