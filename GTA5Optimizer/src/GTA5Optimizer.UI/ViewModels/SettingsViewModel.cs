@@ -37,14 +37,6 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private double _memoryCleanupThreshold = 80.0;
 
-    [ObservableProperty]
-    private ObservableCollection<string> _availableProfiles = new()
-    {
-        "Everyday Mode",
-        "RP Mode",
-        "Massive Online Mode",
-        "Maximum FPS Mode"
-    };
 
     public SettingsViewModel(ILoggerService loggerService)
     {
