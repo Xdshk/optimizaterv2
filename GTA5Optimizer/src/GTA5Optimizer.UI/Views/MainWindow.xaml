@@ -1144,14 +1144,14 @@
                                         <!-- Duration selector chips -->
                                         <TextBlock Text="Длительность теста" Foreground="#555570" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8"/>
                                         <StackPanel Orientation="Horizontal" Margin="0,4,0,16">
-                                            <RadioButton Content="15 сек" IsChecked="{Binding Benchmark.IsDuration15, Mode=TwoWay}"
-                                                         Style="{StaticResource DurationChipStyle}" Checked="DurationChip_Checked" Tag="15"/>
-                                            <RadioButton Content="30 сек" IsChecked="{Binding Benchmark.IsDuration30, Mode=TwoWay}"
-                                                         Style="{StaticResource DurationChipStyle}" Checked="DurationChip_Checked" Tag="30"/>
-                                            <RadioButton Content="60 сек" IsChecked="{Binding Benchmark.IsDuration60, Mode=TwoWay}"
-                                                         Style="{StaticResource DurationChipStyle}" Checked="DurationChip_Checked" Tag="60"/>
-                                            <RadioButton Content="120 сек" IsChecked="{Binding Benchmark.IsDuration120, Mode=TwoWay}"
-                                                         Style="{StaticResource DurationChipStyle}" Checked="DurationChip_Checked" Tag="120"/>
+                                            <RadioButton Content="15 сек" IsChecked="{Binding Benchmark.IsDuration15, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                         Style="{StaticResource DurationChipStyle}" Tag="15"/>
+                                            <RadioButton Content="30 сек" IsChecked="{Binding Benchmark.IsDuration30, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                         Style="{StaticResource DurationChipStyle}" Tag="30"/>
+                                            <RadioButton Content="60 сек" IsChecked="{Binding Benchmark.IsDuration60, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                         Style="{StaticResource DurationChipStyle}" Tag="60"/>
+                                            <RadioButton Content="120 сек" IsChecked="{Binding Benchmark.IsDuration120, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                         Style="{StaticResource DurationChipStyle}" Tag="120"/>
                                         </StackPanel>
 
                                         <!-- Action buttons -->
