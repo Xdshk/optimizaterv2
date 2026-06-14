@@ -287,17 +287,23 @@
 
     </Window.Resources>
 
-    <Border CornerRadius="14" Background="#0A0A0F" BorderBrush="#151525" BorderThickness="1">
+    <Border CornerRadius="22" Background="#05050A" BorderBrush="#1D1D32" BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="52"/>
+                <RowDefinition Height="62"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="28"/>
+                <RowDefinition Height="32"/>
             </Grid.RowDefinitions>
 
             <!-- ===== HEADER ===== -->
-            <Border Grid.Row="0" Background="#0E0E18" BorderBrush="#151525" BorderThickness="0,0,0,1">
-                <Grid Margin="20,0">
+            <Border Grid.Row="0" BorderBrush="#1D1D32" BorderThickness="0,0,0,1">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#0F0F1A" Offset="0"/>
+                        <GradientStop Color="#07070D" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid Margin="22,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
