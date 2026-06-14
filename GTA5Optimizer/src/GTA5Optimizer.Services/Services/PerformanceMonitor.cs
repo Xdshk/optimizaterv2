@@ -343,6 +343,61 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         return 0;
     }
 
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmGetCompositionTimingInfo(IntPtr hwnd, ref DWM_TIMING_INFO pTimingInfo);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct DWM_TIMING_INFO
+    {
+        public int cbSize;
+        public DWM_RATE rateRefresh;
+        public long qpcVBlank;
+        public long cRefresh;
+        public long cRefreshFrameDelta;
+        public int cFrames;
+        public int cFramesBuffered;
+        public DWM_RATE rateCompose;
+        public long qpcCompose;
+        public long cFrame;
+        public long cFramesPresented;
+        public long cFrameComplete;
+        public long cFramesDisplayed;
+        public long cRefreshConfirmed;
+        public int cFramesToConfirm;
+        public long cRefreshConfirmedStart;
+        public long cRefreshConfirmedStop;
+        public long cFramesLastConfirmed;
+        public long cFramesLastDisplayed;
+        public long cFramesLastComplete;
+        public long cFramesLastDrawn;
+        public long cFramesLastSkipped;
+        public long cFramesLastMissed;
+        public long cRefreshFrameDeltas;
+        public long cRefreshFrameDeltasStart;
+        public long cRefreshFrameDeltasStop;
+        public long cRefreshFrameDeltasLast;
+        public long cRefreshFrameDeltasNext;
+        public long cRefreshFrameDeltasLastComplete;
+        public long cRefreshFrameDeltasLastDrawn;
+        public long cRefreshFrameDeltasLastSkipped;
+        public long cRefreshFrameDeltasLastMissed;
+        public long cRefreshFrameDeltasLastConfirmed;
+        public long cRefreshFrameDeltasLastDisplayed;
+        public long cRefreshFrameDeltasLastComplete2;
+        public long cRefreshFrameDeltasLastDrawn2;
+        public long cRefreshFrameDeltasLastSkipped2;
+        public long cRefreshFrameDeltasLastMissed2;
+        public long cRefreshFrameDeltasLastConfirmed2;
+        public long cRefreshFrameDeltasLastDisplayed2;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct DWM_RATE
+    {
+        public uint uiNumerator;
+        public uint uiDenominator;
+    }
+
     private async Task PopulateCpuMetricsAsync(PerformanceMetrics metrics)
     {
         try
