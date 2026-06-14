@@ -102,7 +102,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         Settings = settings;
         Diagnostics = diagnostics;
         Benchmark = benchmark;
-        Profile = profile;
 
         _autoStartEnabled = AutoStartService.IsEnabled;
 
