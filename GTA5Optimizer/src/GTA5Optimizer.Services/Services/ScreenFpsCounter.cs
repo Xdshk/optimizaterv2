@@ -76,11 +76,11 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
         _dwmStopwatch.Stop();
     }
 
-    private void CaptureLoop()
+    private void CaptureLoop(CancellationToken token)
     {
         try
         {
-            while (!_cts.Token.IsCancellationRequested)
+            while (!token.IsCancellationRequested)
             {
                 double fps = 0;
 
