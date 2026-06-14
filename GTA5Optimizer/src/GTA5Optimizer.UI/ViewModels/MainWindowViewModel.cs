@@ -10,6 +10,7 @@ using GTA5LogLevel = GTA5Optimizer.Models.Logging.LogLevel;
 using LogEntry = GTA5Optimizer.Models.Logging.LogEntry;
 using LogCategories = GTA5Optimizer.Models.Logging.LogCategories;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace GTA5Optimizer.UI.ViewModels;
 
@@ -26,9 +27,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly DispatcherTimer _trayUpdateTimer;
 
     [ObservableProperty] private bool _isOptimizing;
-    [ObservableProperty] private OptimizationProfile _selectedProfile = OptimizationProfile.RPMode;
-    [ObservableProperty] private ObservableCollection<ProfileConfig> _profiles = new();
-    [ObservableProperty] private ProfileConfig? _selectedProfileConfig;
+    [ObservableProperty] private OptimizationProfile _selectedProfile = OptimizationProfile.MaximumFPS;
     [ObservableProperty] private bool _isGameRunning;
     [ObservableProperty] private string _gamePath = string.Empty;
     [ObservableProperty] private string _gameStatusText = "GTA V: не запущена";
