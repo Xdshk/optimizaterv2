@@ -16,6 +16,20 @@ public partial class BenchmarkViewModel : ObservableObject
     [ObservableProperty] private string _statusText = "Выберите длительность и нажмите 'Запустить'";
     [ObservableProperty] private bool _hasBeforeSnapshot;
 
+    // Duration chip bindings
+    [ObservableProperty] private bool _isDuration15;
+    [ObservableProperty] private bool _isDuration30 = true;
+    [ObservableProperty] private bool _isDuration60;
+    [ObservableProperty] private bool _isDuration120;
+
+    partial void OnSelectedDurationChanged(int value)
+    {
+        IsDuration15 = value == 15;
+        IsDuration30 = value == 30;
+        IsDuration60 = value == 60;
+        IsDuration120 = value == 120;
+    }
+
     public int[] DurationOptions { get; } = { 15, 30, 60, 120 };
 
     public BenchmarkViewModel(IBenchmarkService benchmark, ISystemOptimizer optimizer)
