@@ -187,13 +187,24 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
                     _dwmFpsAccum += fps;
                     _dwmFpsFrames++;
 
-                    if (_dwmFpsFrames >= 5) // Average over 5 samples
+                    var now = DateTime.UtcNow;
+                    if (_lastDwmSampleTime != DateTime.MinValue)
                     {
-                        var smoothedFps = _dwmFpsAccum / _dwmFpsFrames;
-                        _dwmFpsAccum = 0;
-                        _dwmFpsFrames = 0;
-                        return smoothedFps;
+                        var elapsed = (now - _lastDwmSampleTime).TotalSeconds;
+                        if (elapsed > 0)
+                        {
+                            var deltaFrames = info.cFramesPresented - _lastDwmFramesPresented;
+                            if (deltaFrames > 0)
+                            {
+                                _lastDwmSampleTime = now;
+                                _lastDwmFramesPresented = info.cFramesPresented;
+                                return deltaFrames / elapsed;
+                            }
+                        }
                     }
+
+                    _lastDwmSampleTime = now;
+                    _lastDwmFramesPresented = info.cFramesPresented;
                 }
             }
         }
