@@ -2,17 +2,12 @@ using GTA5Optimizer.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Text;
 
 namespace GTA5Optimizer.Services.Services;
 
 /// <summary>
 /// Считает FPS игры через Microsoft PresentMon — перехватывает DXGI Present calls.
-/// Работает с ЛЮБОЙ игрой в ЛЮБОМ режиме (fullscreen, borderless, windowed).
-/// Поддерживает D3D11, D3D12, Vulkan, OpenGL.
-///
-/// PresentMon: https://github.com/GameTechDev/PresentMon
 /// Нужен файл PresentMon.exe рядом с приложением или в PATH.
 /// </summary>
 public sealed class PresentMonFpsCounter : IScreenFpsCounter
@@ -22,38 +17,23 @@ public sealed class PresentMonFpsCounter : IScreenFpsCounter
     private Process? _presentMonProcess;
     private double _currentFps;
     private readonly object _fpsLock = new();
-    private bool _isRunning;
-    private readonly object _startStopLock = new();
-
-    // PresentMon CSV column indices
-    private const int Col_ProcessId = 0;
-    private const int Col_ProcessName = 1;
-    private const int Col_SwapChainAddress = 2;
-    private const int Col_Runtime = 3;
-    private const int Col_SyncInterval = 4;
-    private const int Col_PresentFlags = 5;
-    private const int Col_AllowsTearing = 6;
-    private const int Col_PresentMode = 7;
-    private const int Col_WasBatched = 8;
-    private const int Col_DwmFrame = 9;
-    private const int Col_Dropped = 10;
-    private const int Col_TimeInSeconds = 11;
-    private const int Col_msInPresentAPI = 12;
-    private const int Col_msBetweenPresents = 13;  // ← главная колонка для FPS
-    private const int Col_msBetweenDisplayChange = 14;
-    private const int Col_msUntilRenderComplete = 15;
-    private const int Col_msUntilDisplayed = 16;
+    private volatile bool _isRunning;
+    private DateTime _lastValidFrame = DateTime.UtcNow;
 
     public double CurrentFPS
     {
-        get { lock (_fpsLock) return _currentFps; }
+        get
+        {
+            lock (_fpsLock)
+            {
+                // If no data for 3 seconds, report 0 (game might be paused/closed)
+                if ((DateTime.UtcNow - _lastValidFrame).TotalSeconds > 3)
+                    return 0;
+                return _currentFps;
+            }
+        }
     }
 
-    /// <summary>
-    /// Создаёт PresentMon FPS counter.
-    /// </summary>
-    /// <param name="logger">Логгер</param>
-    /// <param name="targetProcessName">Имя процесса игры (например "GTA5")</param>
     public PresentMonFpsCounter(ILogger<PresentMonFpsCounter> logger, string targetProcessName = "GTA5")
     {
         _logger = logger;
@@ -62,91 +42,65 @@ public sealed class PresentMonFpsCounter : IScreenFpsCounter
 
     public void StartCapture()
     {
-        lock (_startStopLock)
+        if (_isRunning) return;
+        _isRunning = true;
+
+        try
         {
-            if (_isRunning) return;
-            _isRunning = true;
-
-            try
+            var presentMonPath = FindPresentMon();
+            if (presentMonPath == null)
             {
-                var presentMonPath = FindPresentMon();
-                if (presentMonPath == null)
-                {
-                    _logger.LogWarning("PresentMon.exe not found. FPS monitoring via PresentMon disabled. " +
-                        "Download from: https://github.com/GameTechDev/PresentMon/releases");
-                    _isRunning = false;
-                    return;
-                }
-
-                var startInfo = new ProcessStartInfo
-                {
-                    FileName = presentMonPath,
-                    Arguments = $"-process_name {_targetProcessName}.exe -output_stdout -etl_file none -stop_existing_session",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    StandardOutputEncoding = Encoding.UTF8
-                };
-
-                _presentMonProcess = new Process { StartInfo = startInfo };
-                _presentMonProcess.ErrorDataReceived += (_, e) =>
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
-                        _logger.LogDebug("PresentMon stderr: {Data}", e.Data);
-                };
-
-                _presentMonProcess.Start();
-                _presentMonProcess.BeginErrorReadLine();
-
-                _logger.LogInformation("PresentMon started for process '{Process}' (PID: {Pid})",
-                    _targetProcessName, _presentMonProcess.Id);
-
-                // Start reading stdout in background
-                _ = Task.Run(() => ReadOutputLoop(_presentMonProcess));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to start PresentMon");
+                _logger.LogWarning(
+                    "PresentMon.exe not found. Download: https://github.com/GameTechDev/PresentMon/releases");
                 _isRunning = false;
+                return;
             }
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = presentMonPath,
+                Arguments = $"-process_name {_targetProcessName}.exe -output_stdout -etl_file none -stop_existing_session -timed 0",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                StandardOutputEncoding = Encoding.UTF8
+            };
+
+            _presentMonProcess = new Process { StartInfo = startInfo };
+            _presentMonProcess.Start();
+            _logger.LogInformation("PresentMon started for '{Process}' (PID: {Pid})",
+                _targetProcessName, _presentMonProcess.Id);
+
+            _ = Task.Run(() => ReadOutputLoop(_presentMonProcess));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to start PresentMon");
+            _isRunning = false;
         }
     }
 
     public void StopCapture()
     {
-        lock (_startStopLock)
+        if (!_isRunning) return;
+        _isRunning = false;
+
+        try
         {
-            if (!_isRunning) return;
-            _isRunning = false;
-
-            try
+            if (_presentMonProcess != null && !_presentMonProcess.HasExited)
             {
-                if (_presentMonProcess != null && !_presentMonProcess.HasExited)
-                {
-                    // Graceful shutdown: send Ctrl+C
-                    try
-                    {
-                        _presentMonProcess.StandardInput.Close();
-                    }
-                    catch { }
-
-                    if (!_presentMonProcess.WaitForExit(3000))
-                    {
-                        _presentMonProcess.Kill(entireProcessTree: true);
-                    }
-                }
+                try { _presentMonProcess.StandardInput.Close(); } catch { }
+                if (!_presentMonProcess.WaitForExit(3000))
+                    _presentMonProcess.Kill(entireProcessTree: true);
             }
-            catch (Exception ex)
-            {
-                _logger.LogDebug(ex, "Error stopping PresentMon");
-            }
-            finally
-            {
-                _presentMonProcess?.Dispose();
-                _presentMonProcess = null;
-                lock (_fpsLock) _currentFps = 0;
-            }
+        }
+        catch { }
+        finally
+        {
+            _presentMonProcess?.Dispose();
+            _presentMonProcess = null;
+            lock (_fpsLock) _currentFps = 0;
         }
     }
 
@@ -155,108 +109,88 @@ public sealed class PresentMonFpsCounter : IScreenFpsCounter
         try
         {
             var stdout = process.StandardOutput;
-            var recentFrameTimes = new Queue<double>(120); // last 120 frames for smoothing
             string? headerLine = null;
 
             while (_isRunning && !process.HasExited)
             {
                 var line = await stdout.ReadLineAsync();
                 if (line == null) break;
-
-                // Skip empty lines
                 if (string.IsNullOrWhiteSpace(line)) continue;
 
-                // First non-empty line is the CSV header
+                // Skip header
                 if (headerLine == null)
                 {
                     headerLine = line;
-                    _logger.LogDebug("PresentMon header: {Header}", headerLine);
                     continue;
                 }
 
                 try
                 {
                     var parts = line.Split(',', StringSplitOptions.TrimEntries);
-                    if (parts.Length <= Col_msBetweenPresents) continue;
+                    if (parts.Length <= 13) continue;
 
-                    // Parse msBetweenPresents — time between consecutive presents
-                    if (!double.TryParse(parts[Col_msBetweenPresents],
-                            NumberStyles.Float, CultureInfo.InvariantCulture, out var msBetweenPresents))
+                    // msBetweenPresents is column index 13
+                    if (!double.TryParse(parts[13],
+                            NumberStyles.Float, CultureInfo.InvariantCulture, out var ms))
                         continue;
 
-                    if (msBetweenPresents <= 0 || msBetweenPresents > 1000)
-                        continue;
+                    if (ms <= 0 || ms > 1000) continue;
 
-                    var fps = 1000.0 / msBetweenPresents;
-
-                    // Clamp to reasonable range
+                    var fps = 1000.0 / ms;
                     if (fps < 1 || fps > 1000) continue;
-
-                    // Smoothing: average over recent frames
-                    recentFrameTimes.Enqueue(fps);
-                    if (recentFrameTimes.Count > 120)
-                        recentFrameTimes.Dequeue();
 
                     lock (_fpsLock)
                     {
-                        // Exponential moving average for display
                         if (_currentFps > 0)
                             _currentFps = _currentFps * 0.7 + fps * 0.3;
                         else
                             _currentFps = fps;
+                        _lastValidFrame = DateTime.UtcNow;
                     }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogDebug(ex, "Error parsing PresentMon line: {Line}", line);
-                }
+                catch { /* skip malformed lines */ }
             }
         }
         catch (Exception ex) when (_isRunning)
         {
-            _logger.LogWarning(ex, "PresentMon output reading ended unexpectedly");
+            _logger.LogWarning(ex, "PresentMon reading error");
         }
     }
 
-    /// <summary>
-    /// Ищет PresentMon.exe в нескольких местах.
-    /// </summary>
     private static string? FindPresentMon()
     {
-        // 1. Рядом с нашим приложением
         var appDir = AppContext.BaseDirectory;
-        var localPath = Path.Combine(appDir, "PresentMon.exe");
-        if (File.Exists(localPath)) return localPath;
 
-        // 2. В подпапке tools
-        var toolsPath = Path.Combine(appDir, "tools", "PresentMon.exe");
-        if (File.Exists(toolsPath)) return toolsPath;
+        // 1. Рядом с exe
+        var local = Path.Combine(appDir, "PresentMon.exe");
+        if (File.Exists(local)) return local;
 
-        // 3. В PATH
+        // 2. tools/
+        var tools = Path.Combine(appDir, "tools", "PresentMon.exe");
+        if (File.Exists(tools)) return tools;
+
+        // 3. PATH
         var pathVar = Environment.GetEnvironmentVariable("PATH") ?? "";
-        foreach (var dir in pathVar.Split(Path.PathSeparator))
+        foreach (var dir in pathVar.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
         {
-            var fullPath = Path.Combine(dir.Trim(), "PresentMon.exe");
-            if (File.Exists(fullPath)) return fullPath;
+            var full = Path.Combine(dir.Trim(), "PresentMon.exe");
+            if (File.Exists(full)) return full;
         }
 
-        // 4. Стандартные пути установки
-        var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-        var commonPaths = new[]
+        // 4. Стандартные пути
+        var pf = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var candidates = new[]
         {
-            Path.Combine(programFiles, "PresentMon", "PresentMon.exe"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PresentMon", "PresentMon.exe"),
+            Path.Combine(pf, "PresentMon", "PresentMon.exe"),
+            Path.Combine(localAppData, "PresentMon", "PresentMon.exe"),
             @"C:\Tools\PresentMon\PresentMon.exe",
         };
-
-        foreach (var p in commonPaths)
-            if (File.Exists(p)) return p;
+        foreach (var c in candidates)
+            if (File.Exists(c)) return c;
 
         return null;
     }
 
-    public void Dispose()
-    {
-        StopCapture();
-    }
+    public void Dispose() => StopCapture();
 }
