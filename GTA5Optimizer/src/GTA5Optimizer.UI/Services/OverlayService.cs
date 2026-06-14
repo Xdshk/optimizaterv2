@@ -94,8 +94,8 @@ public class OverlayService : IDisposable
         }
         catch { }
 
-        // Get initial values
-        UpdateOverlayImmediate();
+        // Get initial values without blocking the UI thread
+        _ = RefreshOverlayAsync();
     }
 
     private static TextBlock CreateTextBlock(double fontSize, string color)
