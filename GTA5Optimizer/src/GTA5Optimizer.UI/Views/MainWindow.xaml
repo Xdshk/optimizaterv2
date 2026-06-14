@@ -434,7 +434,7 @@
                                      Style="{StaticResource NavButtonStyle}"
                                      Checked="NavButton_Checked"/>
 
-                        <Separator Background="#151525" Margin="8,16"/>
+                        <Separator Background="#1D1D32" Margin="8,16"/>
 
                         <!-- Quick stats in sidebar -->
                         <Border CornerRadius="14" Padding="12" Margin="4,0">
