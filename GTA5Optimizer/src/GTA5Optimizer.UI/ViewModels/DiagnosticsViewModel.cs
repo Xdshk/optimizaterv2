@@ -54,7 +54,7 @@ public partial class DiagnosticsViewModel : ObservableObject
             HasWarnings = Warnings.Count > 0;
 
             TotalScore = result.TotalScore;
-            StatusText = BuildStatusText(result.HasCriticalIssues, result.Issues.Count, result.Warnings.Count);
+            StatusText = BuildStatusText(result.HasCriticalIssues, result.Issues.Count, result.Warnings.Count, TotalScore);
 
             // Run GTA V settings analysis
             var gameInfo = await _gameDetector.DetectGameAsync();
