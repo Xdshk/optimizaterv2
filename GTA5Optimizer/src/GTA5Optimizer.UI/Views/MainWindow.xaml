@@ -449,18 +449,18 @@
                             </Border.BorderBrush>
                             <Border.BorderThickness>1</Border.BorderThickness>
                             <StackPanel>
-                                <TextBlock Text="БЫСТРАЯ СТАТИСТИКА" Foreground="#333350" FontSize="8" FontWeight="Bold" Margin="0,0,0,8"/>
+                                <TextBlock Text="БЫСТРАЯ СТАТИСТИКА" Foreground="#3F4666" FontSize="9" FontWeight="Bold" Margin="0,0,0,10"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="FPS" Foreground="#555570" FontSize="10"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentFPS, StringFormat={}{0:F0}}" Foreground="White" FontSize="10" FontWeight="SemiBold"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="CPU" Foreground="#555570" FontSize="10"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CpuUsage, StringFormat={}{0:F0}%}" Foreground="#6366F1" FontSize="10" FontWeight="SemiBold"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="GPU" Foreground="#555570" FontSize="10"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding GpuUsage, StringFormat={}{0:F0}%}" Foreground="#F59E0B" FontSize="10" FontWeight="SemiBold"/>
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="RAM" Foreground="#555570" FontSize="10"/>
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding RamUsage, StringFormat={}{0:F0}%}" Foreground="#EC4899" FontSize="10" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="FPS" Foreground="#6E748D" FontSize="11"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentFPS, StringFormat={}{0:F0}}" Foreground="#F5F7FF" FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="CPU" Foreground="#6E748D" FontSize="11"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CpuUsage, StringFormat={}{0:F0}%}" Foreground="#A78BFA" FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="GPU" Foreground="#6E748D" FontSize="11"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding GpuUsage, StringFormat={}{0:F0}%}" Foreground="#F59E0B" FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="RAM" Foreground="#6E748D" FontSize="11"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding RamUsage, StringFormat={}{0:F0}%}" Foreground="#EC4899" FontSize="11" FontWeight="SemiBold"/>
                                 </Grid>
                             </StackPanel>
                         </Border>
