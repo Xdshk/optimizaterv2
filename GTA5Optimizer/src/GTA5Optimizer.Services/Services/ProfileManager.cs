@@ -16,7 +16,7 @@ public class ProfileManager : IProfileManager
     public ProfileManager(ILogger<ProfileManager> logger)
     {
         _logger = logger;
-        _activeProfile = ProfileConfig.GetDefaultProfile(OptimizationProfile.RPMode);
+        _activeProfile = ProfileConfig.GetDefaultProfile(OptimizationProfile.MaximumFPS);
     }
 
     public async Task<ProfileConfig> GetActiveProfileAsync()
