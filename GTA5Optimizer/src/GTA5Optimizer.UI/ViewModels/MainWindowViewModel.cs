@@ -147,8 +147,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private void UpdateFpsStatus()
     {
         var counterFps = _fpsCounter.CurrentFPS;
-        var processFps = _performanceMonitor.GetCurrentMetricsAsync().Result.CurrentFPS;
-        FpsStatus = $"FPS counter: {counterFps:F1} | Process: {processFps:F1} | Time: {DateTime.Now:HH:mm:ss}";
+        FpsStatus = $"FPS counter raw: {counter:F1} | monitor: {CurrentFPS:F1} | {DateTime.Now:HH:mm:ss}";
     }
 
     private void UpdateTrayTooltip()
