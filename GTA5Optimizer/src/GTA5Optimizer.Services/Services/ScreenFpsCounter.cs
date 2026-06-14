@@ -277,6 +277,6 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     public void Dispose()
     {
         StopCapture();
-        _cts.Dispose();
+        _cts?.Dispose();
     }
 }
