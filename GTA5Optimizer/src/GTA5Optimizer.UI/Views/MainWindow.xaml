@@ -34,6 +34,57 @@
         <SolidColorBrush x:Key="Hud.Accent.Pink" Color="#EC4899"/>
         <SolidColorBrush x:Key="Hud.Danger" Color="#EF4444"/>
 
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Foreground" Value="{StaticResource Hud.Text.Muted}"/>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#151526" Offset="0"/>
+                        <GradientStop Color="#0D0D18" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="#F5F7FF"/>
+            <Setter Property="BorderBrush" Value="#26263D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="toggle" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter Grid.Column="0" Content="{TemplateBinding Content}" VerticalAlignment="Center"/>
+                                                <Path Grid.Column="1" Data="M 0 0 L 4 4 L 8 0 Z" Fill="#A78BFA" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                            </Grid>
+                                        </Border>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <Popup x:Name="popup" IsOpen="{Binding IsDropDownOpen, ElementName=toggle}" Placement="Bottom" AllowsTransparency="True">
+                                <Border Background="#0D0D18" BorderBrush="#26263D" BorderThickness="1" CornerRadius="12" Padding="4" Margin="0,4,0,0">
+                                    <ScrollViewer MaxHeight="260">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Card Style -->
         <Style x:Key="CardStyle" TargetType="Border">
             <Setter Property="Background">
