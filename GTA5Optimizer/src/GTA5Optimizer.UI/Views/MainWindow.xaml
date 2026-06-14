@@ -183,14 +183,14 @@
 
         <!-- Social Icon Button -->
         <Style x:Key="SocialIconButton" TargetType="Button">
-            <Setter Property="Width" Value="36"/>
-            <Setter Property="Height" Value="36"/>
-            <Setter Property="Margin" Value="4,0,0,0"/>
+            <Setter Property="Width" Value="38"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Margin" Value="5,0,0,0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" Background="#10101A" BorderBrush="#1E1E30" BorderThickness="1" CornerRadius="10">
+                        <Border x:Name="border" Background="#10101A" BorderBrush="#202035" BorderThickness="1" CornerRadius="12">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
