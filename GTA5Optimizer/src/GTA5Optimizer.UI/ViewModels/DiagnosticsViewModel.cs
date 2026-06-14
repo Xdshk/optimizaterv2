@@ -83,7 +83,7 @@ public partial class DiagnosticsViewModel : ObservableObject
         }
     }
 
-    private static string BuildStatusText(bool hasCriticalIssues, int issueCount, int warningCount)
+    private static string BuildStatusText(bool hasCriticalIssues, int issueCount, int warningCount, int totalScore)
     {
         if (hasCriticalIssues)
             return $"Критические проблемы: {issueCount}. Проверьте блок «Проблемы».";
@@ -97,7 +97,7 @@ public partial class DiagnosticsViewModel : ObservableObject
         if (warningCount > 0)
             return $"Диагностика завершена. Предупреждения: {warningCount}.";
 
-        return $"Диагностика завершена. Оценка: {TotalScore}/100";
+        return $"Диагностика завершена. Оценка: {totalScore}/100";
     }
 }
 
