@@ -118,7 +118,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
         _trayService.OptimizeRequested += async () => await OptimizeAsync();
 
-        _ = LoadProfilesAsync();
         _ = CheckGameStatusAsync();
     }
 
