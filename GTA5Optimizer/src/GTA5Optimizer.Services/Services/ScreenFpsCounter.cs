@@ -187,7 +187,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     {
         try
         {
-            using var mmf = MemoryMappedFile.OpenExisting("RTSSSharedMemoryV2", MemorymappedFileRights.Read);
+            using var mmf = MemoryMappedFile.OpenExisting("RTSSSharedMemoryV2", MemoryMappedFileRights.Read);
             using var accessor = mmf.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
 
             var sig = accessor.ReadUInt32(0);
