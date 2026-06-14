@@ -80,22 +80,24 @@
             <Setter Property="Background">
                 <Setter.Value>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#6366F1" Offset="0"/>
-                        <GradientStop Color="#4F46E5" Offset="1"/>
+                        <GradientStop Color="#7C3AED" Offset="0"/>
+                        <GradientStop Color="#6366F1" Offset="0.55"/>
+                        <GradientStop Color="#06B6D4" Offset="1"/>
                     </LinearGradientBrush>
                 </Setter.Value>
             </Setter>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="20,12"/>
+            <Setter Property="Padding" Value="22,13"/>
+            <Setter Property="MinHeight" Value="44"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border" Background="{TemplateBinding Background}"
-                                BorderThickness="0" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                                BorderThickness="1" BorderBrush="#2A2A55" CornerRadius="12" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -103,19 +105,25 @@
                                 <Setter TargetName="border" Property="Background">
                                     <Setter.Value>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                            <GradientStop Color="#818CF8" Offset="0"/>
-                                            <GradientStop Color="#6366F1" Offset="1"/>
+                                            <GradientStop Color="#A78BFA" Offset="0"/>
+                                            <GradientStop Color="#818CF8" Offset="0.55"/>
+                                            <GradientStop Color="#22D3EE" Offset="1"/>
                                         </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#6366F1" BlurRadius="18" ShadowDepth="0" Opacity="0.35"/>
                                     </Setter.Value>
                                 </Setter>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="border" Property="RenderTransform">
-                                    <Setter.Value><ScaleTransform ScaleX="0.97" ScaleY="0.97"/></Setter.Value>
+                                    <Setter.Value><ScaleTransform ScaleX="0.98" ScaleY="0.98"/></Setter.Value>
                                 </Setter>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Opacity" Value="0.4"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.45"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -125,12 +133,19 @@
 
         <!-- Secondary Button -->
         <Style x:Key="SecondaryButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#1A1A2E"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#171726" Offset="0"/>
+                        <GradientStop Color="#10101A" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="#F5F7FF"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#2A2A40"/>
+            <Setter Property="BorderBrush" Value="#26263D"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Padding" Value="18,11"/>
             <Setter Property="MinHeight" Value="38"/>
@@ -139,7 +154,7 @@
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
-                                CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                CornerRadius="12" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -147,16 +162,18 @@
                                 <Setter TargetName="border" Property="Background">
                                     <Setter.Value>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                            <GradientStop Color="#252540" Offset="0"/>
-                                            <GradientStop Color="#1F1F35" Offset="1"/>
+                                            <GradientStop Color="#202036" Offset="0"/>
+                                            <GradientStop Color="#161626" Offset="1"/>
                                         </LinearGradientBrush>
                                     </Setter.Value>
                                 </Setter>
                                 <Setter TargetName="border" Property="BorderBrush" Value="#6366F1"/>
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#151525"/>
+                                <Setter TargetName="border" Property="RenderTransform">
+                                    <Setter.Value><ScaleTransform ScaleX="0.985" ScaleY="0.985"/></Setter.Value>
+                                </Setter>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
