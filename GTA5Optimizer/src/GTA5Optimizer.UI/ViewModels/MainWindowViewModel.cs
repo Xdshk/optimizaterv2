@@ -144,6 +144,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         });
     }
 
+    private void UpdateFpsStatus()
+    {
+        var counterFps = _fpsCounter.CurrentFPS;
+        var processFps = _performanceMonitor.GetCurrentMetricsAsync().Result.CurrentFPS;
+        FpsStatus = $"FPS counter: {counterFps:F1} | Process: {processFps:F1} | Time: {DateTime.Now:HH:mm:ss}";
+    }
+
     private void UpdateTrayTooltip()
     {
         _trayService.UpdateTooltip($"GTA5 Optimizer | FPS: {CurrentFPS:F0} | CPU: {CpuUsage:F0}% | RAM: {RamUsage:F0}%");
