@@ -72,7 +72,6 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
 
         cts?.Cancel();
         cts?.Dispose();
-        _dwmStopwatch.Stop();
     }
 
     private void CaptureLoop(CancellationToken token)
