@@ -405,9 +405,15 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- ===== SIDEBAR NAVIGATION ===== -->
-                <Border Grid.Column="0" Background="#0C0C16" BorderBrush="#151525" BorderThickness="0,0,1,0">
-                    <StackPanel Margin="8,12">
-                        <TextBlock Text="НАВИГАЦИЯ" Foreground="#333350" FontSize="9" FontWeight="Bold" Margin="12,0,0,8"/>
+                <Border Grid.Column="0" BorderBrush="#1D1D32" BorderThickness="0,0,1,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#0B0B14" Offset="0"/>
+                            <GradientStop Color="#07070D" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <StackPanel Margin="10,14">
+                        <TextBlock Text="НАВИГАЦИЯ" Foreground="#3F4666" FontSize="10" FontWeight="Bold" Margin="12,0,0,10"/>
 
                         <RadioButton x:Name="NavOptimization" Content="Оптимизация" Tag="⚡"
                                      Style="{StaticResource NavButtonStyle}"
