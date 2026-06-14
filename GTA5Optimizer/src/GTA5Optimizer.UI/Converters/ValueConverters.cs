@@ -33,6 +33,9 @@ public class HasContentToVisibilityConverter : IValueConverter
             _ => true
         };
 
+        if (parameter?.ToString()?.Equals("Invert", StringComparison.OrdinalIgnoreCase) == true)
+            isVisible = !isVisible;
+
         return isVisible ? Visibility.Visible : Visibility.Collapsed;
     }
 
