@@ -183,9 +183,6 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
                 if (fps > 1 && fps < 1000)
                 {
                     // Smooth the value
-                    _dwmFpsAccum += fps;
-                    _dwmFpsFrames++;
-
                     var now = DateTime.UtcNow;
                     if (_lastDwmSampleTime != DateTime.MinValue)
                     {
@@ -204,6 +201,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
 
                     _lastDwmSampleTime = now;
                     _lastDwmFramesPresented = info.cFramesPresented;
+                    return fps;
                 }
             }
         }
