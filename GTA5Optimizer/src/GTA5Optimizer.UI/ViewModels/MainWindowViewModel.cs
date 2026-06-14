@@ -137,28 +137,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _trayService.UpdateTooltip($"GTA5 Optimizer | FPS: {CurrentFPS:F0} | CPU: {CpuUsage:F0}% | RAM: {RamUsage:F0}%");
     }
 
-    private async Task LoadProfilesAsync()
-    {
-        try
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var profileManager = scope.ServiceProvider.GetRequiredService<IProfileManager>();
-            var profiles = await profileManager.GetAvailableProfilesAsync();
-            Profiles = new ObservableCollection<ProfileConfig>(profiles);
-            SelectedProfileConfig = Profiles.FirstOrDefault();
-        }
-        catch (Exception ex)
-        {
-            await _loggerService.LogAsync(new LogEntry
-            {
-                Level = GTA5LogLevel.Error,
-                Category = LogCategories.UI,
-                Message = "Ошибка загрузки профилей",
-                Details = ex.Message
-            });
-        }
-    }
-
     private async Task CheckGameStatusAsync()
     {
         try
