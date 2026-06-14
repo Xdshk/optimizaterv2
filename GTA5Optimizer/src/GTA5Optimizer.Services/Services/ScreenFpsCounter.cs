@@ -1,6 +1,5 @@
 using GTA5Optimizer.Core.Interfaces;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 
@@ -10,7 +9,7 @@ namespace GTA5Optimizer.Services.Services;
 /// Считает FPS через несколько методов (в порядке приоритета):
 /// 1. PresentMon — перехватывает DXGI Present calls (самый точный, нужен PresentMon.exe)
 /// 2. RTSS shared memory — MSI Afterburner/RivaTuner
-/// 3. DWM timing — через дельту cFramesPresented (работает всегда в composited режиме)
+/// 3. DWM timing — через дельту cFramesPresented (borderless/windowed)
 /// </summary>
 public sealed class ScreenFpsCounter : IScreenFpsCounter
 {
@@ -25,6 +24,10 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     private long _lastFramesPresented;
     private DateTime _lastDwmPoll = DateTime.MinValue;
     private bool _dwmAvailable = true;
+    private int _pollCount;
+
+    // Which method is active
+    private string _activeMethod = "none";
 
     public double CurrentFPS
     {
@@ -35,7 +38,6 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     {
         _logger = logger;
 
-        // Create PresentMon counter — it'll gracefully handle if PresentMon.exe is missing
         var pmLogger = LoggerFactory.Create(b => b.AddConsole().SetMinimumLevel(LogLevel.Information))
             .CreateLogger<PresentMonFpsCounter>();
         _presentMon = new PresentMonFpsCounter(pmLogger, "GTA5");
@@ -54,21 +56,19 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
         };
         _pollThread.Start();
 
-        _logger.LogInformation("FPS counter started");
+        _logger.LogInformation("FPS counter started (PresentMon + RTSS + DWM fallback)");
     }
 
     public void StopCapture()
     {
         _presentMon.StopCapture();
         _cts?.Cancel();
-        if (_pollThread != null)
-        {
-            _pollThread.Join(2000);
-            _pollThread = null;
-        }
+        _pollThread?.Join(2000);
+        _pollThread = null;
         _cts?.Dispose();
         _cts = null;
         lock (_fpsLock) _currentFps = 0;
+        _activeMethod = "none";
     }
 
     private void PollLoop(CancellationToken token)
@@ -78,17 +78,25 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
             while (!token.IsCancellationRequested)
             {
                 double fps = 0;
+                string method = "none";
 
-                // Method 1: PresentMon (most accurate)
+                // Method 1: PresentMon (most accurate — direct DXGI hook)
                 fps = _presentMon.CurrentFPS;
+                if (fps > 0) method = "PresentMon";
 
                 // Method 2: RTSS shared memory
                 if (fps <= 0)
+                {
                     fps = TryReadRtssFps();
+                    if (fps > 0) method = "RTSS";
+                }
 
-                // Method 3: DWM frame delta (always available on Win10/11)
+                // Method 3: DWM frame delta (borderless/windowed only)
                 if (fps <= 0)
+                {
                     fps = ReadDwmDeltaFps();
+                    if (fps > 0) method = "DWM";
+                }
 
                 if (fps > 0 && fps <= 1000)
                 {
@@ -99,9 +107,26 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
                         else
                             _currentFps = fps;
                     }
+
+                    // Log method changes and periodic status
+                    if (method != _activeMethod)
+                    {
+                        _activeMethod = method;
+                        _logger.LogInformation("FPS source: {Method} — {Fps:F1} FPS", method, _currentFps);
+                    }
+                    else if (++_pollCount % 10 == 0)
+                    {
+                        _logger.LogDebug("FPS [{Method}]: {Fps:F1}", method, _currentFps);
+                    }
+                }
+                else if (_activeMethod != "none")
+                {
+                    _activeMethod = "none";
+                    lock (_fpsLock) _currentFps = 0;
+                    _logger.LogWarning("All FPS methods returned 0 — is the game running?");
                 }
 
-                Thread.Sleep(200); // 5 Hz polling
+                Thread.Sleep(200);
             }
         }
         catch (OperationCanceledException) { }
@@ -111,11 +136,6 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
         }
     }
 
-    /// <summary>
-    /// Reads FPS via DWM by tracking cFramesPresented delta over time.
-    /// This works because DWM composits ALL desktop activity including game frames.
-    /// Returns 0 if DWM is unavailable (e.g., from first call).
-    /// </summary>
     private double ReadDwmDeltaFps()
     {
         if (!_dwmAvailable) return 0;
@@ -129,6 +149,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
             if (hr != 0)
             {
                 _dwmAvailable = false;
+                _logger.LogWarning("DWM not available (hr={Hr})", hr);
                 return 0;
             }
 
@@ -138,7 +159,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
             {
                 _lastDwmPoll = now;
                 _lastFramesPresented = info.cFramesPresented;
-                return 0; // First call — need delta
+                return 0;
             }
 
             var dt = (now - _lastDwmPoll).TotalSeconds;
@@ -147,19 +168,17 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
             _lastDwmPoll = now;
             _lastFramesPresented = info.cFramesPresented;
 
-            if (dt <= 0 || dt > 5) return 0; // Too long between polls
+            if (dt <= 0 || dt > 5) return 0;
 
             var fps = df / dt;
             if (fps < 1 || fps > 1000) return 0;
 
-            // Sanity: if desktop refresh is e.g. 60Hz but game runs at 200 FPS,
-            // DWM still only composites at monitor refresh rate.
-            // That's OK — we'll detect game FPS via PresentMon instead.
             return fps;
         }
-        catch
+        catch (Exception ex)
         {
             _dwmAvailable = false;
+            _logger.LogWarning(ex, "DWM read failed permanently");
             return 0;
         }
     }
@@ -168,11 +187,11 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     {
         try
         {
-            using var mmf = MemoryMappedFile.OpenExisting("RTSSSharedMemoryV2", MemoryMappedFileRights.Read);
+            using var mmf = MemoryMappedFile.OpenExisting("RTSSSharedMemoryV2", MemorymappedFileRights.Read);
             using var accessor = mmf.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
 
             var sig = accessor.ReadUInt32(0);
-            if (sig != 0x53535452) return 0; // "RTSS"
+            if (sig != 0x53535452) return 0;
 
             var version = accessor.ReadUInt32(4);
             if (version < 2) return 0;
@@ -185,8 +204,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
                     return fps;
             }
         }
-        catch { } // RTSS not running — normal
-
+        catch { }
         return 0;
     }
 
