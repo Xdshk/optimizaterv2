@@ -125,24 +125,25 @@ public class OverlayService : IDisposable
         catch { }
     }
 
-    private void UpdateOverlayImmediate(Models.Monitoring.PerformanceMetrics? metrics = null)
+    private async Task RefreshOverlayAsync()
     {
         try
         {
-            if (metrics == null)
+            var metrics = await _monitor.GetCurrentMetricsAsync();
+            if (_overlayWindow != null && !_disposed)
             {
-                // Fallback: get cached metrics
-                var task = _monitor.GetCurrentMetricsAsync();
-                task.Wait();
-                metrics = task.Result;
+                await _overlayWindow.Dispatcher.InvokeAsync(() => UpdateOverlayImmediate(metrics));
             }
-
-            if (_fpsText != null) _fpsText.Text = $"FPS: {metrics.CurrentFPS:F0}";
-            if (_cpuText != null) _cpuText.Text = $"CPU: {metrics.CPUUsage:F0}%";
-            if (_gpuText != null) _gpuText.Text = $"GPU: {metrics.GPUUsage:F0}%";
-            if (_ramText != null) _ramText.Text = $"RAM: {metrics.RAMUsagePercent:F0}%";
         }
         catch { }
+    }
+
+    private void UpdateOverlayImmediate(Models.Monitoring.PerformanceMetrics metrics)
+    {
+        if (_fpsText != null) _fpsText.Text = $"FPS: {metrics.CurrentFPS:F0}";
+        if (_cpuText != null) _cpuText.Text = $"CPU: {metrics.CPUUsage:F0}%";
+        if (_gpuText != null) _gpuText.Text = $"GPU: {metrics.GPUUsage:F0}%";
+        if (_ramText != null) _ramText.Text = $"RAM: {metrics.RAMUsagePercent:F0}%";
     }
 
     private void Hide()
