@@ -44,7 +44,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     public SettingsViewModel Settings { get; }
     public DiagnosticsViewModel Diagnostics { get; }
     public BenchmarkViewModel Benchmark { get; }
-    public ProfileViewModel Profile { get; }
 
     public bool OverlayEnabled
     {
