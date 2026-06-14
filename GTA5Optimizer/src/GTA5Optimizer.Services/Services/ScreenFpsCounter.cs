@@ -3,29 +3,28 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace GTA5Optimizer.Services.Services;
 
 /// <summary>
-/// Считает FPS игры через несколько методов (в порядке приоритета):
-/// 1. PresentMon — перехватывает DXGI Present calls (работает всегда)
-/// 2. RTSS shared memory — если установлен MSI Afterburner/RivaTuner
-/// 3. DWM composition timing — только для borderless/windowed
+/// Считает FPS через несколько методов (в порядке приоритета):
+/// 1. PresentMon — перехватывает DXGI Present calls (самый точный, нужен PresentMon.exe)
+/// 2. RTSS shared memory — MSI Afterburner/RivaTuner
+/// 3. DWM timing — через дельту cFramesPresented (работает всегда в composited режиме)
 /// </summary>
 public sealed class ScreenFpsCounter : IScreenFpsCounter
 {
     private readonly ILogger<ScreenFpsCounter> _logger;
-    private readonly PresentMonFpsCounter? _presentMon;
-    private Thread? _captureThread;
+    private readonly PresentMonFpsCounter _presentMon;
+    private Thread? _pollThread;
     private CancellationTokenSource? _cts;
-    private readonly object _captureLock = new();
     private double _currentFps;
     private readonly object _fpsLock = new();
 
-    // DWM timing
-    private DateTime _lastDwmSampleTime = DateTime.MinValue;
-    private long _lastDwmFramesPresented;
+    // DWM delta tracking
+    private long _lastFramesPresented;
+    private DateTime _lastDwmPoll = DateTime.MinValue;
+    private bool _dwmAvailable = true;
 
     public double CurrentFPS
     {
@@ -36,58 +35,43 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     {
         _logger = logger;
 
-        // Try to create PresentMon counter
-        try
-        {
-            var presentMonLogger = LoggerFactory.Create(b => b.AddConsole().SetMinimumLevel(LogLevel.Debug))
-                .CreateLogger<PresentMonFpsCounter>();
-            _presentMon = new PresentMonFpsCounter(presentMonLogger, "GTA5");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug(ex, "PresentMon not available");
-            _presentMon = null;
-        }
+        // Create PresentMon counter — it'll gracefully handle if PresentMon.exe is missing
+        var pmLogger = LoggerFactory.Create(b => b.AddConsole().SetMinimumLevel(LogLevel.Information))
+            .CreateLogger<PresentMonFpsCounter>();
+        _presentMon = new PresentMonFpsCounter(pmLogger, "GTA5");
     }
 
     public void StartCapture()
     {
-        lock (_captureLock)
+        _presentMon.StartCapture();
+
+        _cts = new CancellationTokenSource();
+        _pollThread = new Thread(() => PollLoop(_cts.Token))
         {
-            if (_captureThread != null) return;
+            IsBackground = true,
+            Priority = ThreadPriority.BelowNormal,
+            Name = "FpsCounter"
+        };
+        _pollThread.Start();
 
-            // Start PresentMon if available
-            _presentMon?.StartCapture();
-
-            _cts = new CancellationTokenSource();
-            var token = _cts.Token;
-
-            _captureThread = new Thread(() => CaptureLoop(token))
-            {
-                IsBackground = true,
-                Priority = ThreadPriority.BelowNormal,
-                Name = "ScreenFpsCounter"
-            };
-            _captureThread.Start();
-        }
+        _logger.LogInformation("FPS counter started");
     }
 
     public void StopCapture()
     {
-        CancellationTokenSource? cts;
-        lock (_captureLock)
+        _presentMon.StopCapture();
+        _cts?.Cancel();
+        if (_pollThread != null)
         {
-            cts = _cts;
-            _cts = null;
-            _captureThread = null;
+            _pollThread.Join(2000);
+            _pollThread = null;
         }
-
-        _presentMon?.StopCapture();
-        cts?.Cancel();
-        cts?.Dispose();
+        _cts?.Dispose();
+        _cts = null;
+        lock (_fpsLock) _currentFps = 0;
     }
 
-    private void CaptureLoop(CancellationToken token)
+    private void PollLoop(CancellationToken token)
     {
         try
         {
@@ -95,71 +79,103 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
             {
                 double fps = 0;
 
-                // Method 1: PresentMon (most reliable — works in any mode)
-                if (_presentMon != null)
-                {
-                    fps = _presentMon.CurrentFPS;
-                }
+                // Method 1: PresentMon (most accurate)
+                fps = _presentMon.CurrentFPS;
 
-                // Method 2: RTSS shared memory (if PresentMon not available)
+                // Method 2: RTSS shared memory
                 if (fps <= 0)
-                {
                     fps = TryReadRtssFps();
-                }
 
-                // Method 3: DWM composition timing (last resort — borderless only)
+                // Method 3: DWM frame delta (always available on Win10/11)
                 if (fps <= 0)
-                {
-                    fps = ReadDwmComposedFps();
-                }
+                    fps = ReadDwmDeltaFps();
 
-                if (fps > 0)
+                if (fps > 0 && fps <= 1000)
                 {
                     lock (_fpsLock)
                     {
-                        // Exponential smoothing to prevent jitter
                         if (_currentFps > 0)
-                            _currentFps = _currentFps * 0.65 + fps * 0.35;
+                            _currentFps = _currentFps * 0.6 + fps * 0.4;
                         else
                             _currentFps = fps;
                     }
                 }
 
-                Thread.Sleep(100); // 10 Hz polling
+                Thread.Sleep(200); // 5 Hz polling
             }
         }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Screen FPS counter failed");
+            _logger.LogWarning(ex, "FPS poll loop error");
         }
     }
 
     /// <summary>
-    /// Читает FPS из RTSS (RivaTuner Statistics Server) shared memory.
-    /// RTSS используется MSI Afterburner и другими оверлеями.
-    /// Возвращает 0 если RTSS не запущен.
+    /// Reads FPS via DWM by tracking cFramesPresented delta over time.
+    /// This works because DWM composits ALL desktop activity including game frames.
+    /// Returns 0 if DWM is unavailable (e.g., from first call).
     /// </summary>
+    private double ReadDwmDeltaFps()
+    {
+        if (!_dwmAvailable) return 0;
+
+        try
+        {
+            var info = new DWM_TIMING_INFO();
+            info.cbSize = Marshal.SizeOf<DWM_TIMING_INFO>();
+
+            var hr = DwmGetCompositionTimingInfo(IntPtr.Zero, ref info);
+            if (hr != 0)
+            {
+                _dwmAvailable = false;
+                return 0;
+            }
+
+            var now = DateTime.UtcNow;
+
+            if (_lastDwmPoll == DateTime.MinValue || info.cFramesPresented <= _lastFramesPresented)
+            {
+                _lastDwmPoll = now;
+                _lastFramesPresented = info.cFramesPresented;
+                return 0; // First call — need delta
+            }
+
+            var dt = (now - _lastDwmPoll).TotalSeconds;
+            var df = info.cFramesPresented - _lastFramesPresented;
+
+            _lastDwmPoll = now;
+            _lastFramesPresented = info.cFramesPresented;
+
+            if (dt <= 0 || dt > 5) return 0; // Too long between polls
+
+            var fps = df / dt;
+            if (fps < 1 || fps > 1000) return 0;
+
+            // Sanity: if desktop refresh is e.g. 60Hz but game runs at 200 FPS,
+            // DWM still only composites at monitor refresh rate.
+            // That's OK — we'll detect game FPS via PresentMon instead.
+            return fps;
+        }
+        catch
+        {
+            _dwmAvailable = false;
+            return 0;
+        }
+    }
+
     private static double TryReadRtssFps()
     {
         try
         {
-            using var mmf = MemoryMappedFile.OpenExisting(RtssSharedMemName, MemoryMappedFileRights.Read);
+            using var mmf = MemoryMappedFile.OpenExisting("RTSSSharedMemoryV2", MemoryMappedFileRights.Read);
             using var accessor = mmf.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
 
-            // RTSS Shared Memory v2 format:
-            // Offset 0: uint32 signature "RTSS" (0x53535452 LE)
-            // Offset 4: uint32 version (must be >= 2)
-            // Offset 8: uint32 appEntrySize
-            // Offset 12: uint32 time (GetTickCount)
-            // Offset 16: uint32 frames
-            // Offset 20: uint32 frameTime (microseconds)
             var sig = accessor.ReadUInt32(0);
-            if (sig != RtssSignature)
-                return 0;
+            if (sig != 0x53535452) return 0; // "RTSS"
 
             var version = accessor.ReadUInt32(4);
-            if (version < 2)
-                return 0;
+            if (version < 2) return 0;
 
             var frameTimeUs = accessor.ReadUInt32(20);
             if (frameTimeUs > 0)
@@ -169,92 +185,25 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
                     return fps;
             }
         }
-        catch
-        {
-            // RTSS not running — normal, not an error
-        }
+        catch { } // RTSS not running — normal
 
         return 0;
     }
 
-    /// <summary>
-    /// Считает FPS через DWM composition timing.
-    /// DwmGetCompositionTimingInfo даёт информацию о кадрах композиции.
-    /// cFrames / cRefreshFrameDelta * rateRefresh = FPS.
-    /// </summary>
-    private double ReadDwmComposedFps()
-    {
-        try
-        {
-            var info = new DWM_TIMING_INFO();
-            info.cbSize = Marshal.SizeOf<DWM_TIMING_INFO>();
-
-            DwmGetCompositionTimingInfo(IntPtr.Zero, ref info);
-
-            // Используем cFrames и cRefreshFrameDelta для расчёта FPS
-            // cFrames — количество кадров с момента последнего вызова
-            // cRefreshFrameDelta — количество тиков между кадрами
-            // rateRefresh — частота обновления монитора (например 60/1 = 60Hz)
-
-            if (info.cFrames > 0 && info.cRefreshFrameDelta > 0 &&
-                info.rateRefresh.uiNumerator > 0 && info.rateRefresh.uiDenominator > 0)
-            {
-                var refreshRate = (double)info.rateRefresh.uiNumerator / info.rateRefresh.uiDenominator;
-                var fps = (double)info.cFrames / info.cRefreshFrameDelta * refreshRate;
-
-                if (fps > 1 && fps < 1000)
-                {
-                    // Smooth the value
-                    var now = DateTime.UtcNow;
-                    if (_lastDwmSampleTime != DateTime.MinValue)
-                    {
-                        var elapsed = (now - _lastDwmSampleTime).TotalSeconds;
-                        if (elapsed > 0)
-                        {
-                            var deltaFrames = info.cFramesPresented - _lastDwmFramesPresented;
-                            if (deltaFrames > 0)
-                            {
-                                _lastDwmSampleTime = now;
-                                _lastDwmFramesPresented = info.cFramesPresented;
-                                return deltaFrames / elapsed;
-                            }
-                        }
-                    }
-
-                    _lastDwmSampleTime = now;
-                    _lastDwmFramesPresented = info.cFramesPresented;
-                    return fps;
-                }
-            }
-        }
-        catch
-        {
-            // DWM not available
-        }
-
-        return 0;
-    }
-
-    private const string RtssSharedMemName = "RTSSSharedMemoryV2";
-    private const uint RtssSignature = 0x53535452; // "RTSS"
-
-    // DWM Interop
-    [DllImport("dwmapi.dll")]
-    private static extern int DwmGetCompositionTimingInfo(
-        IntPtr hwnd,
-        ref DWM_TIMING_INFO pTimingInfo);
+    [DllImport("dwmapi.dll", PreserveSig = true)]
+    private static extern int DwmGetCompositionTimingInfo(IntPtr hwnd, ref DWM_TIMING_INFO pTimingInfo);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct DWM_TIMING_INFO
     {
         public int cbSize;
-        public DWM_RATE rateRefresh;
+        public RPC_RATE rateRefresh;
         public long qpcVBlank;
         public long cRefresh;
         public long cRefreshFrameDelta;
         public int cFrames;
         public int cFramesBuffered;
-        public DWM_RATE rateCompose;
+        public RPC_RATE rateCompose;
         public long qpcCompose;
         public long cFrame;
         public long cFramesPresented;
@@ -290,15 +239,11 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct DWM_RATE
+    private struct RPC_RATE
     {
         public uint uiNumerator;
         public uint uiDenominator;
     }
 
-    public void Dispose()
-    {
-        StopCapture();
-        _cts?.Dispose();
-    }
+    public void Dispose() => StopCapture();
 }
