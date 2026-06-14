@@ -258,6 +258,90 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         }
     }
 
+    private double GetGtaWindowFps()
+    {
+        var process = Process.GetProcessesByName("GTA5").FirstOrDefault();
+        if (process == null || process.MainWindowHandle == IntPtr.Zero)
+            return 0;
+
+        var hwnd = process.MainWindowHandle;
+        var fps = TryReadRtssFpsForProcess(process.Id);
+        if (fps > 0)
+            return fps;
+
+        return TryReadDwmWindowFps(hwnd);
+    }
+
+    private static double TryReadRtssFpsForProcess(int processId)
+    {
+        try
+        {
+            using var mmf = MemoryMappedFile.OpenExisting("RTSSSharedMemoryV2", MemoryMappedFileRights.Read);
+            using var accessor = mmf.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
+
+            var signature = accessor.ReadUInt32(0);
+            if (signature != 0x53535452)
+                return 0;
+
+            var version = accessor.ReadUInt32(4);
+            if (version < 2)
+                return 0;
+
+            var entryCount = accessor.ReadInt32(8);
+            var entrySize = accessor.ReadInt32(12);
+            if (entryCount <= 0 || entrySize < 28)
+                return 0;
+
+            for (var i = 0; i < entryCount; i++)
+            {
+                var offset = 16L + i * entrySize;
+                var pid = accessor.ReadInt32(offset);
+                if (pid != processId)
+                    continue;
+
+                var frameTimeUs = accessor.ReadUInt32(offset + 20);
+                if (frameTimeUs <= 0)
+                    continue;
+
+                var fps = 1_000_000.0 / frameTimeUs;
+                if (fps is > 1 and < 1000)
+                    return fps;
+            }
+        }
+        catch { }
+
+        return 0;
+    }
+
+    private static double TryReadDwmWindowFps(IntPtr hwnd)
+    {
+        try
+        {
+            var info = new DWM_TIMING_INFO { cbSize = Marshal.SizeOf<DWM_TIMING_INFO>() };
+            if (DwmGetCompositionTimingInfo(hwnd, ref info) != 0)
+                return 0;
+
+            if (info.cFramesPresented > 0 && info.cRefreshFrameDelta > 0 &&
+                info.rateRefresh.uiNumerator > 0 && info.rateRefresh.uiDenominator > 0)
+            {
+                var refreshRate = (double)info.rateRefresh.uiNumerator / info.rateRefresh.uiDenominator;
+                var fps = (double)info.cFramesPresented / info.cRefreshFrameDelta * refreshRate;
+                return fps is > 1 and < 1000 ? fps : 0;
+            }
+
+            if (info.cFrames > 0 && info.cRefreshFrameDelta > 0 &&
+                info.rateRefresh.uiNumerator > 0 && info.rateRefresh.uiDenominator > 0)
+            {
+                var refreshRate = (double)info.rateRefresh.uiNumerator / info.rateRefresh.uiDenominator;
+                var fps = (double)info.cFrames / info.cRefreshFrameDelta * refreshRate;
+                return fps is > 1 and < 1000 ? fps : 0;
+            }
+        }
+        catch { }
+
+        return 0;
+    }
+
     private async Task PopulateCpuMetricsAsync(PerformanceMetrics metrics)
     {
         try
