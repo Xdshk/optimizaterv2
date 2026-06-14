@@ -268,6 +268,14 @@ public sealed class DiagnosticsService : IDiagnosticsService
                 Description = "Файл settings.xml не найден. Возможно, игра ещё не запускалась.",
                 Severity = SettingsIssueSeverity.Info
             });
+            analysis.Recommendations.Add(new SettingsRecommendation
+            {
+                Title = "Запустить GTA V один раз",
+                Description = "После первого запуска игра создаст settings.xml, и анализатор сможет проверить настройки графики.",
+                Action = "Запустите GTA V и выйдите из меню настроек",
+                ExpectedFpsGain = 0
+            });
+            analysis.PerformanceScore = 50;
             return analysis;
         }
 
