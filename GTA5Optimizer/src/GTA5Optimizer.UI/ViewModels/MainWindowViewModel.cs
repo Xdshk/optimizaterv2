@@ -88,8 +88,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         LogsViewModel logs,
         SettingsViewModel settings,
         DiagnosticsViewModel diagnostics,
-        BenchmarkViewModel benchmark,
-        ProfileViewModel profile)
+        BenchmarkViewModel benchmark)
     {
         _serviceProvider = serviceProvider;
         _loggerService = loggerService;
