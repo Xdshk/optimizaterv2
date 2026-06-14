@@ -322,6 +322,13 @@
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
+
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
+                            <Button Content="▶" ToolTip="YouTube" Tag="TODO:YOUTUBE_URL" Style="{StaticResource SocialIconButton}" Click="SocialButton_Click"/>
+                            <Button Content="♪" ToolTip="TikTok" Tag="TODO:TIKTOK_URL" Style="{StaticResource SocialIconButton}" Click="SocialButton_Click"/>
+                            <Button Content="D" ToolTip="Discord" Tag="TODO:DISCORD_URL_1" Style="{StaticResource SocialIconButton}" Click="SocialButton_Click"/>
+                            <Button Content="D" ToolTip="Discord 2" Tag="TODO:DISCORD_URL_2" Style="{StaticResource SocialIconButton}" Click="SocialButton_Click"/>
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </Border>
