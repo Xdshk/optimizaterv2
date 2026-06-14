@@ -23,8 +23,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly IGameDetector _gameDetector;
     private readonly TrayService _trayService;
     private readonly OverlayService _overlayService;
+    private readonly IScreenFpsCounter _fpsCounter;
     private readonly DispatcherTimer _gameStatusTimer;
     private readonly DispatcherTimer _trayUpdateTimer;
+    private readonly DispatcherTimer _fpsStatusTimer;
 
     [ObservableProperty] private bool _isOptimizing;
     [ObservableProperty] private OptimizationProfile _selectedProfile = OptimizationProfile.MaximumFPS;
