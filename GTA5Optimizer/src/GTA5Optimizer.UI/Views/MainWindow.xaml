@@ -403,8 +403,15 @@
                             <TextBlock Text="{Binding StatusMessage}" Foreground="#A0A4BD" FontSize="12" VerticalAlignment="Center"/>
                         </StackPanel>
 
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="▶" ToolTip="YouTube" Tag="https://www.youtube.com/@juziksuzuykin" Style="{StaticResource SocialIconButton}" Click="SocialButton_Click"/>
+                            <Button Content="♪" ToolTip="TikTok" Tag="https://www.tiktok.com/@juzikxd" Style="{StaticResource SocialIconButton}" Click="SocialButton_Click"/>
+                            <Button Content="D" ToolTip="Discord" Tag="https://discord.gg/juzikxdshka" Style="{StaticResource SocialIconButton}" Click="SocialButton_Click"/>
+                            <Button Content="D" ToolTip="Discord 2" Tag="https://discord.gg/TX77XhEW" Style="{StaticResource SocialIconButton}" Click="SocialButton_Click"/>
+                        </StackPanel>
+
                         <Button Content="─" Width="32" Height="32" Background="Transparent" Foreground="#444460"
-                                BorderThickness="0" FontSize="10" Cursor="Hand" Margin="0,0,4,0" Click="MinimizeButton_Click">
+                                BorderThickness="0" FontSize="10" Cursor="Hand" Margin="4,0,0,0" Click="MinimizeButton_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border x:Name="border" Background="Transparent" CornerRadius="6">
@@ -421,7 +428,7 @@
                         </Button>
 
                         <Button Content="✕" Width="32" Height="32" Background="Transparent" Foreground="#444460"
-                                BorderThickness="0" FontSize="12" Cursor="Hand" Click="CloseButton_Click">
+                                BorderThickness="0" FontSize="12" Cursor="Hand" Margin="4,0,0,0" Click="CloseButton_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border x:Name="border" Background="Transparent" CornerRadius="6">
@@ -436,13 +443,6 @@
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-
-                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
-                            <Button Content="▶" ToolTip="YouTube" Tag="https://www.youtube.com/@juziksuzuykin" Style="{StaticResource SocialIconButton}" Click="SocialButton_Click"/>
-                            <Button Content="♪" ToolTip="TikTok" Tag="https://www.tiktok.com/@juzikxd" Style="{StaticResource SocialIconButton}" Click="SocialButton_Click"/>
-                            <Button Content="D" ToolTip="Discord" Tag="https://discord.gg/juzikxdshka" Style="{StaticResource SocialIconButton}" Click="SocialButton_Click"/>
-                            <Button Content="D" ToolTip="Discord 2" Tag="https://discord.gg/TX77XhEW" Style="{StaticResource SocialIconButton}" Click="SocialButton_Click"/>
-                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </Border>
