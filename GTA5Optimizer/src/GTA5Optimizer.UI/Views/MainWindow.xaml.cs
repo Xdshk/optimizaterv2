@@ -106,15 +106,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void DurationChip_Checked(object sender, RoutedEventArgs e)
-    {
-        if (sender is not System.Windows.Controls.RadioButton rb) return;
-        if (rb.Tag == null) return;
-        if (DataContext is not MainWindowViewModel vm) return;
-        if (int.TryParse(rb.Tag.ToString(), out var seconds))
-            vm.Benchmark.SelectedDuration = seconds;
-    }
-
     private static T? FindVisualChild<T>(DependencyObject parent, string name) where T : FrameworkElement
     {
         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
