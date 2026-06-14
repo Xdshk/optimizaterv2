@@ -4,7 +4,6 @@ using GTA5Optimizer.Core.Interfaces;
 using GTA5Optimizer.Models.Enums;
 using GTA5Optimizer.UI.Services;
 using Microsoft.Extensions.Logging;
-using System.Collections.ObjectModel;
 using GTA5LogLevel = GTA5Optimizer.Models.Logging.LogLevel;
 using LogEntry = GTA5Optimizer.Models.Logging.LogEntry;
 using LogCategories = GTA5Optimizer.Models.Logging.LogCategories;
