@@ -80,18 +80,9 @@ public partial class SettingsViewModel : ObservableObject
     {
         try
         {
-            var profile = SelectedProfileName switch
-            {
-                "Everyday Mode" => OptimizationProfile.Everyday,
-                "RP Mode" => OptimizationProfile.RPMode,
-                "Massive Online Mode" => OptimizationProfile.MassiveOnline,
-                "Maximum FPS Mode" => OptimizationProfile.MaximumFPS,
-                _ => OptimizationProfile.RPMode
-            };
-
             var settings = new AppSettings
             {
-                ActiveProfile = profile,
+                ActiveProfile = OptimizationProfile.MaximumFPS,
                 AutoOptimizationIntervalSeconds = AutoOptimizationInterval,
                 EnableAutoOptimization = EnableAutoOptimization
             };
