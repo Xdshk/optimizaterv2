@@ -60,8 +60,15 @@ public partial class MainWindow : Window
         if (sender is not Button button) return;
 
         var url = button.Tag?.ToString();
-        if (!string.IsNullOrWhiteSpace(url))
+        if (string.IsNullOrWhiteSpace(url) || url.StartsWith("TODO:")) return;
+
+        try
+        {
             Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        }
+        catch
+        {
+        }
     }
 
     private void NavButton_Checked(object sender, RoutedEventArgs e)
