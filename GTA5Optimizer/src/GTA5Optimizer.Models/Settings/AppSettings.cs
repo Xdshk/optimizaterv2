@@ -20,7 +20,7 @@ public sealed class AppSettings
     public bool AutoDetectGames { get; set; } = true;
 
     // Profile
-    public OptimizationProfile ActiveProfile { get; set; } = OptimizationProfile.RPMode;
+    public OptimizationProfile ActiveProfile { get; set; } = OptimizationProfile.MaximumFPS;
     public ProfileConfig? CustomProfile { get; set; }
     public ObservableCollection<ProfileConfig> SavedProfiles { get; set; } = new();
 
