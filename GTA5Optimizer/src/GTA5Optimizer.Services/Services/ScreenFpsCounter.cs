@@ -28,9 +28,8 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     private readonly object _fpsLock = new();
 
     // DWM timing
-    private readonly Stopwatch _dwmStopwatch = new();
-    private double _dwmFpsAccum;
-    private int _dwmFpsFrames;
+    private DateTime _lastDwmSampleTime = DateTime.MinValue;
+    private long _lastDwmFramesPresented;
 
     public double CurrentFPS
     {
