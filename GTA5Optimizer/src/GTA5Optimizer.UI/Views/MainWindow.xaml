@@ -1113,31 +1113,70 @@
 
                     <!-- PAGE: BENCHMARK -->
                     <Border x:Name="PageBenchmark" Visibility="Collapsed">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Style="{StaticResource HudScrollViewer}">
                             <StackPanel Margin="16">
                                 <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
                                     <StackPanel Margin="18">
-                                        <TextBlock Text="🏁  БЕНЧМАРК" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                            <TextBlock Text="🏁" FontSize="18" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Text="БЕНЧМАРК" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            <Border CornerRadius="8" Padding="8,3" Margin="12,0,0,0" Background="#1A1508" BorderBrush="#2A2010" BorderThickness="1">
+                                                <TextBlock Text="Majestic RP" Foreground="#F59E0B" FontSize="10" FontWeight="SemiBold"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <!-- Duration selector chips -->
+                                        <TextBlock Text="Длительность теста" Foreground="#555570" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,4,0,16">
+                                            <RadioButton Content="15 сек" IsChecked="{Binding Benchmark.IsDuration15}"
+                                                         Style="{StaticResource DurationChipStyle}" Checked="DurationChip_Checked" Tag="15"/>
+                                            <RadioButton Content="30 сек" IsChecked="{Binding Benchmark.IsDuration30}"
+                                                         Style="{StaticResource DurationChipStyle}" Checked="DurationChip_Checked" Tag="30"/>
+                                            <RadioButton Content="60 сек" IsChecked="{Binding Benchmark.IsDuration60}"
+                                                         Style="{StaticResource DurationChipStyle}" Checked="DurationChip_Checked" Tag="60"/>
+                                            <RadioButton Content="120 сек" IsChecked="{Binding Benchmark.IsDuration120}"
+                                                         Style="{StaticResource DurationChipStyle}" Checked="DurationChip_Checked" Tag="120"/>
+                                        </StackPanel>
+
+                                        <!-- Action buttons -->
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="Длительность:" Foreground="#555570" FontSize="12" VerticalAlignment="Center" Width="100"/>
-                                            <ComboBox ItemsSource="{Binding Benchmark.DurationOptions}" SelectedItem="{Binding Benchmark.SelectedDuration}"
-                                                      Width="100" Height="36" FontSize="13" VerticalAlignment="Center"/>
-                                            <TextBlock Text=" сек" Foreground="#555570" FontSize="12" VerticalAlignment="Center"/>
+                                            <Button Content="▶  ЗАПУСТИТЬ" Command="{Binding Benchmark.RunBenchmarkCommand}"
+                                                    IsEnabled="{Binding Benchmark.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
+                                                    Style="{StaticResource BenchmarkPrimaryButton}" Width="180"/>
+                                            <Button Content="📸 ДО" Command="{Binding Benchmark.CaptureBeforeCommand}"
+                                                    IsEnabled="{Binding Benchmark.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
+                                                    Style="{StaticResource BenchmarkSecondaryButton}" Margin="8,0,0,0"/>
+                                            <Button Content="📸 ПОСЛЕ" Command="{Binding Benchmark.CaptureAfterCommand}"
+                                                    IsEnabled="{Binding Benchmark.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
+                                                    Style="{StaticResource BenchmarkSecondaryButton}" Margin="8,0,0,0"/>
+                                            <Button Content="🔄 СБРОС" Command="{Binding Benchmark.ResetCommand}"
+                                                    Style="{StaticResource BenchmarkSecondaryButton}" Margin="8,0,0,0"/>
                                         </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                            <Button Content="▶ Запустить бенчмарк" Command="{Binding Benchmark.RunBenchmarkCommand}"
-                                                    IsEnabled="{Binding Benchmark.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
-                                                    Height="44" Width="200" Style="{StaticResource PrimaryButtonStyle}"/>
-                                            <Button Content="📸 Снять До" Command="{Binding Benchmark.CaptureBeforeCommand}"
-                                                    IsEnabled="{Binding Benchmark.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
-                                                    Height="44" Width="130" Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
-                                            <Button Content="📸 Снять После" Command="{Binding Benchmark.CaptureAfterCommand}"
-                                                    IsEnabled="{Binding Benchmark.IsRunning, Converter={StaticResource InverseBooleanConverter}}"
-                                                    Height="44" Width="140" Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
-                                            <Button Content="🔄 Сброс" Command="{Binding Benchmark.ResetCommand}"
-                                                    Height="44" Width="100" Style="{StaticResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
-                                        </StackPanel>
-                                        <TextBlock Text="{Binding Benchmark.StatusText}" Foreground="#606080" FontSize="11" Margin="0,8,0,0"/>
+
+                                        <!-- Status bar -->
+                                        <Border CornerRadius="10" Padding="12,8" Margin="0,12,0,0">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                    <GradientStop Color="#0A0A12" Offset="0"/>
+                                                    <GradientStop Color="#0E0E18" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Ellipse Width="6" Height="6" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                    <Ellipse.Style>
+                                                        <Style TargetType="Ellipse">
+                                                            <Setter Property="Fill" Value="#22C55E"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Benchmark.IsRunning}" Value="True">
+                                                                    <Setter Property="Fill" Value="#F59E0B"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Ellipse.Style>
+                                                </Ellipse>
+                                                <TextBlock Text="{Binding Benchmark.StatusText}" Foreground="#8B90A8" FontSize="11"/>
+                                            </StackPanel>
+                                        </Border>
                                     </StackPanel>
                                 </Border>
 
