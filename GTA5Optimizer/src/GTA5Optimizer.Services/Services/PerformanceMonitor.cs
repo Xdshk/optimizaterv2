@@ -214,16 +214,6 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         if (frameTimes.Length == 0)
             return;
 
-        lock (_frameTimes)
-        {
-            foreach (var frameTime in frameTimes)
-            {
-                _frameTimes.Enqueue(frameTime);
-                while (_frameTimes.Count > MaxFpsHistory)
-                    _frameTimes.Dequeue();
-            }
-        }
-
         var sortedFrameTimes = frameTimes.OrderByDescending(t => t).ToArray();
         int onePercentIdx = Math.Max(1, (int)Math.Ceiling(sortedFrameTimes.Length * 0.01));
         int pointOnePercentIdx = Math.Max(1, (int)Math.Ceiling(sortedFrameTimes.Length * 0.001));
