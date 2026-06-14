@@ -168,9 +168,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             var optimizer = scope.ServiceProvider.GetRequiredService<ISystemOptimizer>();
             var profileManager = scope.ServiceProvider.GetRequiredService<IProfileManager>();
 
-            var profile = SelectedProfileConfig?.Profile ?? SelectedProfile;
-            await profileManager.ApplyProfileAsync(profile);
-            var success = await optimizer.ApplyOptimizationsAsync(profile);
+            await profileManager.ApplyProfileAsync(OptimizationProfile.MaximumFPS);
+            var success = await optimizer.ApplyOptimizationsAsync(OptimizationProfile.MaximumFPS);
 
             StatusMessage = success ? "✅ Оптимизация завершена" : "⚠️ Завершена с ошибками";
             _trayService.ShowNotification("GTA5 Optimizer", StatusMessage);
