@@ -44,28 +44,35 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
 
     public void StartCapture()
     {
-        if (_cts.IsCancellationRequested)
-            _cts.Dispose();
-
-        if (_captureThread != null) return;
-
-        _captureThread = new Thread(CaptureLoop)
+        lock (_captureLock)
         {
-            IsBackground = true,
-            Priority = ThreadPriority.BelowNormal,
-            Name = "ScreenFpsCounter"
-        };
-        _captureThread.Start();
+            if (_captureThread != null) return;
+
+            _cts = new CancellationTokenSource();
+            var token = _cts.Token;
+
+            _captureThread = new Thread(() => CaptureLoop(token))
+            {
+                IsBackground = true,
+                Priority = ThreadPriority.BelowNormal,
+                Name = "ScreenFpsCounter"
+            };
+            _captureThread.Start();
+        }
     }
 
     public void StopCapture()
     {
-        if (_cts.IsCancellationRequested)
-            return;
+        CancellationTokenSource? cts;
+        lock (_captureLock)
+        {
+            cts = _cts;
+            _cts = null;
+            _captureThread = null;
+        }
 
-        _cts.Cancel();
-        _captureThread?.Join(2000);
-        _captureThread = null;
+        cts?.Cancel();
+        cts?.Dispose();
         _dwmStopwatch.Stop();
     }
 
