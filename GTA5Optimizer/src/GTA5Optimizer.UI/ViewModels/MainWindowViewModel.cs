@@ -43,6 +43,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private bool _autoStartEnabled;
     [ObservableProperty] private string _version = "v1.0.0";
     [ObservableProperty] private string _fpsStatus = "FPS: инициализация...";
+    [ObservableProperty] private string _cpuTemp = "—";
+    [ObservableProperty] private string _gpuTemp = "—";
 
     public MonitorViewModel Monitor { get; }
     public LogsViewModel Logs { get; }
