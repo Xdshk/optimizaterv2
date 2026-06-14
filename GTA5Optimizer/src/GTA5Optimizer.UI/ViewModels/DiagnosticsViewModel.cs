@@ -145,9 +145,15 @@ public sealed class GtaVSettingsDto
             .Where(i => i.Severity >= Core.Interfaces.SettingsIssueSeverity.Performance)
             .Select(i => $"{i.SettingName}: {i.CurrentValue} → {i.RecommendedValue}")
             .Take(5).ToList();
+        TopIssues = analysis.Issues
+            .Where(i => i.Severity >= Core.Interfaces.SettingsIssueSeverity.Performance)
+            .Select(i => $"{i.SettingName}: {i.CurrentValue} → {i.RecommendedValue}")
+            .Take(5).ToList();
         TopRecommendations = analysis.Recommendations
             .Select(r => $"{r.Title} (~+{r.ExpectedFpsGain} FPS)")
-            .Take(5).ToList();
+            .Take(5)
+            .DefaultIfEmpty("Настройки GTA V уже выглядят оптимизированными для максимального FPS.")
+            .ToList();
     }
 }
 
