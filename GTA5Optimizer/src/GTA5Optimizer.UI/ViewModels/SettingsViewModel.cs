@@ -113,7 +113,6 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void Reset()
     {
-        SelectedProfileName = "RP Mode";
         AutoOptimizationInterval = 30;
         EnableAutoOptimization = true;
         EnableMemoryCleanup = true;
