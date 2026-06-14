@@ -1,8 +1,22 @@
 {
   "version": 2,
-  "dgSpecHash": "3JT916mF9Hc=",
+  "dgSpecHash": "E3kPXUWdzfA=",
   "success": true,
   "projectFilePath": "C:\\Users\\Burov\\Downloads\\majestic\\GTA5Optimizer\\src\\GTA5Optimizer.Models\\GTA5Optimizer.Models.csproj",
-  "expectedPackageFiles": [],
-  "logs": []
+  "expectedPackageFiles": [
+    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.27\\microsoft.netcore.app.ref.8.0.27.nupkg.sha512",
+    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.27\\microsoft.windowsdesktop.app.ref.8.0.27.nupkg.sha512",
+    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.27\\microsoft.aspnetcore.app.ref.8.0.27.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1900",
+      "level": "Warning",
+      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json.",
+      "projectPath": "C:\\Users\\Burov\\Downloads\\majestic\\GTA5Optimizer\\src\\GTA5Optimizer.Models\\GTA5Optimizer.Models.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Burov\\Downloads\\majestic\\GTA5Optimizer\\src\\GTA5Optimizer.Models\\GTA5Optimizer.Models.csproj",
+      "targetGraphs": []
+    }
+  ]
 }

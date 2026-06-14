@@ -1,8 +1,3 @@
-C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Optimizer.Services.csproj.AssemblyReference.cache
-C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Optimizer.Services.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Optimizer.Services.AssemblyInfoInputs.cache
-C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Optimizer.Services.AssemblyInfo.cs
-C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Optimizer.Services.csproj.CoreCompileInputs.cache
 C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\bin\Release\net8.0-windows\GTA5Optimizer.Services.deps.json
 C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\bin\Release\net8.0-windows\GTA5Optimizer.Services.dll
 C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\bin\Release\net8.0-windows\GTA5Optimizer.Services.pdb
@@ -10,6 +5,12 @@ C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\bin\R
 C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\bin\Release\net8.0-windows\GTA5Optimizer.Models.dll
 C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\bin\Release\net8.0-windows\GTA5Optimizer.Core.pdb
 C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\bin\Release\net8.0-windows\GTA5Optimizer.Models.pdb
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Optimizer.Services.csproj.AssemblyReference.cache
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Optimizer.Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Optimizer.Services.AssemblyInfoInputs.cache
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Optimizer.Services.AssemblyInfo.cs
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Optimizer.Services.csproj.CoreCompileInputs.cache
+C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Optimizer.Services.sourcelink.json
 C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Opti.8B54FF43.Up2Date
 C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\GTA5Optimizer.Services.dll
 C:\Users\Burov\Downloads\majestic\GTA5Optimizer\src\GTA5Optimizer.Services\obj\Release\net8.0-windows\refint\GTA5Optimizer.Services.dll

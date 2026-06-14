@@ -1,11 +1,24 @@
 {
   "version": 2,
-  "dgSpecHash": "TbLsXgQ5+5I=",
+  "dgSpecHash": "RbD7qfTvYlk=",
   "success": true,
   "projectFilePath": "C:\\Users\\Burov\\Downloads\\majestic\\GTA5Optimizer\\src\\GTA5Optimizer.Core\\GTA5Optimizer.Core.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Burov\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.1\\microsoft.extensions.dependencyinjection.abstractions.8.0.1.nupkg.sha512",
-    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.1\\microsoft.extensions.logging.abstractions.8.0.1.nupkg.sha512"
+    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.1\\microsoft.extensions.logging.abstractions.8.0.1.nupkg.sha512",
+    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.27\\microsoft.netcore.app.ref.8.0.27.nupkg.sha512",
+    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.27\\microsoft.windowsdesktop.app.ref.8.0.27.nupkg.sha512",
+    "C:\\Users\\Burov\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.27\\microsoft.aspnetcore.app.ref.8.0.27.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1900",
+      "level": "Warning",
+      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json.",
+      "projectPath": "C:\\Users\\Burov\\Downloads\\majestic\\GTA5Optimizer\\src\\GTA5Optimizer.Core\\GTA5Optimizer.Core.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Burov\\Downloads\\majestic\\GTA5Optimizer\\src\\GTA5Optimizer.Core\\GTA5Optimizer.Core.csproj",
+      "targetGraphs": []
+    }
+  ]
 }
