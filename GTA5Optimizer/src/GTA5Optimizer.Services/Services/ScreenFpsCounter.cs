@@ -43,6 +43,9 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
 
     public void StartCapture()
     {
+        if (_cts.IsCancellationRequested)
+            _cts.Dispose();
+
         if (_captureThread != null) return;
 
         _captureThread = new Thread(CaptureLoop)
@@ -56,6 +59,9 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
 
     public void StopCapture()
     {
+        if (_cts.IsCancellationRequested)
+            return;
+
         _cts.Cancel();
         _captureThread?.Join(2000);
         _captureThread = null;
