@@ -482,12 +482,12 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Grid.Column="0">
-                                            <TextBlock Text="ПРОФИЛЬ ОПТИМИЗАЦИИ" Foreground="#555570" FontSize="9" FontWeight="Bold" Margin="0,0,0,6"/>
+                                            <TextBlock Text="ПРОФИЛЬ ОПТИМИЗАЦИИ" Foreground="#8B90A8" FontSize="10" FontWeight="Bold" Margin="0,0,0,8"/>
                                             <ComboBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfileConfig}"
-                                                      DisplayMemberPath="Name" Width="240" HorizontalAlignment="Left" Height="40" FontSize="13"/>
+                                                      DisplayMemberPath="Name" Width="260" HorizontalAlignment="Left" Height="42" FontSize="13"/>
                                         </StackPanel>
                                         <TextBlock Grid.Column="1" Text="{Binding SelectedProfileConfig.Description, TargetNullValue='Выберите профиль', FallbackValue='Выберите профиль'}"
-                                                   Foreground="#606080" VerticalAlignment="Center" FontSize="12" Margin="20,0,0,0"/>
+                                                   Foreground="#A0A4BD" VerticalAlignment="Center" FontSize="13" Margin="20,0,0,0"/>
                                     </Grid>
                                 </Border>
 
