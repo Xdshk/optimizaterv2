@@ -30,6 +30,17 @@ public partial class BenchmarkViewModel : ObservableObject
         IsDuration120 = value == 120;
     }
 
+    partial void OnIsDuration15Changed(bool value) { if (value) SetDuration(15); }
+    partial void OnIsDuration30Changed(bool value) { if (value) SetDuration(30); }
+    partial void OnIsDuration60Changed(bool value) { if (value) SetDuration(60); }
+    partial void OnIsDuration120Changed(bool value) { if (value) SetDuration(120); }
+
+    private void SetDuration(int seconds)
+    {
+        if (SelectedDuration == seconds) return;
+        SelectedDuration = seconds;
+    }
+
     public int[] DurationOptions { get; } = { 15, 30, 60, 120 };
 
     public BenchmarkViewModel(IBenchmarkService benchmark, ISystemOptimizer optimizer)
