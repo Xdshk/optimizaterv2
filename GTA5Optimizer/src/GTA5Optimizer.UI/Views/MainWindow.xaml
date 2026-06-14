@@ -312,10 +312,16 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="GTA5" Foreground="#818CF8" FontSize="18" FontWeight="Light" VerticalAlignment="Center"/>
-                        <TextBlock Text="OPTIMIZER" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
-                        <Border Background="#1A1A2E" CornerRadius="6" Padding="8,3" Margin="12,0,0,0" BorderBrush="#2A2A40" BorderThickness="1">
-                            <TextBlock Text="Majestic RP" Foreground="#818CF8" FontSize="10" FontWeight="SemiBold"/>
+                        <TextBlock Text="GTA5" Foreground="#A78BFA" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <TextBlock Text="OPTIMIZER" Foreground="#FFFFFF" FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <Border CornerRadius="8" Padding="8,4" Margin="12,0,0,0" BorderBrush="#2A2A55" BorderThickness="1">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#151530" Offset="0"/>
+                                    <GradientStop Color="#0E0E18" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <TextBlock Text="Majestic RP" Foreground="#22D3EE" FontSize="11" FontWeight="SemiBold"/>
                         </Border>
                     </StackPanel>
 
