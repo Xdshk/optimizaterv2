@@ -128,8 +128,11 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
             }
             else
             {
-                metrics.CurrentFPS = GetLastReportedFps();
+                metrics.CurrentFPS = GetGtaWindowFps();
             }
+
+            if (metrics.CurrentFPS <= 0)
+                metrics.CurrentFPS = GetLastReportedFps();
 
             metrics.FrameTimeMs = metrics.CurrentFPS > 0 ? (int)(1000.0 / metrics.CurrentFPS) : 0;
             PopulateFpsHistory(metrics);
