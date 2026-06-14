@@ -352,6 +352,17 @@ public sealed class DiagnosticsService : IDiagnosticsService
             // Generate recommendations
             GenerateRecommendations(analysis);
 
+            if (analysis.Recommendations.Count == 0)
+            {
+                analysis.Recommendations.Add(new SettingsRecommendation
+                {
+                    Title = "Настройки уже оптимизированы",
+                    Description = "Проверенные параметры GTA V уже соответствуют профилю максимального FPS.",
+                    Action = "Оставить текущие настройки",
+                    ExpectedFpsGain = 0
+                });
+            }
+
             // Calculate performance score
             int issueCount = analysis.Issues.Count(i => i.Severity == SettingsIssueSeverity.Performance);
             int criticalCount = analysis.Issues.Count(i => i.Severity == SettingsIssueSeverity.Critical);
