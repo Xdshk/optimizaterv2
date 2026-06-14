@@ -19,6 +19,21 @@
         <converters:SeverityToColorConverter x:Key="SeverityToColorConverter" xmlns:converters="clr-namespace:GTA5Optimizer.UI.Converters"/>
         <converters:BytesToMBConverter x:Key="BytesToMBConverter" xmlns:converters="clr-namespace:GTA5Optimizer.UI.Converters"/>
 
+        <SolidColorBrush x:Key="Hud.Background" Color="#05050A"/>
+        <SolidColorBrush x:Key="Hud.Panel" Color="#0B0B14"/>
+        <SolidColorBrush x:Key="Hud.Panel.Strong" Color="#11111E"/>
+        <SolidColorBrush x:Key="Hud.Panel.Soft" Color="#151526"/>
+        <SolidColorBrush x:Key="Hud.Border" Color="#202035"/>
+        <SolidColorBrush x:Key="Hud.Border.Soft" Color="#17172A"/>
+        <SolidColorBrush x:Key="Hud.Text" Color="#F5F7FF"/>
+        <SolidColorBrush x:Key="Hud.Text.Muted" Color="#8B90A8"/>
+        <SolidColorBrush x:Key="Hud.Text.Subtle" Color="#5E637C"/>
+        <SolidColorBrush x:Key="Hud.Accent" Color="#6366F1"/>
+        <SolidColorBrush x:Key="Hud.Accent.Green" Color="#22C55E"/>
+        <SolidColorBrush x:Key="Hud.Accent.Orange" Color="#F59E0B"/>
+        <SolidColorBrush x:Key="Hud.Accent.Pink" Color="#EC4899"/>
+        <SolidColorBrush x:Key="Hud.Danger" Color="#EF4444"/>
+
         <!-- Card Style -->
         <Style x:Key="CardStyle" TargetType="Border">
             <Setter Property="Background" Value="#12121A"/>
