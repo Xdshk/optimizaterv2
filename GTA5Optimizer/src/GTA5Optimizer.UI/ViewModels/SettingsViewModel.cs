@@ -20,9 +20,6 @@ public partial class SettingsViewModel : ObservableObject
     private readonly string _settingsPath;
 
     [ObservableProperty]
-    private string _selectedProfileName = "RP Mode";
-
-    [ObservableProperty]
     private int _autoOptimizationInterval = 30;
 
     [ObservableProperty]
