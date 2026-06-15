@@ -289,7 +289,20 @@ public sealed class DiagnosticsService : IDiagnosticsService
         try
         {
             var doc = await Task.Run(() => XDocument.Load(settingsPath), ct);
-            var gfx = doc.Root?.Element("GFX") ?? doc.Root?.Element("graphics");
+
+            // GTA V settings.xml has evolved over the years. Try multiple known formats:
+            // Format 1: <Settings><GFX><Quality><TextureQuality value="2"/></Quality></GFX></Settings>
+            // Format 2: <Settings><Graphics><TextureQuality value="2"/></Graphics></Settings>
+            // Format 3: <Settings><GFX><TextureQuality>2</TextureQuality></GFX></Settings>
+            XElement? gfx = doc.Root?.Element("GFX")
+                          ?? doc.Root?.Element("Graphics")
+                          ?? doc.Root?.Element("graphics")
+                          ?? doc.Root;
+
+            // Try to find the quality/settings sub-element
+            XElement? qualityContainer = gfx?.Element("Quality")
+                                      ?? gfx?.Element("Settings")
+                                      ?? gfx;
 
             if (gfx == null)
             {
@@ -298,15 +311,8 @@ public sealed class DiagnosticsService : IDiagnosticsService
                     SettingName = "GFX",
                     CurrentValue = "Not found",
                     RecommendedValue = "N/A",
-                    Description = "Секция GFX не найдена в settings.xml.",
+                    Description = "Секция GFX/Graphics не найдена в settings.xml.",
                     Severity = SettingsIssueSeverity.Info
-                });
-                analysis.Recommendations.Add(new SettingsRecommendation
-                {
-                    Title = "Проверить settings.xml",
-                    Description = "Файл существует, но не содержит секцию GFX с настройками графики.",
-                    Action = "Откройте settings.xml и убедитесь, что есть секция GFX",
-                    ExpectedFpsGain = 0
                 });
                 analysis.PerformanceScore = 50;
                 return analysis;
