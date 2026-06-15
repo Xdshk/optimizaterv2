@@ -255,7 +255,14 @@ public sealed class DiagnosticsService : IDiagnosticsService
     public async Task<GtaVSettingsAnalysis> AnalyzeGtaVSettingsAsync(string gtaVPath, CancellationToken ct = default)
     {
         var analysis = new GtaVSettingsAnalysis();
-        var settingsPath = Path.Combine(gtaVPath, "settings.xml");
+
+        // GTA V stores settings.xml in Documents\Rockstar Games\GTA V\, NOT in the game install dir
+        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        var docSettingsPath = Path.Combine(documentsPath, "Rockstar Games", "GTA V", "settings.xml");
+        var gameSettingsPath = Path.Combine(gtaVPath, "settings.xml");
+
+        // Try Documents path first (where GTA V actually stores settings), then game dir
+        var settingsPath = File.Exists(docSettingsPath) ? docSettingsPath : gameSettingsPath;
         analysis.SettingsPath = settingsPath;
 
         if (!File.Exists(settingsPath))
@@ -265,14 +272,14 @@ public sealed class DiagnosticsService : IDiagnosticsService
                 SettingName = "settings.xml",
                 CurrentValue = "Not found",
                 RecommendedValue = "N/A",
-                Description = "Файл settings.xml не найден. Возможно, игра ещё не запускалась.",
+                Description = $"Файл settings.xml не найден. Проверены пути:{Environment.NewLine}  {docSettingsPath}{Environment.NewLine}  {gameSettingsPath}{Environment.NewLine}Возможно, игра ещё не запускалась.",
                 Severity = SettingsIssueSeverity.Info
             });
             analysis.Recommendations.Add(new SettingsRecommendation
             {
                 Title = "Запустить GTA V один раз",
-                Description = "После первого запуска игра создаст settings.xml, и анализатор сможет проверить настройки графики.",
-                Action = "Запустите GTA V и выйдите из меню настроек",
+                Description = "После первого запуска игра создаст settings.xml в папке Documents\\Rockstar Games\\GTA V\\, и анализатор сможет проверить настройки графики.",
+                Action = "Запустите GTA V, зайдите в меню настроек и выйдите",
                 ExpectedFpsGain = 0
             });
             analysis.PerformanceScore = 50;
