@@ -13,6 +13,7 @@ namespace GTA5Optimizer.Services.Services;
 /// </summary>
 public sealed class ScreenFpsCounter : IScreenFpsCounter
 {
+    private readonly ILoggerService _logSrv;
     private readonly ILogger<ScreenFpsCounter> _logger;
     private readonly PresentMonFpsCounter _presentMon;
     private Thread? _pollThread;
