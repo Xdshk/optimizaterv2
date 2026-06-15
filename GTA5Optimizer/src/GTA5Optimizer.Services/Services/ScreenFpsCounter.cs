@@ -41,7 +41,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
         _logger = logger;
         _logSrv = logSrv;
 
-        var pmLogger = LoggerFactory.Create(b => b.AddConsole().SetMinimumLevel(LogLevel.Information))
+        var pmLogger = LoggerFactory.Create(b => b.AddConsole().SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information))
             .CreateLogger<PresentMonFpsCounter>();
         _presentMon = new PresentMonFpsCounter(pmLogger, "GTA5");
     }
