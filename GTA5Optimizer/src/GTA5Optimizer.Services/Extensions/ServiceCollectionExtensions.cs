@@ -22,7 +22,13 @@ public static class ServiceCollectionExtensions
         builder.Services.AddSingleton<ISystemOptimizer, SystemOptimizer>();
         builder.Services.AddSingleton<IGameDetector, GameDetector>();
         builder.Services.AddSingleton<IPerformanceMonitor, PerformanceMonitor>();
-        builder.Services.AddSingleton<IScreenFpsCounter, ScreenFpsCounter>();
+        // Register ScreenFpsCounter with both ILogger and ILoggerService
+builder.Services.AddSingleton<IScreenFpsCounter>(sp =>
+{
+    var logger   = sp.GetRequiredService<ILogger<ScreenFpsCounter>>();
+    var logSrv   = sp.GetRequiredService<ILoggerService>();
+    return new ScreenFpsCounter(logger, logSrv);
+});
         builder.Services.AddSingleton<IRegistryManager, RegistryManager>();
         builder.Services.AddSingleton<IMemoryManager, MemoryManager>();
         builder.Services.AddSingleton<IProcessManager, ProcessManager>();
