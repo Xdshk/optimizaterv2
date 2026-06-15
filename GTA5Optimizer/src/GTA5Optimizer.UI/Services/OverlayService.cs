@@ -2,12 +2,11 @@ using GTA5Optimizer.Core.Interfaces;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace GTA5Optimizer.UI.Services;
 
 /// <summary>
-/// Сервис игрового оверлея (показывает FPS, CPU, GPU поверх игры)
+/// Сервис игрового оверлея (показывает FPS, CPU, GPU, температуру поверх игры)
 /// </summary>
 public class OverlayService : IDisposable
 {
@@ -17,6 +16,8 @@ public class OverlayService : IDisposable
     private TextBlock? _cpuText;
     private TextBlock? _gpuText;
     private TextBlock? _ramText;
+    private TextBlock? _cpuTempText;
+    private TextBlock? _gpuTempText;
     private bool _isVisible;
     private bool _disposed;
 
@@ -34,7 +35,6 @@ public class OverlayService : IDisposable
     public OverlayService(IPerformanceMonitor monitor)
     {
         _monitor = monitor;
-        // Subscribe to metrics updates instead of polling
         _monitor.OnMetricsUpdated += OnMetricsUpdated;
     }
 
@@ -45,11 +45,11 @@ public class OverlayService : IDisposable
         _overlayWindow = new Window
         {
             Title = "GTA5 Optimizer Overlay",
-            Width = 180,
-            Height = 120,
+            Width = 200,
+            Height = 160,
             WindowStyle = WindowStyle.None,
             AllowsTransparency = true,
-            Background = System.Windows.Media.Brushes.Transparent,
+            Background = Brushes.Transparent,
             Topmost = true,
             ShowInTaskbar = false,
             Left = 10,
@@ -58,33 +58,37 @@ public class OverlayService : IDisposable
         };
 
         var grid = new Grid { Margin = new Thickness(8) };
-        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        for (int i = 0; i < 6; i++)
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
         var bg = new Border
         {
-            Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 10, 10, 10)),
+            Background = new SolidColorBrush(Color.FromArgb(160, 10, 10, 10)),
             CornerRadius = new CornerRadius(8),
             Padding = new Thickness(10, 6, 10, 6),
             Child = grid
         };
 
         _fpsText = CreateTextBlock(16, "#00E676");
-        _cpuText = CreateTextBlock(12, "#00D4FF");
-        _gpuText = CreateTextBlock(12, "#FF6D00");
-        _ramText = CreateTextBlock(12, "#FFAB00");
+        _cpuText = CreateTextBlock(11, "#00D4FF");
+        _gpuText = CreateTextBlock(11, "#FF6D00");
+        _ramText = CreateTextBlock(11, "#FFAB00");
+        _cpuTempText = CreateTextBlock(11, "#22D3EE");
+        _gpuTempText = CreateTextBlock(11, "#F59E0B");
 
         Grid.SetRow(_fpsText, 0);
         Grid.SetRow(_cpuText, 1);
         Grid.SetRow(_gpuText, 2);
         Grid.SetRow(_ramText, 3);
+        Grid.SetRow(_cpuTempText, 4);
+        Grid.SetRow(_gpuTempText, 5);
 
         grid.Children.Add(_fpsText);
         grid.Children.Add(_cpuText);
         grid.Children.Add(_gpuText);
         grid.Children.Add(_ramText);
+        grid.Children.Add(_cpuTempText);
+        grid.Children.Add(_gpuTempText);
 
         _overlayWindow.Content = bg;
 
@@ -94,7 +98,6 @@ public class OverlayService : IDisposable
         }
         catch { }
 
-        // Get initial values without blocking the UI thread
         _ = RefreshOverlayAsync();
     }
 
@@ -103,8 +106,8 @@ public class OverlayService : IDisposable
         return new TextBlock
         {
             FontSize = fontSize,
-            FontFamily = new System.Windows.Media.FontFamily("Consolas, Courier New, monospace"),
-            Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(color)),
+            FontFamily = new FontFamily("Consolas, Courier New, monospace"),
+            Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color)),
             FontWeight = FontWeights.SemiBold,
             Margin = new Thickness(0, 1, 0, 1)
         };
@@ -114,7 +117,6 @@ public class OverlayService : IDisposable
     {
         try
         {
-            // Only update if overlay is visible
             if (!_isVisible || _overlayWindow == null) return;
 
             _overlayWindow.Dispatcher.Invoke(() =>
@@ -144,6 +146,8 @@ public class OverlayService : IDisposable
         if (_cpuText != null) _cpuText.Text = $"CPU: {metrics.CPUUsage:F0}%";
         if (_gpuText != null) _gpuText.Text = $"GPU: {metrics.GPUUsage:F0}%";
         if (_ramText != null) _ramText.Text = $"RAM: {metrics.RAMUsagePercent:F0}%";
+        if (_cpuTempText != null) _cpuTempText.Text = $"CPU: {metrics.CPUTemperature:F0}°C";
+        if (_gpuTempText != null) _gpuTempText.Text = $"GPU: {metrics.GPUTemperature:F0}°C";
     }
 
     private void Hide()
