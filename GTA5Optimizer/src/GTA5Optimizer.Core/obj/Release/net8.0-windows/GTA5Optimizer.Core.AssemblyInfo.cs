@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GTA5Optimizer.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b45b1cd4fe559859199fc1d1f481843886b24f86")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9d8332ff6bd9d7b9a6bf31e8b80176432316231a")]
 [assembly: System.Reflection.AssemblyProductAttribute("GTA5Optimizer.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GTA5Optimizer.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
