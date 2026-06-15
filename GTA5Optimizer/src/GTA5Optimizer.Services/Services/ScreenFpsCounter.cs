@@ -35,9 +35,10 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
         get { lock (_fpsLock) return _currentFps; }
     }
 
-    public ScreenFpsCounter(ILogger<ScreenFpsCounter> logger)
+    public ScreenFpsCounter(ILogger<ScreenFpsCounter> logger, ILoggerService logSrv)
     {
         _logger = logger;
+        _logSrv = logSrv;
 
         var pmLogger = LoggerFactory.Create(b => b.AddConsole().SetMinimumLevel(LogLevel.Information))
             .CreateLogger<PresentMonFpsCounter>();
