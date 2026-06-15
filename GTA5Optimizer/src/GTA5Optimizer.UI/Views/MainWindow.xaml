@@ -797,8 +797,8 @@
                             <StackPanel Margin="16">
                                 <Border Style="{StaticResource CardStyle}" Margin="0,0,0,12">
                                     <StackPanel Margin="18">
-                                        <TextBlock Text="ОПТИМИЗАЦИЯ MAX FPS" Foreground="#8B90A8" FontSize="10" FontWeight="Bold" Margin="0,0,0,8"/>
-                                        <TextBlock Text="Одна кнопка применяет агрессивный профиль Maximum FPS: приоритет игры, очистка памяти, закрытие лишних процессов и отключение фоновых ограничений." Foreground="#A0A4BD" FontSize="13" TextWrapping="Wrap"/>
+                                        <TextBlock Text="ОПТИМИЗАЦИЯ МАКСИМАЛЬНОГО FPS" Foreground="#8B90A8" FontSize="10" FontWeight="Bold" Margin="0,0,0,8"/>
+                                        <TextBlock Text="Одна кнопка применяет агрессивный профиль максимального FPS: приоритет игры, очистка памяти, закрытие лишних процессов и отключение фоновых ограничений." Foreground="#A0A4BD" FontSize="13" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
 
