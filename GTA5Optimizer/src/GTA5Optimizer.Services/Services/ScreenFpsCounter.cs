@@ -82,15 +82,35 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
                 double fps = 0;
                 string method = "none";
 
+                // 1️⃣ start iteration
+                _ = _logSrv.LogAsync(new LogEntry
+                {
+                    Level    = GTA5LogLevel.Debug,
+                    Category = "FPS",
+                    Message  = "Poll loop iteration start"
+                });
+
                 // Method 1: PresentMon (most accurate — direct DXGI hook)
                 fps = _presentMon.CurrentFPS;
                 if (fps > 0) method = "PresentMon";
+                _ = _logSrv.LogAsync(new LogEntry
+                {
+                    Level    = GTA5LogLevel.Debug,
+                    Category = "FPS",
+                    Message  = $"PresentMon FPS={fps:F1}"
+                });
 
                 // Method 2: RTSS shared memory
                 if (fps <= 0)
                 {
                     fps = TryReadRtssFps();
                     if (fps > 0) method = "RTSS";
+                    _ = _logSrv.LogAsync(new LogEntry
+                    {
+                        Level    = GTA5LogLevel.Debug,
+                        Category = "FPS",
+                        Message  = $"RTSS FPS={fps:F1}"
+                    });
                 }
 
                 // Method 3: DWM frame delta (borderless/windowed only)
@@ -98,45 +118,15 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
                 {
                     fps = ReadDwmDeltaFps();
                     if (fps > 0) method = "DWM";
+                    _ = _logSrv.LogAsync(new LogEntry
+                    {
+                        Level    = GTA5LogLevel.Debug,
+                        Category = "FPS",
+                        Message  = $"DWM FPS={fps:F1}"
+                    });
                 }
 
-                if (fps > 0 && fps <= 1000)
-                {
-                    lock (_fpsLock)
-                    {
-                        if (_currentFps > 0)
-                            _currentFps = _currentFps * 0.6 + fps * 0.4;
-                        else
-                            _currentFps = fps;
-                    }
-
-                    // Log method changes and periodic status
-                    if (method != _activeMethod)
-                    {
-                        _activeMethod = method;
-                        _logger.LogInformation("FPS source: {Method} — {Fps:F1} FPS", method, _currentFps);
-                    }
-                    else if (++_pollCount % 10 == 0)
-                    {
-                        _logger.LogDebug("FPS [{Method}]: {Fps:F1}", method, _currentFps);
-                    }
-                }
-                else if (_activeMethod != "none")
-                {
-                    _activeMethod = "none";
-                    lock (_fpsLock) _currentFps = 0;
-                    _logger.LogWarning("All FPS methods returned 0 — is the game running?");
-                }
-
-                Thread.Sleep(200);
-            }
-        }
-        catch (OperationCanceledException) { }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "FPS poll loop error");
-        }
-    }
+                if (fps > 0 && fps
 
     private double ReadDwmDeltaFps()
     {
