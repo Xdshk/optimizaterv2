@@ -580,17 +580,28 @@ public sealed class DiagnosticsService : IDiagnosticsService
 
     /// <summary>
     /// Checks a GTA V graphics setting against its optimal value for max FPS.
-    /// GTA V settings.xml uses mixed values — some numeric ("0"-"4"), some text ("Low","High","Ultra"), some percentage ("50","100").
-    /// We flag the setting ONLY if its current value is in the "worseValues" list (i.e. higher quality than optimal).
-    /// If the setting already matches or is better than optimal, it's ignored.
+    /// GTA V settings.xml uses mixed formats:
+    ///   - <TextureQuality value="2"/> (attribute-based)
+    ///   - <TextureQuality>2</TextureQuality> (text-based)
+    ///   - Nested: <GFX><Quality><TextureQuality value="2"/></Quality></GFX>
+    /// Numeric values "0"-"4" where 0=Lowest, 4=Ultra.
+    /// We flag the setting ONLY if its current value is worse than optimal.
     /// </summary>
     private static void CheckGtaVSetting(XElement gfx, string settingName, string displayName,
         GtaVSettingsAnalysis analysis, string optimalValue, string[] worseValues, string recommendation)
     {
+        // Try to find the element directly or inside a Quality/Settings sub-container
         var element = gfx.Element(settingName);
+        if (element == null)
+        {
+            // Try nested: gfx > Quality > settingName
+            element = gfx.Elements("Quality").Elements(settingName).FirstOrDefault()
+                  ?? gfx.Elements("Settings").Elements(settingName).FirstOrDefault();
+        }
         if (element == null) return;
 
-        var currentValue = element.Value;
+        // Get value: either from "value" attribute or element text
+        var currentValue = element.Attribute("value")?.Value ?? element.Value;
 
         // Normalize for comparison: trim, ignore case
         var normalizedCurrent = currentValue.Trim();
