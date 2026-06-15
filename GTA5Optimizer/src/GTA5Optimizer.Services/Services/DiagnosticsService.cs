@@ -318,80 +318,80 @@ public sealed class DiagnosticsService : IDiagnosticsService
                 return analysis;
             }
 
-            // GTA V settings.xml uses string values: "Off", "Low", "Medium", "High", "Very High", "Ultra"
-            // and also numeric "0"-"4" for some settings. We check the actual string value.
-            // For max FPS: lower is better (Low/Off optimal), except FXAA (should be On).
+            // GTA V settings.xml uses numeric values "0"-"4" for most quality settings:
+            //   0 = Lowest/Low, 1 = Normal, 2 = High, 3 = Very High, 4 = Ultra
+            // For max FPS we want 0. We flag only values > optimal.
 
             CheckGtaVSetting(gfx, "TextureQuality", "Качество текстур", analysis,
-                optimalValue: "Normal",
-                worseValues: new[] { "High", "Very High", "Ultra" },
-                recommendation: "Уменьшите до Normal для +10-20 FPS");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "Normal", "High", "Very High", "Ultra" },
+                recommendation: "Уменьшите до Lowest (0) для +10-20 FPS");
 
             CheckGtaVSetting(gfx, "ShadowQuality", "Качество теней", analysis,
-                optimalValue: "Normal",
-                worseValues: new[] { "High", "Very High", "Ultra", "Soft", "Softest", "Nvidia PCSS" },
-                recommendation: "Уменьшите до Normal для +5-15 FPS");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "Normal", "High", "Very High", "Ultra", "Soft", "Softest", "Nvidia PCSS" },
+                recommendation: "Уменьшите до Lowest (0) для +5-15 FPS");
 
             CheckGtaVSetting(gfx, "ReflectionQuality", "Качество отражений", analysis,
-                optimalValue: "Low",
-                worseValues: new[] { "Medium", "High", "Very High", "Ultra" },
-                recommendation: "Уменьшите до Low для +5-10 FPS");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "Low", "Medium", "High", "Very High", "Ultra" },
+                recommendation: "Уменьшите до Lowest (0) для +5-10 FPS");
 
             CheckGtaVSetting(gfx, "MSAA", "MSAA", analysis,
-                optimalValue: "Off",
-                worseValues: new[] { "2x", "4x", "8x" },
-                recommendation: "Отключите MSAA для +10-20 FPS");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "2x", "4x", "8x", "On" },
+                recommendation: "Отключите MSAA (0) для +10-20 FPS");
 
             CheckGtaVSetting(gfx, "FXAA", "FXAA", analysis,
-                optimalValue: "On",
-                worseValues: new[] { "Off" },
-                recommendation: "FXAA почти бесплатен, включите");
+                optimalValue: "1",
+                worseValues: new[] { "0", "Off" },
+                recommendation: "FXAA почти бесплатен, включите (1)");
 
             CheckGtaVSetting(gfx, "PopulationDensity", "Плотность населения", analysis,
-                optimalValue: "50",
-                worseValues: new[] { "75", "100" },
-                recommendation: "Уменьшите до 50% для +5-10 FPS в городах");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "50", "75", "100" },
+                recommendation: "Уменьшите до минимума для +5-10 FPS в городах");
 
             CheckGtaVSetting(gfx, "DistanceScaling", "Дальность прорисовки", analysis,
-                optimalValue: "50",
-                worseValues: new[] { "75", "100" },
-                recommendation: "Уменьшите до 50% для +5-10 FPS");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "50", "75", "100" },
+                recommendation: "Уменьшите до минимума для +5-10 FPS");
 
             CheckGtaVSetting(gfx, "VSync", "VSync", analysis,
-                optimalValue: "Off",
-                worseValues: new[] { "On", "1", "2", "Adaptive" },
-                recommendation: "Отключите VSync для снятия ограничения FPS");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "On", "Adaptive" },
+                recommendation: "Отключите VSync (0) для снятия ограничения FPS");
 
             CheckGtaVSetting(gfx, "GrassQuality", "Качество травы", analysis,
-                optimalValue: "Low",
-                worseValues: new[] { "Medium", "High", "Very High", "Ultra" },
-                recommendation: "Уменьшите до Low для +5-15 FPS");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "Low", "Medium", "High", "Very High", "Ultra" },
+                recommendation: "Уменьшите до Lowest (0) для +5-15 FPS");
 
             CheckGtaVSetting(gfx, "PostFX", "Post-обработка", analysis,
-                optimalValue: "Low",
-                worseValues: new[] { "Medium", "High", "Very High", "Ultra" },
-                recommendation: "Уменьшите до Low для +3-8 FPS");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "Low", "Medium", "High", "Very High", "Ultra" },
+                recommendation: "Уменьшите до Lowest (0) для +3-8 FPS");
 
             CheckGtaVSetting(gfx, "AnisotropicFiltering", "Анизотропная фильтрация", analysis,
-                optimalValue: "Off",
-                worseValues: new[] { "2x", "4x", "8x", "16x", "High", "Medium" },
-                recommendation: "Отключите для +2-3 FPS (незаметно на низких настройках)");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "2x", "4x", "8x", "16x", "High", "Medium", "Low", "On" },
+                recommendation: "Отключите (0) для +2-3 FPS (незаметно на низких настройках)");
 
             // Extended settings
             CheckGtaVSetting(gfx, "Tessellation", "Тесселяция", analysis,
-                optimalValue: "Off",
-                worseValues: new[] { "On", "High", "Medium", "Very High" },
-                recommendation: "Отключите тесселяцию для +5-10 FPS");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "On", "High", "Medium", "Very High" },
+                recommendation: "Отключите тесселяцию (0) для +5-10 FPS");
 
             CheckGtaVSetting(gfx, "ShaderQuality", "Качество шейдеров", analysis,
-                optimalValue: "Normal",
-                worseValues: new[] { "High", "Very High" },
-                recommendation: "Уменьшите до Normal для +3-5 FPS");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "Normal", "High", "Very High" },
+                recommendation: "Уменьшите до Lowest (0) для +3-5 FPS");
 
             CheckGtaVSetting(gfx, "WaterQuality", "Качество воды", analysis,
-                optimalValue: "Low",
-                worseValues: new[] { "Medium", "High", "Very High", "Ultra" },
-                recommendation: "Уменьшите до Low для +3-5 FPS");
+                optimalValue: "0",
+                worseValues: new[] { "1", "2", "3", "4", "Low", "Medium", "High", "Very High", "Ultra" },
+                recommendation: "Уменьшите до Lowest (0) для +3-5 FPS");
 
             if (analysis.Recommendations.Count == 0)
             {
