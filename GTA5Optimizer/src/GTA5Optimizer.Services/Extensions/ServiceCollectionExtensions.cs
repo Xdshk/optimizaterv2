@@ -2,6 +2,7 @@ using GTA5Optimizer.Core.Interfaces;
 using GTA5Optimizer.Services.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace GTA5Optimizer.Services.Extensions;
 
