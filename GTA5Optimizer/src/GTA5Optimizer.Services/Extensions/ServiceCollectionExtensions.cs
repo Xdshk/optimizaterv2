@@ -12,6 +12,11 @@ public static class ServiceCollectionExtensions
 {
     public static IHostApplicationBuilder AddGTA5OptimizerServices(this IHostApplicationBuilder builder)
     {
+        // Enable console logging with the most verbose level
+        builder.Logging.ClearProviders()
+                       .AddConsole()
+                       .SetMinimumLevel(LogLevel.Debug);
+
         // Core services
         builder.Services.AddSingleton<ISystemOptimizer, SystemOptimizer>();
         builder.Services.AddSingleton<IGameDetector, GameDetector>();
