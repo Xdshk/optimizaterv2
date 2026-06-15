@@ -25,7 +25,6 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     private long _lastFramesPresented;
     private DateTime _lastDwmPoll = DateTime.MinValue;
     private bool _dwmAvailable = true;
-    private int _pollCount;
 
     // Which method is active
     private string _activeMethod = "none";
@@ -59,6 +58,12 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
         _pollThread.Start();
 
         _logger.LogInformation("FPS counter started (PresentMon + RTSS + DWM fallback)");
+        _ = _logSrv.LogAsync(new LogEntry
+        {
+            Level = GTA5LogLevel.Information,
+            Category = "FPS",
+            Message = "FPS counter started (PresentMon + RTSS + DWM fallback)"
+        });
     }
 
     public void StopCapture()
@@ -77,56 +82,89 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
     {
         try
         {
+            // Wait a bit for PresentMon to start producing data
+            Thread.Sleep(1000);
+
             while (!token.IsCancellationRequested)
             {
                 double fps = 0;
                 string method = "none";
 
-                // 1️⃣ start iteration
-                _ = _logSrv.LogAsync(new LogEntry
+                try
                 {
-                    Level    = GTA5LogLevel.Debug,
-                    Category = "FPS",
-                    Message  = "Poll loop iteration start"
-                });
+                    // Method 1: PresentMon (most accurate — direct DXGI hook)
+                    fps = _presentMon.CurrentFPS;
+                    if (fps > 0) method = "PresentMon";
 
-                // Method 1: PresentMon (most accurate — direct DXGI hook)
-                fps = _presentMon.CurrentFPS;
-                if (fps > 0) method = "PresentMon";
-                _ = _logSrv.LogAsync(new LogEntry
-                {
-                    Level    = GTA5LogLevel.Debug,
-                    Category = "FPS",
-                    Message  = $"PresentMon FPS={fps:F1}"
-                });
+                    // Method 2: RTSS shared memory
+                    if (fps <= 0)
+                    {
+                        fps = TryReadRtssFps();
+                        if (fps > 0) method = "RTSS";
+                    }
 
-                // Method 2: RTSS shared memory
-                if (fps <= 0)
+                    // Method 3: DWM frame delta (borderless/windowed only)
+                    if (fps <= 0)
+                    {
+                        fps = ReadDwmDeltaFps();
+                        if (fps > 0) method = "DWM";
+                    }
+
+                    if (fps > 0 && fps < 1000)
+                    {
+                        lock (_fpsLock)
+                        {
+                            if (_currentFps > 0)
+                                _currentFps = _currentFps * 0.7 + fps * 0.3;
+                            else
+                                _currentFps = fps;
+                        }
+                        _activeMethod = method;
+
+                        _logger.LogDebug("FPS source: {Method} — {Fps:F1} FPS", method, fps);
+                        _ = _logSrv.LogAsync(new LogEntry
+                        {
+                            Level = GTA5LogLevel.Debug,
+                            Category = "FPS",
+                            Message = $"FPS source: {method} — {fps:F1} FPS"
+                        });
+                    }
+                    else
+                    {
+                        _logger.LogDebug("All FPS methods returned 0 — PresentMon={PM:F1}, method={Method}",
+                            _presentMon.CurrentFPS, method);
+                    }
+                }
+                catch (Exception ex)
                 {
-                    fps = TryReadRtssFps();
-                    if (fps > 0) method = "RTSS";
+                    _logger.LogError(ex, "FPS poll loop error");
                     _ = _logSrv.LogAsync(new LogEntry
                     {
-                        Level    = GTA5LogLevel.Debug,
+                        Level = GTA5LogLevel.Error,
                         Category = "FPS",
-                        Message  = $"RTSS FPS={fps:F1}"
+                        Message = $"FPS poll loop error: {ex.Message}"
                     });
                 }
 
-                // Method 3: DWM frame delta (borderless/windowed only)
-                if (fps <= 0)
-                {
-                    fps = ReadDwmDeltaFps();
-                    if (fps > 0) method = "DWM";
-                    _ = _logSrv.LogAsync(new LogEntry
-                    {
-                        Level    = GTA5LogLevel.Debug,
-                        Category = "FPS",
-                        Message  = $"DWM FPS={fps:F1}"
-                    });
-                }
-
-                if (fps > 0 && fps
+                // Poll every 500ms
+                Thread.Sleep(500);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Normal shutdown
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "FPS poll loop fatal error");
+            _ = _logSrv.LogAsync(new LogEntry
+            {
+                Level = GTA5LogLevel.Error,
+                Category = "FPS",
+                Message = $"FPS poll loop fatal error: {ex.Message}"
+            });
+        }
+    }
 
     private double ReadDwmDeltaFps()
     {
