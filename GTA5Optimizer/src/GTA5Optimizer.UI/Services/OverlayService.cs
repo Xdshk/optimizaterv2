@@ -68,7 +68,7 @@ public class OverlayService : IDisposable
 
         var bg = new Border
         {
-            Background = new SolidColorBrush(Color.FromArgb(160, 10, 10, 10)),
+            Background = new SolidColorBrush(MediaColor.FromArgb(160, 10, 10, 10)),
             CornerRadius = new CornerRadius(8),
             Padding = new Thickness(10, 6, 10, 6),
             Child = grid
