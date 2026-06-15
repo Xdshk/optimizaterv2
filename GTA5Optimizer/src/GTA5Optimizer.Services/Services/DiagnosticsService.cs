@@ -312,52 +312,80 @@ public sealed class DiagnosticsService : IDiagnosticsService
                 return analysis;
             }
 
-            // Check texture quality
-            CheckSetting(gfx, "TextureQuality", "Texture quality", analysis, optimalValue: "2",
-                highImpact: "Снижение качества текстур может дать +10-20 FPS");
+            // GTA V settings.xml uses string values: "Off", "Low", "Medium", "High", "Very High", "Ultra"
+            // and also numeric "0"-"4" for some settings. We check the actual string value.
+            // For max FPS: lower is better (Low/Off optimal), except FXAA (should be On).
 
-            // Check shadow quality
-            CheckSetting(gfx, "ShadowQuality", "Shadow quality", analysis, optimalValue: "2",
-                highImpact: "Снижение качества теней может дать +5-15 FPS");
+            CheckGtaVSetting(gfx, "TextureQuality", "Качество текстур", analysis,
+                optimalValue: "Normal",
+                worseValues: new[] { "High", "Very High", "Ultra" },
+                recommendation: "Уменьшите до Normal для +10-20 FPS");
 
-            // Check reflection quality
-            CheckSetting(gfx, "ReflectionQuality", "Reflection quality", analysis, optimalValue: "1",
-                highImpact: "Снижение качества отражений может дать +5-10 FPS");
+            CheckGtaVSetting(gfx, "ShadowQuality", "Качество теней", analysis,
+                optimalValue: "Normal",
+                worseValues: new[] { "High", "Very High", "Ultra", "Soft", "Softest", "Nvidia PCSS" },
+                recommendation: "Уменьшите до Normal для +5-15 FPS");
 
-            // Check MSAA
-            CheckSetting(gfx, "MSAA", "MSAA", analysis, optimalValue: "0",
-                highImpact: "Отключение MSAA может дать +10-20 FPS");
+            CheckGtaVSetting(gfx, "ReflectionQuality", "Качество отражений", analysis,
+                optimalValue: "Low",
+                worseValues: new[] { "Medium", "High", "Very High", "Ultra" },
+                recommendation: "Уменьшите до Low для +5-10 FPS");
 
-            // Check FXAA
-            CheckSetting(gfx, "FXAA", "FXAA", analysis, optimalValue: "1",
-                highImpact: "FXAA почти бесплатен, рекомендуется включить");
+            CheckGtaVSetting(gfx, "MSAA", "MSAA", analysis,
+                optimalValue: "Off",
+                worseValues: new[] { "2x", "4x", "8x" },
+                recommendation: "Отключите MSAA для +10-20 FPS");
 
-            // Check population density
-            CheckSetting(gfx, "PopulationDensity", "Population density", analysis, optimalValue: "5",
-                highImpact: "Снижение плотности населения может дать +5-10 FPS в городах");
+            CheckGtaVSetting(gfx, "FXAA", "FXAA", analysis,
+                optimalValue: "On",
+                worseValues: new[] { "Off" },
+                recommendation: "FXAA почти бесплатен, включите");
 
-            // Check distance scaling
-            CheckSetting(gfx, "DistanceScaling", "Distance scaling", analysis, optimalValue: "5",
-                highImpact: "Снижение дальности прорисовки может дать +5-10 FPS");
+            CheckGtaVSetting(gfx, "PopulationDensity", "Плотность населения", analysis,
+                optimalValue: "50",
+                worseValues: new[] { "75", "100" },
+                recommendation: "Уменьшите до 50% для +5-10 FPS в городах");
 
-            // Check VSync
-            CheckSetting(gfx, "VSync", "VSync", analysis, optimalValue: "0",
-                highImpact: "Отключение VSync убирает ограничение FPS, но может дать tearing");
+            CheckGtaVSetting(gfx, "DistanceScaling", "Дальность прорисовки", analysis,
+                optimalValue: "50",
+                worseValues: new[] { "75", "100" },
+                recommendation: "Уменьшите до 50% для +5-10 FPS");
 
-            // Check grass quality
-            CheckSetting(gfx, "GrassQuality", "Grass quality", analysis, optimalValue: "1",
-                highImpact: "Снижение качества травы может дать +5-15 FPS");
+            CheckGtaVSetting(gfx, "VSync", "VSync", analysis,
+                optimalValue: "Off",
+                worseValues: new[] { "On", "1", "2", "Adaptive" },
+                recommendation: "Отключите VSync для снятия ограничения FPS");
 
-            // Check post FX
-            CheckSetting(gfx, "PostFX", "Post FX", analysis, optimalValue: "2",
-                highImpact: "Снижение Post FX может дать +3-8 FPS");
+            CheckGtaVSetting(gfx, "GrassQuality", "Качество травы", analysis,
+                optimalValue: "Low",
+                worseValues: new[] { "Medium", "High", "Very High", "Ultra" },
+                recommendation: "Уменьшите до Low для +5-15 FPS");
 
-            // Check anisotropic filtering
-            CheckSetting(gfx, "AnisotropicFiltering", "Anisotropic filtering", analysis, optimalValue: "2",
-                highImpact: "Анизотропная фильтрация почти бесплатна на современных GPU");
+            CheckGtaVSetting(gfx, "PostFX", "Post-обработка", analysis,
+                optimalValue: "Low",
+                worseValues: new[] { "Medium", "High", "Very High", "Ultra" },
+                recommendation: "Уменьшите до Low для +3-8 FPS");
 
-            // Generate recommendations
-            GenerateRecommendations(analysis);
+            CheckGtaVSetting(gfx, "AnisotropicFiltering", "Анизотропная фильтрация", analysis,
+                optimalValue: "Off",
+                worseValues: new[] { "2x", "4x", "8x", "16x", "High", "Medium" },
+                recommendation: "Отключите для +2-3 FPS (незаметно на низких настройках)");
+
+            // Extended settings
+            CheckGtaVSetting(gfx, "Tessellation", "Тесселяция", analysis,
+                optimalValue: "Off",
+                worseValues: new[] { "On", "High", "Medium", "Very High" },
+                recommendation: "Отключите тесселяцию для +5-10 FPS");
+
+            CheckGtaVSetting(gfx, "ShaderQuality", "Качество шейдеров", analysis,
+                optimalValue: "Normal",
+                worseValues: new[] { "High", "Very High" },
+                recommendation: "Уменьшите до Normal для +3-5 FPS");
+
+            CheckGtaVSetting(gfx, "WaterQuality", "Качество воды", analysis,
+                optimalValue: "Low",
+                worseValues: new[] { "Medium", "High", "Very High", "Ultra" },
+                recommendation: "Уменьшите до Low для +3-5 FPS");
 
             if (analysis.Recommendations.Count == 0)
             {
