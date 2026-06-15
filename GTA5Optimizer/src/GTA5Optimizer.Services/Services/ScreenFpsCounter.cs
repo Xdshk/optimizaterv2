@@ -62,7 +62,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
         _logger.LogInformation("FPS counter started (PresentMon + RTSS + DWM fallback)");
         _ = _logSrv.LogAsync(new LogEntry
         {
-            Level = GTA5LogLevel.Information,
+            Level = GTA5Optimizer.Models.Logging.LogLevel.Information,
             Category = "FPS",
             Message = "FPS counter started (PresentMon + RTSS + DWM fallback)"
         });
@@ -126,7 +126,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
                         _logger.LogDebug("FPS source: {Method} — {Fps:F1} FPS", method, fps);
                         _ = _logSrv.LogAsync(new LogEntry
                         {
-                            Level = GTA5LogLevel.Debug,
+                            Level = GTA5Optimizer.Models.Logging.LogLevel.Debug,
                             Category = "FPS",
                             Message = $"FPS source: {method} — {fps:F1} FPS"
                         });
@@ -142,7 +142,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
                     _logger.LogError(ex, "FPS poll loop error");
                     _ = _logSrv.LogAsync(new LogEntry
                     {
-                        Level = GTA5LogLevel.Error,
+                        Level = GTA5Optimizer.Models.Logging.LogLevel.Error,
                         Category = "FPS",
                         Message = $"FPS poll loop error: {ex.Message}"
                     });
@@ -161,7 +161,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
             _logger.LogError(ex, "FPS poll loop fatal error");
             _ = _logSrv.LogAsync(new LogEntry
             {
-                Level = GTA5LogLevel.Error,
+                Level = GTA5Optimizer.Models.Logging.LogLevel.Error,
                 Category = "FPS",
                 Message = $"FPS poll loop fatal error: {ex.Message}"
             });
