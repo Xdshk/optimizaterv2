@@ -2,12 +2,6 @@ using GTA5Optimizer.Core.Interfaces;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using MediaColor = System.Windows.Media.Color;
-using MediaBrushes = System.Windows.Media.Brushes;
-using MediaColorConverter = System.Windows.Media.ColorConverter;
-using MediaFontFamily = System.Windows.Media.FontFamily;
-<longcat_arg_value>
-
 
 namespace GTA5Optimizer.UI.Services;
 
@@ -55,7 +49,7 @@ public class OverlayService : IDisposable
             Height = 160,
             WindowStyle = WindowStyle.None,
             AllowsTransparency = true,
-            Background = MediaBrushes.Transparent,
+            Background = System.Windows.Media.Brushes.Transparent,
             Topmost = true,
             ShowInTaskbar = false,
             Left = 10,
@@ -69,7 +63,7 @@ public class OverlayService : IDisposable
 
         var bg = new Border
         {
-            Background = new SolidColorBrush(MediaColor.FromArgb(160, 10, 10, 10)),
+            Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 10, 10, 10)),
             CornerRadius = new CornerRadius(8),
             Padding = new Thickness(10, 6, 10, 6),
             Child = grid
@@ -112,9 +106,9 @@ public class OverlayService : IDisposable
         return new TextBlock
         {
             FontSize = fontSize,
-            FontFamily = new MediaFontFamily("Consolas, Courier New, monospace"),
-            Foreground = new SolidColorBrush((Color)MediaColorConverter.ConvertFromString(color)),
-            FontWeight = MediaFontWeights.SemiBold,
+            FontFamily = new System.Windows.Media.FontFamily("Consolas, Courier New, monospace"),
+            Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(color)),
+            FontWeight = FontWeights.SemiBold,
             Margin = new Thickness(0, 1, 0, 1)
         };
     }
