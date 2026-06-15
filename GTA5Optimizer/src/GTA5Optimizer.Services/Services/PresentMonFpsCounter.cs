@@ -1,4 +1,3 @@
-using GTA5Optimizer.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Globalization;
@@ -10,7 +9,7 @@ namespace GTA5Optimizer.Services.Services;
 /// Считает FPS игры через Microsoft PresentMon — перехватывает DXGI Present calls.
 /// Нужен файл PresentMon.exe рядом с приложением или в PATH.
 /// </summary>
-public sealed class PresentMonFpsCounter : IScreenFpsCounter
+public sealed class PresentMonFpsCounter : IDisposable
 {
     private readonly ILogger<PresentMonFpsCounter> _logger;
     private readonly string _targetProcessName;
@@ -19,6 +18,7 @@ public sealed class PresentMonFpsCounter : IScreenFpsCounter
     private readonly object _fpsLock = new();
     private volatile bool _isRunning;
     private DateTime _lastValidFrame = DateTime.UtcNow;
+    private string? _lastError;
 
     public double CurrentFPS
     {
@@ -26,7 +26,6 @@ public sealed class PresentMonFpsCounter : IScreenFpsCounter
         {
             lock (_fpsLock)
             {
-                // If no data for 3 seconds, report 0 (game might be paused/closed)
                 if ((DateTime.UtcNow - _lastValidFrame).TotalSeconds > 3)
                     return 0;
                 return _currentFps;
@@ -50,34 +49,94 @@ public sealed class PresentMonFpsCounter : IScreenFpsCounter
             var presentMonPath = FindPresentMon();
             if (presentMonPath == null)
             {
-                _logger.LogWarning(
-                    "PresentMon.exe not found. Download: https://github.com/GameTechDev/PresentMon/releases");
+                _lastError = "PresentMon.exe not found in app dir, tools/, PATH, or standard locations";
+                _logger.LogWarning("PresentMon.exe not found. Download: https://github.com/GameTechDev/PresentMon/releases");
                 _isRunning = false;
                 return;
             }
 
+            _logger.LogInformation("Found PresentMon at: {Path}", presentMonPath);
+
+            // Try multiple process name variants
+            // GTA V can be: GTA5.exe, GTA5, or even custom names via launchers
+            var processNames = new[] { _targetProcessName, "GTA5", "GTA5.exe", "GTA V", "GTAV" };
+            var targetName = processNames[0]; // Use the configured one
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = presentMonPath,
-                Arguments = $"-process_name {_targetProcessName}.exe -output_stdout -etl_file none -stop_existing_session -timed 0",
+                Arguments = $"-process_name {targetName}.exe -output_stdout -etl_file none -stop_existing_session -timed 0",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
-                StandardOutputEncoding = Encoding.UTF8
+                StandardOutputEncoding = Encoding.UTF8,
+                WorkingDirectory = Path.GetDirectoryName(presentMonPath) ?? AppContext.BaseDirectory
             };
 
-            _presentMonProcess = new Process { StartInfo = startInfo };
-            _presentMonProcess.Start();
-            _logger.LogInformation("PresentMon started for '{Process}' (PID: {Pid})",
-                _targetProcessName, _presentMonProcess.Id);
+            _logger.LogInformation("Starting PresentMon: {Exe} {Args}", presentMonPath, startInfo.Arguments);
 
+            _presentMonProcess = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
+            _presentMonProcess.Exited += (_, _) =>
+            {
+                _logger.LogWarning("PresentMon process exited with code {Code}", _presentMonProcess.ExitCode);
+                _isRunning = false;
+            };
+
+            _presentMonProcess.Start();
+            _logger.LogInformation("PresentMon started (PID: {Pid})", _presentMonProcess.Id);
+
+            // Read stderr in background — PresentMon writes errors there
+            _ = Task.Run(() => ReadStderrLoop(_presentMonProcess));
+            // Read stdout (FPS data)
             _ = Task.Run(() => ReadOutputLoop(_presentMonProcess));
         }
         catch (Exception ex)
         {
+            _lastError = ex.Message;
             _logger.LogError(ex, "Failed to start PresentMon");
             _isRunning = false;
+        }
+    }
+
+    private async Task ReadStderrLoop(Process process)
+    {
+        try
+        {
+            var stderr = process.StandardError;
+            while (_isRunning && !process.HasExited)
+            {
+                var line = await stderr.ReadLineAsync();
+                if (line == null) break;
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                _logger.LogWarning("PresentMon stderr: {Line}", line);
+
+                // Common PresentMon errors:
+                // "Failed to find process" — wrong process name
+                // "Failed to initialize" — admin rights issue
+                // "A trace session is already in use" — another PresentMon running
+                if (line.Contains("Failed to find", StringComparison.OrdinalIgnoreCase) ||
+                    line.Contains("No matching", StringComparison.OrdinalIgnoreCase))
+                {
+                    _lastError = $"PresentMon can't find process '{_targetProcessName}.exe'. Is the game running?";
+                }
+                else if (line.Contains("access", StringComparison.OrdinalIgnoreCase) ||
+                         line.Contains("denied", StringComparison.OrdinalIgnoreCase) ||
+                         line.Contains("privilege", StringComparison.OrdinalIgnoreCase))
+                {
+                    _lastError = "PresentMon needs admin rights. Run GTA5Optimizer as administrator.";
+                }
+                else if (line.Contains("already in use", StringComparison.OrdinalIgnoreCase) ||
+                         line.Contains("existing session", StringComparison.OrdinalIgnoreCase))
+                {
+                    _lastError = "Another PresentMon/ETL session is running. Close other monitoring tools.";
+                }
+            }
+        }
+        catch (Exception ex) when (_isRunning)
+        {
+            _logger.LogDebug(ex, "PresentMon stderr read error");
         }
     }
 
@@ -110,6 +169,7 @@ public sealed class PresentMonFpsCounter : IScreenFpsCounter
         {
             var stdout = process.StandardOutput;
             string? headerLine = null;
+            int lineCount = 0;
 
             while (_isRunning && !process.HasExited)
             {
@@ -117,10 +177,13 @@ public sealed class PresentMonFpsCounter : IScreenFpsCounter
                 if (line == null) break;
                 if (string.IsNullOrWhiteSpace(line)) continue;
 
+                lineCount++;
+
                 // Skip header
                 if (headerLine == null)
                 {
                     headerLine = line;
+                    _logger.LogInformation("PresentMon header: {Header}", line);
                     continue;
                 }
 
@@ -150,6 +213,8 @@ public sealed class PresentMonFpsCounter : IScreenFpsCounter
                 }
                 catch { /* skip malformed lines */ }
             }
+
+            _logger.LogInformation("PresentMon output loop ended. Total lines read: {Count}", lineCount);
         }
         catch (Exception ex) when (_isRunning)
         {
@@ -161,7 +226,7 @@ public sealed class PresentMonFpsCounter : IScreenFpsCounter
     {
         var appDir = AppContext.BaseDirectory;
 
-        // 1. Рядом с exe
+        // 1. Next to exe
         var local = Path.Combine(appDir, "PresentMon.exe");
         if (File.Exists(local)) return local;
 
@@ -177,7 +242,7 @@ public sealed class PresentMonFpsCounter : IScreenFpsCounter
             if (File.Exists(full)) return full;
         }
 
-        // 4. Стандартные пути
+        // 4. Standard paths
         var pf = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
         var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var candidates = new[]
