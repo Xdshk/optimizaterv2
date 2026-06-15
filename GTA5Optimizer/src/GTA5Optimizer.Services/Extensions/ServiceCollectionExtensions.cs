@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
         // Enable console logging with the most verbose level
         builder.Logging.ClearProviders()
                        .AddConsole()
-                       .SetMinimumLevel(LogLevel.Debug);
+                       .SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug);
 
         // Core services
         builder.Services.AddSingleton<ISystemOptimizer, SystemOptimizer>();
