@@ -3,7 +3,8 @@ using GTA5Optimizer.Models.Logging;
 using Microsoft.Extensions.Logging;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
-using LogEntry = GTA5Optimizer.Models.Logging.LogEntry;
+using LogEntry = GTA5Optimizer.Models.Logging.LogLevel;
+using LogEntryModel = GTA5Optimizer.Models.Logging.LogEntry;
 
 namespace GTA5Optimizer.Services.Services;
 
@@ -30,6 +31,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
 
     // Which method is active
     private string _activeMethod = "none";
+    private int _pollIteration;
 
     public double CurrentFPS
     {
@@ -41,13 +43,16 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
         _logger = logger;
         _logSrv = logSrv;
 
-        var pmLogger = LoggerFactory.Create(b => b.AddConsole().SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information))
+        var pmLogger = LoggerFactory.Create(b => b.AddConsole().SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug))
             .CreateLogger<PresentMonFpsCounter>();
         _presentMon = new PresentMonFpsCounter(pmLogger, "GTA5");
     }
 
     public void StartCapture()
     {
+        _logger.LogInformation("Starting FPS capture...");
+        LogToUi("FPS", "Starting FPS capture...", GTA5Optimizer.Models.Logging.LogLevel.Information);
+
         _presentMon.StartCapture();
 
         _cts = new CancellationTokenSource();
@@ -60,12 +65,7 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
         _pollThread.Start();
 
         _logger.LogInformation("FPS counter started (PresentMon + RTSS + DWM fallback)");
-        _ = _logSrv.LogAsync(new LogEntry
-        {
-            Level = GTA5Optimizer.Models.Logging.LogLevel.Information,
-            Category = "FPS",
-            Message = "FPS counter started (PresentMon + RTSS + DWM fallback)"
-        });
+        LogToUi("FPS", "FPS counter started (PresentMon + RTSS + DWM fallback)", GTA5Optimizer.Models.Logging.LogLevel.Information);
     }
 
     public void StopCapture()
@@ -80,36 +80,70 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
         _activeMethod = "none";
     }
 
+    private void LogToUi(string category, string message, GTA5Optimizer.Models.Logging.LogLevel level)
+    {
+        try
+        {
+            _ = _logSrv.LogAsync(new LogEntryModel
+            {
+                Level = level,
+                Category = category,
+                Message = message
+            });
+        }
+        catch { }
+    }
+
     private void PollLoop(CancellationToken token)
     {
         try
         {
-            // Wait a bit for PresentMon to start producing data
-            Thread.Sleep(1000);
+            // Wait for PresentMon to start producing data
+            Thread.Sleep(2000);
 
             while (!token.IsCancellationRequested)
             {
+                _pollIteration++;
                 double fps = 0;
                 string method = "none";
 
                 try
                 {
                     // Method 1: PresentMon (most accurate — direct DXGI hook)
-                    fps = _presentMon.CurrentFPS;
-                    if (fps > 0) method = "PresentMon";
+                    double pmFps = _presentMon.CurrentFPS;
+                    if (pmFps > 0)
+                    {
+                        fps = pmFps;
+                        method = "PresentMon";
+                    }
+
+                    // Log PresentMon status every 10 iterations (5 seconds)
+                    if (_pollIteration % 10 == 0)
+                    {
+                        LogToUi("FPS", $"PresentMon.CurrentFPS = {pmFps:F1} (iteration {_pollIteration})",
+                            GTA5Optimizer.Models.Logging.LogLevel.Debug);
+                    }
 
                     // Method 2: RTSS shared memory
                     if (fps <= 0)
                     {
-                        fps = TryReadRtssFps();
-                        if (fps > 0) method = "RTSS";
+                        double rtssFps = TryReadRtssFps();
+                        if (rtssFps > 0)
+                        {
+                            fps = rtssFps;
+                            method = "RTSS";
+                        }
                     }
 
                     // Method 3: DWM frame delta (borderless/windowed only)
                     if (fps <= 0)
                     {
-                        fps = ReadDwmDeltaFps();
-                        if (fps > 0) method = "DWM";
+                        double dwmFps = ReadDwmDeltaFps();
+                        if (dwmFps > 0)
+                        {
+                            fps = dwmFps;
+                            method = "DWM";
+                        }
                     }
 
                     if (fps > 0 && fps < 1000)
@@ -123,32 +157,28 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
                         }
                         _activeMethod = method;
 
-                        _logger.LogDebug("FPS source: {Method} — {Fps:F1} FPS", method, fps);
-                        _ = _logSrv.LogAsync(new LogEntry
+                        if (_pollIteration % 5 == 0)
                         {
-                            Level = GTA5Optimizer.Models.Logging.LogLevel.Debug,
-                            Category = "FPS",
-                            Message = $"FPS source: {method} — {fps:F1} FPS"
-                        });
+                            LogToUi("FPS", $"FPS source: {method} — {fps:F1} FPS (smoothed: {CurrentFPS:F1})",
+                                GTA5Optimizer.Models.Logging.LogLevel.Information);
+                        }
                     }
                     else
                     {
-                        _logger.LogDebug("All FPS methods returned 0 — PresentMon={PM:F1}, method={Method}",
-                            _presentMon.CurrentFPS, method);
+                        if (_pollIteration % 10 == 0)
+                        {
+                            LogToUi("FPS", $"All FPS methods returned 0 — PresentMon={pmFps:F1}, RTSS=0, DWM=0. Is the game running?",
+                                GTA5Optimizer.Models.Logging.LogLevel.Warning);
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "FPS poll loop error");
-                    _ = _logSrv.LogAsync(new LogEntry
-                    {
-                        Level = GTA5Optimizer.Models.Logging.LogLevel.Error,
-                        Category = "FPS",
-                        Message = $"FPS poll loop error: {ex.Message}"
-                    });
+                    LogToUi("FPS", $"FPS poll loop error: {ex.Message}",
+                        GTA5Optimizer.Models.Logging.LogLevel.Error);
                 }
 
-                // Poll every 500ms
                 Thread.Sleep(500);
             }
         }
@@ -159,12 +189,8 @@ public sealed class ScreenFpsCounter : IScreenFpsCounter
         catch (Exception ex)
         {
             _logger.LogError(ex, "FPS poll loop fatal error");
-            _ = _logSrv.LogAsync(new LogEntry
-            {
-                Level = GTA5Optimizer.Models.Logging.LogLevel.Error,
-                Category = "FPS",
-                Message = $"FPS poll loop fatal error: {ex.Message}"
-            });
+            LogToUi("FPS", $"FPS poll loop fatal error: {ex.Message}",
+                GTA5Optimizer.Models.Logging.LogLevel.Error);
         }
     }
 
