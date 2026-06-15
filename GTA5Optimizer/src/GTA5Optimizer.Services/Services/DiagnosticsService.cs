@@ -572,46 +572,64 @@ public sealed class DiagnosticsService : IDiagnosticsService
         };
     }
 
-    private static void CheckSetting(XElement gfx, string settingName, string displayName,
-        GtaVSettingsAnalysis analysis, string optimalValue, string highImpact)
+    /// <summary>
+    /// Checks a GTA V graphics setting against its optimal value for max FPS.
+    /// GTA V settings.xml uses mixed values — some numeric ("0"-"4"), some text ("Low","High","Ultra"), some percentage ("50","100").
+    /// We flag the setting ONLY if its current value is in the "worseValues" list (i.e. higher quality than optimal).
+    /// If the setting already matches or is better than optimal, it's ignored.
+    /// </summary>
+    private static void CheckGtaVSetting(XElement gfx, string settingName, string displayName,
+        GtaVSettingsAnalysis analysis, string optimalValue, string[] worseValues, string recommendation)
     {
         var element = gfx.Element(settingName);
         if (element == null) return;
 
         var currentValue = element.Value;
-        if (currentValue != optimalValue)
-        {
-            analysis.Issues.Add(new SettingsIssue
-            {
-                SettingName = displayName,
-                CurrentValue = currentValue,
-                RecommendedValue = optimalValue,
-                Description = $"{displayName} установлено на {currentValue}, рекомендуется {optimalValue}.",
-                Severity = SettingsIssueSeverity.Performance
-            });
 
-            analysis.Recommendations.Add(new SettingsRecommendation
-            {
-                Title = $"Оптимизировать {displayName}",
-                Description = highImpact,
-                Action = $"Установить {displayName} = {optimalValue}",
-                ExpectedFpsGain = 5 // Conservative estimate
-            });
+        // Normalize for comparison: trim, ignore case
+        var normalizedCurrent = currentValue.Trim();
+        var normalizedOptimal = optimalValue.Trim();
+
+        // If the setting already matches optimal or is "better" (lower), don't flag it
+        if (normalizedCurrent.Equals(normalizedOptimal, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        // Check if current value is numeric — compare numerically
+        if (int.TryParse(normalizedCurrent, out var currentNum) && int.TryParse(normalizedOptimal, out var optimalNum))
+        {
+            // For numeric values: flag only if current > optimal (higher = worse for FPS)
+            if (currentNum <= optimalNum)
+                return;
         }
+        else
+        {
+            // For string values: flag only if current is in the explicit "worse" list
+            if (!worseValues.Any(w => w.Trim().Equals(normalizedCurrent, StringComparison.OrdinalIgnoreCase)))
+                return;
+        }
+
+        analysis.Issues.Add(new SettingsIssue
+        {
+            SettingName = displayName,
+            CurrentValue = currentValue,
+            RecommendedValue = optimalValue,
+            Description = $"{displayName}: текущее значение \"{currentValue}\", рекомендуется \"{optimalValue}\".",
+            Severity = SettingsIssueSeverity.Performance
+        });
+
+        analysis.Recommendations.Add(new SettingsRecommendation
+        {
+            Title = $"Оптимизировать {displayName}",
+            Description = recommendation,
+            Action = $"Установить {displayName} = {optimalValue}",
+            ExpectedFpsGain = 5
+        });
     }
 
     private void GenerateRecommendations(GtaVSettingsAnalysis analysis)
     {
-        if (!analysis.Issues.Any(i => i.SettingName == "VSync" && i.CurrentValue != "0"))
-            return;
-
-        analysis.Recommendations.Add(new SettingsRecommendation
-        {
-            Title = "Отключить VSync",
-            Description = "VSync ограничивает FPS и добавляет инпут-лаг. Рекомендуется отключить.",
-            Action = "Установить VSync = 0",
-            ExpectedFpsGain = 10
-        });
+        // This method is no longer needed — recommendations are generated inline in CheckGtaVSetting.
+        // Kept for backward compatibility but intentionally left empty.
     }
 
     private void CheckPageFile(DiagnosticsResult result)
