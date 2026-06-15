@@ -125,7 +125,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _trayUpdateTimer.Tick += (_, _) => UpdateTrayTooltip();
         _trayUpdateTimer.Start();
 
-        // Debug FPS status timer — updates every 2 seconds
+        // FPS status timer — updates every 2 seconds
         _fpsStatusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
         _fpsStatusTimer.Tick += (_, _) => UpdateFpsStatus();
         _fpsStatusTimer.Start();
@@ -143,21 +143,34 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             CpuUsage = metrics.CPUUsage;
             GpuUsage = metrics.GPUUsage;
             RamUsage = metrics.RAMUsagePercent;
+            CpuTemp = metrics.CPUTempStr;
+            GpuTemp = metrics.GPUTempStr;
         });
     }
 
     private void UpdateFpsStatus()
     {
-        var counterFps = _fpsCounter.CurrentFPS;
-        var metrics = _performanceMonitor.GetCurrentMetricsAsync().Result;
-            CpuTemp = metrics.CPUTempStr;
-            GpuTemp = metrics.GPUTempStr;
+        try
+        {
+            var counterFps = _fpsCounter.CurrentFPS;
             FpsStatus = $"counter: {counterFps:F1} | monitor: {CurrentFPS:F1} | CPU {CpuTemp} GPU {GpuTemp} | {DateTime.Now:HH:mm:ss}";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "UpdateFpsStatus error");
+        }
     }
 
     private void UpdateTrayTooltip()
     {
-        _trayService.UpdateTooltip($"GTA5 Optimizer | FPS: {CurrentFPS:F0} | CPU: {CpuUsage:F0}% | RAM: {RamUsage:F0}%");
+        try
+        {
+            _trayService.UpdateTooltip($"GTA5 Optimizer | FPS: {CurrentFPS:F0} | CPU: {CpuUsage:F0}% | RAM: {RamUsage:F0}%");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "UpdateTrayTooltip error");
+        }
     }
 
     private async Task CheckGameStatusAsync()
