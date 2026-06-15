@@ -113,7 +113,7 @@ public class OverlayService : IDisposable
             FontSize = fontSize,
             FontFamily = new MediaFontFamily("Consolas, Courier New, monospace"),
             Foreground = new SolidColorBrush((Color)MediaColorConverter.ConvertFromString(color)),
-            FontWeight = FontWeights.SemiBold,
+            FontWeight = MediaFontWeights.SemiBold,
             Margin = new Thickness(0, 1, 0, 1)
         };
     }
