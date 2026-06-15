@@ -2,6 +2,11 @@ using GTA5Optimizer.Core.Interfaces;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using MediaColor = System.Windows.Media.Color;
+using MediaBrushes = System.Windows.Media.Brushes;
+using MediaColorConverter = System.Windows.Media.ColorConverter;
+using MediaFontFamily = System.Windows.Media.FontFamily;
+using MediaFontWeights = System.Windows.Media.FontWeights;
 
 namespace GTA5Optimizer.UI.Services;
 
