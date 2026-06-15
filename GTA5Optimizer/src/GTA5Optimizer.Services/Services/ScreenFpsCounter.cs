@@ -3,7 +3,6 @@ using GTA5Optimizer.Models.Logging;
 using Microsoft.Extensions.Logging;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
-using GTA5LogLevel = GTA5Optimizer.Models.Logging.LogLevel;
 using LogEntry = GTA5Optimizer.Models.Logging.LogEntry;
 
 namespace GTA5Optimizer.Services.Services;
